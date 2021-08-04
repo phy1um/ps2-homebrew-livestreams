@@ -12,8 +12,10 @@
 
 #include <inttypes.h>
 
-#define OFFSET_X 0
-#define OFFSET_Y 0
+#define OFFSET_X 2048
+#define OFFSET_Y 2048
+
+#define myftoi4(x) ((x)<<4)
 
 #define VID_W 640
 #define VID_H 448
@@ -33,7 +35,6 @@ int print_buffer(qword_t *b, int len)
   return 0;
 }
 
-// TODO: maybe FINISH needs to be in the same GS packet
 int gs_finish()
 {
   qword_t *q = buf;
@@ -43,6 +44,8 @@ int gs_finish()
   return 0;
 }
 
+
+zbuffer_t *z;
 int gs_init(int width, int height, int psm, int psmz, int vmode, int gmode)
 {
   framebuffer_t fb;
@@ -52,12 +55,11 @@ int gs_init(int width, int height, int psm, int psmz, int vmode, int gmode)
   fb.psm = psm;
   fb.mask = 0;
 
-  zbuffer_t z;
-  z.address = graph_vram_allocate(width, height, psmz, GRAPH_ALIGN_PAGE);
-  z.enable = 0;
-  z.method = 0;
-  z.zsm = 0;
-  z.mask = 0;
+  z->address = graph_vram_allocate(width, height, psmz, GRAPH_ALIGN_PAGE);
+  z->enable = 0;
+  z->method = 0;
+  z->zsm = 0;
+  z->mask = 0;
 
   graph_set_mode(gmode, vmode, GRAPH_MODE_FIELD, GRAPH_DISABLE); 
   graph_set_screen(0, 0, width, height);
@@ -67,7 +69,8 @@ int gs_init(int width, int height, int psm, int psmz, int vmode, int gmode)
 
   qword_t *q = buf;
   memset(buf, 0, DRAWBUF_LEN);
-  q = draw_setup_environment(q, 0, &fb, &z);
+  q = draw_setup_environment(q, 0, &fb, z);
+  q = draw_primitive_xyoffset(q, 0, 2048-(VID_W/2), 2048-(VID_H/2));
   q = draw_finish(q);
   dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
   draw_wait_finish();
@@ -77,9 +80,9 @@ int gs_init(int width, int height, int psm, int psmz, int vmode, int gmode)
 }
 
 static int tri[] = {
-    10, 0, 0,
-    600, 200, 1,
-    20, 400, 0,
+  10, 10, 0,
+  500, 20, 0,
+  300, 400, 0,
 };
 
 #define SHIFT_AS_I64(x, b) (((int64_t)x)<<b)
@@ -104,18 +107,24 @@ qword_t *draw(qword_t *q)
   q->dw[1] = 0x0000000000515151;
   q++;
 
+  int cx = myftoi4(2048 - (VID_W/2));
+  int cy = myftoi4(2048 - (VID_H/2));
+
   for(int i = 0; i < 3; i++) {
 
     q->dw[0] = (red&0xff) | (green&0xff)<<32;
-    q->dw[1] = (blue&0xff) | (0x80 << 32);
+    q->dw[1] = (blue&0xff) | (SHIFT_AS_I64(0x80, 32));
     q++;
     
     // 0xa -> 0xa0
     // fixed point format - xxxx xxxx xxxx.yyyy
     int base = i*3;
-    q->dw[0] = (tri[base+0]<<4) | SHIFT_AS_I64(tri[base+1]<<4, 32);
-    q->dw[1] = (tri[base+2]<<4);
-    printf("drawing vertex %x %x %x\n", tri[base+0], tri[base+1], tri[base+2]);
+    int x = myftoi4(tri[base+0]) + cx;
+    int y = myftoi4(tri[base+1]) + cy;
+    int z = 0;
+    q->dw[0] = x | SHIFT_AS_I64(y, 32);
+    q->dw[1] = z; 
+    // printf("drawing vertex %x %x %x\n", tri[base+0], tri[base+1], tri[base+2]);
     q++;
   }
 
@@ -126,6 +135,7 @@ int main()
 {
   printf("Hello\n");
   buf = malloc(DRAWBUF_LEN);
+  z = malloc(sizeof(zbuffer_t));
   // init DMAC
   dma_channel_initialize(DMA_CHANNEL_GIF, 0, 0);
   dma_channel_fast_waits(DMA_CHANNEL_GIF);
@@ -133,16 +143,19 @@ int main()
   int vmode = graph_get_region();
   // initialize graphics mode 
   gs_init(VID_W, VID_H, GS_PSM_32, GS_PSMZ_24, vmode, GRAPH_MODE_INTERLACED);
-  
+
   graph_wait_vsync();
   while(1) {
     dma_wait_fast();
     qword_t *q = buf;
     memset(buf, 0, DRAWBUF_LEN);
-    q = draw_clear(q, 0, 0, 0, VID_W, VID_H, 20, 20, 20);
+    q = draw_disable_tests(q, 0, z);
+    q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H, 20, 20, 20);
+    q = draw_enable_tests(q, 0, z);
     q = draw(q);
     q = draw_finish(q);
     dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
+    print_buffer(buf, q-buf); 
 
     draw_wait_finish();
     // wait for vsync
