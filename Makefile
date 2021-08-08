@@ -1,6 +1,6 @@
 
 EE_BIN=test.elf
-EE_OBJS=main.o
+EE_OBJS=main.o gs.o
 
 EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug
 
@@ -28,3 +28,7 @@ docker-build:
 .PHONY: clean
 clean:
 	rm -rf $(ISO_TGT) $(EE_BIN) $(EE_OBJS)
+
+.PHONY: run
+run:
+	PCSX2 --elf=$(PWD)/$(EE_BIN) 
