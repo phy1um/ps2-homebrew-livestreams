@@ -13,14 +13,21 @@
 #include <inttypes.h>
 
 #include "gs.h"
+#include "mesh.h"
+#include "log.h"
 
 #define OFFSET_X 2048
 #define OFFSET_Y 2048
 
-#define myftoi4(x) ((x)<<4)
+#define myftoi4(x) (((uint64_t)(x))<<4)
 
 #define VID_W 640
 #define VID_H 448
+
+#define TGT_FILE "host:cube.gif"
+
+#define fatalerror(st, msg, ...) printf("FATAL: " msg "\n", ##__VA_ARGS__); error_forever(st); ((void)0)
+void error_forever(struct draw_state *st);
 
 int print_buffer(qword_t *b, int len)
 {
@@ -86,10 +93,29 @@ qword_t *draw(qword_t *q)
   return q;
 }
 
+void mesh_transform(struct model *m, char *b, int cx, int cy, float scale, float tx, float ty)
+{
+  int stride = m->vertex_size * 16;
+  for (int i = 0; i < m->vertex_count; i++) {
+    // get address of current vertex data
+    float *pos = (float*) (b + (stride*i) + (m->vertex_position_offset*16));
+    float x = pos[0];
+    float y = pos[1];
+    float z = pos[2];
+    // float w = pos[3];
+    *((uint32_t*)pos) = myftoi4((x * scale) + tx) + cx;
+    *((uint32_t*)(pos+1)) = myftoi4((y * scale) + ty) + cy;
+    *((uint32_t*)(pos+2)) = (int) z;
+    pos[3] = 0;
+  }
+}
+
 int main()
 {
   printf("Hello\n");
-  qword_t *buf = malloc(100*16);
+  qword_t *buf = malloc(20000*16);
+  char *file_load_buffer = malloc(310 * 1024);
+  int file_load_buffer_len = 310*1024;
 
   struct draw_state st = {0};
   st.width = VID_W,
@@ -104,24 +130,61 @@ int main()
   // initialize graphics mode 
   gs_init(&st, GS_PSM_32, GS_PSMZ_24);
 
+  struct model m = {0};
+  m.r = 0xff;
+  int bytes_read = load_file(TGT_FILE, file_load_buffer, file_load_buffer_len);
+  if (bytes_read <= 0) {
+    fatalerror(&st, "failed to load file %s", TGT_FILE);
+  }
+  if (bytes_read % 16 != 0) {
+    fatalerror(&st, "lengt of model file %s was not 0 %% 16", TGT_FILE);
+  }
+
+  if (!model_load(&m, file_load_buffer, bytes_read)) {
+    fatalerror(&st, "failed to process model");
+  }
+
   graph_wait_vsync();
   while(1) {
     dma_wait_fast();
     qword_t *q = buf;
-    memset(buf, 0, 100*16);
+    memset(buf, 0, 20000*16);
     q = draw_disable_tests(q, 0, &st.zb);
     q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H, 20, 20, 20);
     q = draw_enable_tests(q, 0, &st.zb);
-    q = draw(q);
+    qword_t *model_verts_start = q;
+    memcpy(q, m.buffer, m.buffer_len);
+    info("copied mesh buffer with len=%d", m.buffer_len);
+    q += (m.buffer_len/16);
     q = draw_finish(q);
+    mesh_transform(&m, (char *) (model_verts_start+4), myftoi4(2048), myftoi4(2048), 2.0f, 0, 0);
     dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
     print_buffer(buf, q-buf); 
+    info("draw from buffer with length %d", q-buf);
 
     draw_wait_finish();
-    // wait for vsync
+    graph_wait_vsync();
+    sleep(10);
+  }
+}
+
+
+void error_forever(struct draw_state *st)
+{
+  qword_t *buf = malloc(1200);
+  while(1) {
+    dma_wait_fast();
+    qword_t *q = buf;
+    memset(buf, 0, 1200);
+    q = draw_disable_tests(q, 0, &st->zb);
+    q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H, 0xff, 0, 0);
+    q = draw_finish(q);
+    dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
+    draw_wait_finish();
     graph_wait_vsync();
     sleep(2);
   }
+
 }
 
 /*

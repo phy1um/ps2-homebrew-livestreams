@@ -1,6 +1,6 @@
 
 EE_BIN=test.elf
-EE_OBJS=main.o gs.o
+EE_OBJS=main.o gs.o mesh.o
 
 EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug
 
