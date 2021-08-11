@@ -35,28 +35,25 @@ int model_load(struct model *m, char *b, int b_len)
   m->buffer = malloc(b_len + MODEL_BUFFER_PRE);
   m->buffer_len = b_len + MODEL_BUFFER_PRE;
   qword_t *q = m->buffer; 
-  m->vertex_count = b_len/16;
-  m->vertex_size = 1;
-  m->vertex_position_offset = 0;
+  m->vertex_size = 2;
+  m->vertex_count = b_len / (16 * m->vertex_size);
+  m->vertex_position_offset = 1;
+  m->vertex_colour_offset = 0;
   m->face_count = m->vertex_count / 3;
   info("initializing model: verts=%d, faces=%d, bytes in buf=%d", m->vertex_count,
       m->face_count, m->buffer_len);
 
   // Create giftag, set regs via A+D
-  q->dw[0] = 0x1000000000000002;
+  q->dw[0] = 0x1000000000000001;
   q->dw[1] = 0x000000000000000e;
   q++;
   // set PRIM = triangle
   q->dw[0] = GS_SET_PRIM(GS_PRIM_TRIANGLE, 0, 0, 0, 0, 0, 0, 0, 0);
   q->dw[1] = GS_REG_PRIM;
   q++;
-  // set RGBAQ
-  q->dw[0] = GS_SET_RGBAQ(m->r, m->g, m->b, 0x80, 0x80);
-  q->dw[1] = GS_REG_RGBAQ;
-  q++;
   // start vertex data GIFTAG
-  q->dw[0] = 0x3000000000000000 | (m->face_count & 0x3fff);
-  q->dw[1] = 0x0000000000000555;
+  q->dw[0] = 0x6000000000000000 | (m->face_count & 0x3fff);
+  q->dw[1] = 0x0000000000515151;
   q++;
   memcpy(q,b,b_len);
   return 1;

@@ -2,7 +2,7 @@
 #ifndef DRAW_H
 #define DRAW_H
 
-
+#define MESH_HEADER_SIZE 3
 #define myftoi4(x) (((uint64_t)(x))<<4)
 
 struct render_state {

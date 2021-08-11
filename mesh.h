@@ -12,6 +12,7 @@ struct model {
   int vertex_count;
   int vertex_size;
   int vertex_position_offset;
+  int vertex_colour_offset;
   int buffer_len;
 };
 

@@ -6,6 +6,7 @@
 
 #include "draw.h"
 #include "mesh.h"
+#include "log.h"
 
 void mesh_transform(char *b, struct model_instance *inst, struct render_state *d)
 {
@@ -20,10 +21,21 @@ void mesh_transform(char *b, struct model_instance *inst, struct render_state *d
     // get address of current vertex data
     float *pos = (float*) (b + (stride*i) + (inst->m->vertex_position_offset*16));
     VECTOR *v = pos;
+
     vector_apply(v, v, tmp);
+
+    float z = pos[2];
+    info("vert depth = %f", z);
+
     *((uint32_t*)pos) = ftoi4(pos[0]+d->offset_x);
     *((uint32_t*)(pos+1)) = ftoi4(pos[1]+d->offset_y);
     *((uint32_t*)(pos+2)) = (int) pos[2];
+
+    uint32_t * col = (uint32_t*) (b + (stride*i) + (inst->m->vertex_colour_offset*16));
+    col[1] = 0x0f;
+    col[2] = 0x0f;
+    col[0] = ((int) ((z/1000.0f) * 0xa0)) & 0xff;
+    col[3] = 0x80;
     /*
     *((uint32_t*)pos) = (short)((pos[0]+1.0f)*d->offset_x);
     *((uint32_t*)(pos+1)) = (short)((pos[1]+1.0f)*d->offset_y);

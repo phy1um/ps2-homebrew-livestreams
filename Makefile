@@ -1,8 +1,8 @@
 
 EE_BIN=test.elf
-EE_OBJS=main.o gs.o mesh.o
+EE_OBJS=main.o gs.o mesh.o draw.o
 
-EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug
+EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d
 
 EE_CFLAGS += -Wall --std=c99
 EE_LDFLAGS = -L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib
