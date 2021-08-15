@@ -32,9 +32,9 @@ int gs_init(struct draw_state *ds, int psm, int psmz)
   ds->fb.mask = 0;
 
   ds->zb.address = graph_vram_allocate(ds->width, ds->height, psmz, GRAPH_ALIGN_PAGE);
-  ds->zb.enable = 0;
-  ds->zb.method = 0;
-  ds->zb.zsm = 0;
+  ds->zb.enable = 1;
+  ds->zb.method = ZTEST_METHOD_GREATER;
+  ds->zb.zsm = psmz;
   ds->zb.mask = 0;
 
   graph_set_mode(ds->gmode, ds->vmode, GRAPH_MODE_FIELD, GRAPH_DISABLE); 

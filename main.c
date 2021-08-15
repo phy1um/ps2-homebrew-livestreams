@@ -124,9 +124,8 @@ int main()
     inst.scale[1] += 0.01f;
     inst.scale[2] += 0.01f;
     */
-    inst.rotate[0] += 0.1f;
-    inst.rotate[1] += 0.1f;
-    r.camera_pos[2] -= 0.1f;
+    inst.rotate[0] += 0.01f;
+    inst.rotate[1] += 0.005f;
 
   }
 }

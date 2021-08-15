@@ -48,7 +48,7 @@ int model_load(struct model *m, char *b, int b_len)
   q->dw[1] = 0x000000000000000e;
   q++;
   // set PRIM = triangle
-  q->dw[0] = GS_SET_PRIM(GS_PRIM_TRIANGLE, 0, 0, 0, 0, 0, 0, 0, 0);
+  q->dw[0] = GS_SET_PRIM(GS_PRIM_TRIANGLE, 1, 0, 0, 0, 0, 0, 0, 0);
   q->dw[1] = GS_REG_PRIM;
   q++;
   // start vertex data GIFTAG
