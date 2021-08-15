@@ -13,7 +13,8 @@ struct render_state {
   MATRIX view_screen;
   MATRIX world_to_screen;
   VECTOR camera_pos;
-  VECTOR camera_rot;
+  VECTOR camera_tgt;
+  VECTOR up;
 };
 
 struct model_instance {

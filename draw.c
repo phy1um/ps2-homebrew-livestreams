@@ -7,8 +7,18 @@
 #include "draw.h"
 #include "mesh.h"
 #include "log.h"
+#include "ps2math.h"
 
 #define ZMAX (1024*1024)
+
+void log_matrix(MATRIX m)
+{
+  printf("Matrix = \n");
+  for(int i = 0; i < 4; i++) {
+    int b = i*4;
+    printf("%.2f %.2f %.2f %.2f\n", m[b], m[b+1], m[b+2], m[b+3]);
+  }
+}
 
 void mesh_transform(char *b, struct model_instance *inst, struct render_state *d)
 {
@@ -18,6 +28,11 @@ void mesh_transform(char *b, struct model_instance *inst, struct render_state *d
   create_model_matrix(model, inst->translate, inst->scale, inst->rotate);
   matrix_unit(tmp);
   matrix_multiply(tmp, model, d->world_to_screen);
+
+  info("Matrix info");
+  log_matrix(d->world_to_screen);
+  log_matrix(model);
+  log_matrix(tmp);
   int stride = inst->m->vertex_size * 16;
   for (int i = 0; i < inst->m->vertex_count; i++) {
     // get address of current vertex data
@@ -25,6 +40,9 @@ void mesh_transform(char *b, struct model_instance *inst, struct render_state *d
     VECTOR *v = pos;
 
     vector_apply(v, v, tmp);
+    pos[0] = pos[0]/pos[3];
+    pos[1] = pos[1]/pos[3];
+    pos[2] = pos[2]/pos[3];
 
     *((uint32_t*)pos) = ftoi4(pos[0]+d->offset_x);
     *((uint32_t*)(pos+1)) = ftoi4(pos[1]+d->offset_y);
@@ -58,7 +76,12 @@ void create_model_matrix(MATRIX tgt, VECTOR translate, VECTOR scale, VECTOR rota
 
 void update_draw_matrix(struct render_state *d)
 {
+  d->up[0] = 0;
+  d->up[1] = 1.0f;
+  d->up[2] = 0;
+  d->up[3] = 0;
   create_view_screen(d->view_screen, 3.0f/4.0f, -3.0f, 3.0f, -3.0f, 3.0f, 1.0f, 2000.0f);
-  create_world_view(d->world_view, d->camera_pos, d->camera_rot);
+  matrix_lookat(d->world_view, d->camera_pos, d->camera_tgt, d->up);
   matrix_multiply(d->world_to_screen, d->world_view, d->view_screen);
 }
+

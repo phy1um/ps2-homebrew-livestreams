@@ -80,8 +80,6 @@ int main()
   r.camera_pos[2] = 400.0f;
   r.camera_pos[3] = 1.0f;
 
-  r.camera_rot[3] = 1.0f;
-
   r.clear_col[0] = 0xb1;
   r.clear_col[1] = 0xce;
   r.clear_col[2] = 0xcb;
@@ -91,9 +89,9 @@ int main()
 
   struct model_instance inst = {0};
   inst.m = &m;
-  inst.scale[0] = 100.0f;
-  inst.scale[1] = 100.0f;
-  inst.scale[2] = 100.0f;
+  inst.scale[0] = 10.0f;
+  inst.scale[1] = 10.0f;
+  inst.scale[2] = 10.0f;
   inst.scale[3] = 1.0f;
 
   graph_wait_vsync();
@@ -124,9 +122,12 @@ int main()
     inst.scale[1] += 0.01f;
     inst.scale[2] += 0.01f;
     */
-    inst.rotate[0] += 0.01f;
-    inst.rotate[1] += 0.005f;
 
+    inst.translate[0] += 0.1f;
+    //r.camera_pos[0] += 1.0f;
+    r.camera_tgt[0] = inst.translate[0];
+    r.camera_tgt[1] = inst.translate[1];
+    r.camera_tgt[2] = inst.translate[2];
   }
 }
 
