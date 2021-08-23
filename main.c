@@ -16,6 +16,7 @@
 #include "mesh.h"
 #include "draw.h"
 #include "log.h"
+#include "pad.h"
 
 #define OFFSET_X 2048
 #define OFFSET_Y 2048
@@ -77,7 +78,7 @@ int main()
   struct render_state r = {0};
 
   r.camera_pos[0] = 0.0f;
-  r.camera_pos[2] = 400.0f;
+  r.camera_pos[2] = 10.0f;
   r.camera_pos[3] = 1.0f;
 
   r.clear_col[0] = 0xb1;
@@ -94,8 +95,12 @@ int main()
   inst.scale[2] = 10.0f;
   inst.scale[3] = 1.0f;
 
+  pad_init();
+
   graph_wait_vsync();
   while(1) {
+    pad_frame_start();
+    pad_poll();
     update_draw_matrix(&r);
     dma_wait_fast();
     qword_t *q = buf;
@@ -117,17 +122,14 @@ int main()
 
     draw_wait_finish();
     graph_wait_vsync();
-    /*
-    inst.scale[0] += 0.01f;
-    inst.scale[1] += 0.01f;
-    inst.scale[2] += 0.01f;
-    */
 
-    inst.translate[0] += 0.1f;
-    //r.camera_pos[0] += 1.0f;
-    r.camera_tgt[0] = inst.translate[0];
-    r.camera_tgt[1] = inst.translate[1];
-    r.camera_tgt[2] = inst.translate[2];
+    int dx = button_held(DPAD_RIGHT) - button_held(DPAD_LEFT);
+    int dy = button_held(DPAD_DOWN) - button_held(DPAD_UP);
+    int dz = button_held(BUTTON_L2) - button_held(BUTTON_L1); 
+
+    inst.translate[0] += 1.4f * dx;
+    inst.translate[1] += 1.4f * dy;
+    inst.translate[2] += 0.2f * dz;
   }
 }
 
@@ -147,6 +149,7 @@ void error_forever(struct draw_state *st)
     graph_wait_vsync();
     sleep(2);
   }
+
 
 }
 
