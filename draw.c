@@ -25,7 +25,7 @@ void mesh_transform(char *b, struct model_instance *inst, struct render_state *d
   MATRIX tmp;
   MATRIX model;
   matrix_unit(model);
-  // create_model_matrix(model, inst->translate, inst->scale, inst->rotate);
+  create_model_matrix(model, inst->translate, inst->scale, inst->rotate);
   matrix_unit(tmp);
   matrix_multiply(tmp, model, d->world_to_screen);
 
@@ -85,10 +85,9 @@ void update_draw_matrix(struct render_state *d)
 
   MATRIX viewport, proj, cam;
   matrix_viewport(viewport, 640.f, 480.f);
-  // matrix_proj(proj, 1.2f, 3.f/4.f, 1.f, 100.f);
-  matrix_unit(proj);
+  matrix_proj(proj, 1.2f, 3.f/4.f, 1.f, 100.f);
   matrix_lookat(cam, d->camera_pos, d->camera_tgt, d->up);
-   matrix_multiply(d->world_to_screen, viewport, proj);
+  matrix_multiply(d->world_to_screen, viewport, proj);
   //matrix_multiply(d->world_to_screen, d->world_to_screen, cam);
 }
 

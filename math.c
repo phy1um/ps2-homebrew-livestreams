@@ -8,7 +8,7 @@ void matrix_tsp(MATRIX a)
   float t;
   SWAP(1,4);
   SWAP(2,8);
-  SWAP(9,12);
+  SWAP(3,12);
   SWAP(6,9);
   SWAP(7,13);
   SWAP(11,14);
@@ -78,9 +78,9 @@ void matrix_proj(MATRIX out, float fov, float ar, float near, float far)
 void matrix_viewport(MATRIX out, float w, float h)
 {
   matrix_unit(out);
-  out[0] = w/2.f;
-  out[5] = h/2.f;
-  out[3] = w/2.f;
-  out[7] = h/2.f;
+  out[0] = 320;
+  out[5] = 224;
+  out[3] = 320;
+  out[7] = 224;
   matrix_tsp(out);
 }
