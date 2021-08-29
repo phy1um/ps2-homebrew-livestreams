@@ -1,21 +1,17 @@
+PS2SDK=/usr/local/ps2dev/ps2sdk
 
+ISO_TGT=test.iso
 EE_BIN=test.elf
 EE_OBJS=main.o gs.o mesh.o draw.o math.o pad.o
-
 EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d -lm -lpad
-
 EE_CFLAGS += -Wall --std=c99
 EE_LDFLAGS = -L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib
 
-PS2SDK=/usr/local/ps2dev/ps2sdk
-
 PS2HOST?=192.168.20.99
 
-ISO_TGT=test.iso
-
 DOCKER_IMG=ps2build
-
 DOCKERFLAGS=--user "$(shell id -u):$(shell id -g)"
+DOCKER?=sudo docker
 
 include .lintvars
 
@@ -54,5 +50,5 @@ lint:
 
 .PHONY: format
 format:
-	docker run $(DOCKERFLAGS) -v $(shell pwd):/workdir unibeautify/clang-format -i -sort-includes *.c *.h
+	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/workdir unibeautify/clang-format -i -sort-includes *.c *.h
 
