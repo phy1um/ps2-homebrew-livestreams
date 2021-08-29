@@ -123,7 +123,7 @@ int main()
     draw_wait_finish();
     graph_wait_vsync();
 
-    int dx = button_held(DPAD_RIGHT) - button_held(DPAD_LEFT);
+    float dx = (joy_axis_value(AXIS_LEFT_X) - 128) / 128.0f;
     int dy = button_held(DPAD_DOWN) - button_held(DPAD_UP);
     int dz = button_held(BUTTON_L2) - button_held(BUTTON_L1); 
 
