@@ -48,14 +48,14 @@ void mesh_transform(char *b, struct model_instance *inst, struct render_state *d
      
     *((uint32_t*)pos) = ftoi4(pos[0]+d->offset_x);
     *((uint32_t*)(pos+1)) = ftoi4(pos[1]+d->offset_y);
-    uint32_t zv = (uint32_t) (ZMAX * (pos[2] / 2000.f));
+    uint32_t zv = (uint32_t) (ZMAX * (pos[2] / 100.f));
     *((uint32_t*)(pos+2)) = zv;
 
 
     uint32_t * col = (uint32_t*) (b + (stride*i) + (inst->m->vertex_colour_offset*16));
     col[1] = 0x0f;
     col[2] = 0x0f;
-    col[0] = (int) (((zv*1.0f)/(ZMAX*1.0f)) * 255.0f);
+    col[0] = (int) (((zv)/(ZMAX*1.0f)) * 255.0f);
     col[3] = 0x80;
     /*
     *((uint32_t*)pos) = (short)((pos[0]+1.0f)*d->offset_x);
@@ -88,6 +88,6 @@ void update_draw_matrix(struct render_state *d)
   matrix_proj(proj, 1.2f, 3.f/4.f, 1.f, 100.f);
   matrix_lookat(cam, d->camera_pos, d->camera_tgt, d->up);
   matrix_multiply(d->world_to_screen, viewport, proj);
-  //matrix_multiply(d->world_to_screen, d->world_to_screen, cam);
+  matrix_multiply(d->world_to_screen, d->world_to_screen, cam);
 }
 
