@@ -1,40 +1,41 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <math.h>
 
-#include <draw.h>
-#include <graph.h>
-#include <gs_psm.h>
-#include <gs_gp.h>
 #include <dma.h>
 #include <dma_tags.h>
+#include <draw.h>
+#include <graph.h>
+#include <gs_gp.h>
+#include <gs_psm.h>
 
 #include <inttypes.h>
 
-#include "gs.h"
-#include "mesh.h"
 #include "draw.h"
+#include "gs.h"
 #include "log.h"
+#include "mesh.h"
 #include "pad.h"
 
 #define OFFSET_X 2048
 #define OFFSET_Y 2048
-
 
 #define VID_W 640
 #define VID_H 448
 
 #define TGT_FILE "host:cube.bin"
 
-#define fatalerror(st, msg, ...) printf("FATAL: " msg "\n", ##__VA_ARGS__); error_forever(st); ((void)0)
+#define fatalerror(st, msg, ...)                                               \
+  printf("FATAL: " msg "\n", ##__VA_ARGS__);                                   \
+  error_forever(st);                                                           \
+  ((void)0)
 void error_forever(struct draw_state *st);
 
-int print_buffer(qword_t *b, int len)
-{
+int print_buffer(qword_t *b, int len) {
   printf("-- buffer\n");
-  for(int i = 0; i < len; i++) {
+  for (int i = 0; i < len; i++) {
     printf("%016llx %016llx\n", b->dw[0], b->dw[1]);
     b++;
   }
@@ -42,24 +43,21 @@ int print_buffer(qword_t *b, int len)
   return 0;
 }
 
-int main()
-{
+int main() {
   printf("Hello\n");
-  qword_t *buf = malloc(20000*16);
+  qword_t *buf = malloc(20000 * 16);
   char *file_load_buffer = malloc(310 * 1024);
-  int file_load_buffer_len = 310*1024;
+  int file_load_buffer_len = 310 * 1024;
 
   struct draw_state st = {0};
-  st.width = VID_W,
-  st.height = VID_H,
-  st.vmode = graph_get_region(),
+  st.width = VID_W, st.height = VID_H, st.vmode = graph_get_region(),
   st.gmode = GRAPH_MODE_INTERLACED,
 
   // init DMAC
-  dma_channel_initialize(DMA_CHANNEL_GIF, 0, 0);
+      dma_channel_initialize(DMA_CHANNEL_GIF, 0, 0);
   dma_channel_fast_waits(DMA_CHANNEL_GIF);
 
-  // initialize graphics mode 
+  // initialize graphics mode
   gs_init(&st, GS_PSM_32, GS_PSMZ_24);
 
   struct model m = {0};
@@ -99,26 +97,25 @@ int main()
   pad_init();
 
   graph_wait_vsync();
-  while(1) {
+  while (1) {
     pad_frame_start();
     pad_poll();
     update_draw_matrix(&r);
     dma_wait_fast();
     qword_t *q = buf;
-    memset(buf, 0, 20000*16);
+    memset(buf, 0, 20000 * 16);
     q = draw_disable_tests(q, 0, &st.zb);
-    q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, 
-        VID_W, VID_H, 
-        r.clear_col[0], r.clear_col[1], r.clear_col[2]);
+    q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H,
+                   r.clear_col[0], r.clear_col[1], r.clear_col[2]);
     q = draw_enable_tests(q, 0, &st.zb);
     qword_t *model_verts_start = q;
     memcpy(q, m.buffer, m.buffer_len);
     // info("copied mesh buffer with len=%d", m.buffer_len);
-    q += (m.buffer_len/16);
+    q += (m.buffer_len / 16);
     q = draw_finish(q);
-    mesh_transform((char*) (model_verts_start+MESH_HEADER_SIZE), &inst, &r);
-    dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
-    // print_buffer(buf, q-buf); 
+    mesh_transform((char *)(model_verts_start + MESH_HEADER_SIZE), &inst, &r);
+    dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q - buf, 0, 0);
+    // print_buffer(buf, q-buf);
     // info("draw from buffer with length %d", q-buf);
 
     draw_wait_finish();
@@ -140,28 +137,24 @@ int main()
 
     r.camera_pos[0] += 0.02f * dx;
     r.camera_pos[2] += 0.02f * dz;
-
   }
 }
 
-
-void error_forever(struct draw_state *st)
-{
+void error_forever(struct draw_state *st) {
   qword_t *buf = malloc(1200);
-  while(1) {
+  while (1) {
     dma_wait_fast();
     qword_t *q = buf;
     memset(buf, 0, 1200);
     q = draw_disable_tests(q, 0, &st->zb);
-    q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H, 0xff, 0, 0);
+    q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H, 0xff, 0,
+                   0);
     q = draw_finish(q);
-    dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
+    dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q - buf, 0, 0);
     draw_wait_finish();
     graph_wait_vsync();
     sleep(2);
   }
-
-
 }
 
 /*

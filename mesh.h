@@ -16,7 +16,6 @@ struct model {
   int buffer_len;
 };
 
-
 int load_file(const char *fname, char *b, int b_len);
 
 int model_load(struct model *m, char *b, int b_len);

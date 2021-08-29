@@ -1,8 +1,8 @@
 #ifndef GS_H
 #define GS_H
 
-#include <graph.h>
 #include <draw.h>
+#include <graph.h>
 
 struct draw_state {
   int width;
