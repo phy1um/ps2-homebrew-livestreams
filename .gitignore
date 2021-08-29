@@ -52,3 +52,6 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# python stuff
+**/__pycache__/
+**/*.bin
