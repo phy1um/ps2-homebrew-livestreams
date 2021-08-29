@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-#include "draw.h"
+#include "ps2draw.h"
 #include "log.h"
 #include "mesh.h"
 #include "ps2math.h"
