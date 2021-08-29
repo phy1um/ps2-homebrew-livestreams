@@ -1,12 +1,12 @@
 
-#include "mesh.h"
-#include "log.h"
-
 #include <gs_gp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <tamtypes.h>
+
+#include "log.h"
+#include "mesh.h"
 
 #define myftoi4(x) ((x) << 4)
 
