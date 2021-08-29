@@ -16,6 +16,7 @@ assets:
 	if ! [ -d dist ]; then mkdir dist; fi
 	$(MAKE) -C asset
 	cp asset/*.bin dist/
+	cp distfiles/* dist/
 
 $(BIN):
 	if ! [ -d dist ]; then mkdir dist; fi
