@@ -3,11 +3,12 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: ps2dev/ps2dev
     steps:
       - uses: actions/checkout@v2
+      - run: apk add python3 make gmp-dev mpfr-dev mpc1-dev
       - run: make assets
-      - uses: docker://ps2dev/ps2dev 
-      - run: apk add make gmp-dev mpfr-dev mpc1-dev
       - run: make dist/test.elf
       - uses: actions/upload-artifact@v2
         with: 
