@@ -1,0 +1,3 @@
+CPPLINT_FILTERS=-readability/casting,-build/include_subdir,-legal,-build/header_guard,-whitespace/blank_line
+CPPLINT_LINE_LENGTH=80
+

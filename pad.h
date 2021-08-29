@@ -23,7 +23,6 @@
 #define R_SIO2MAN "rom0:SIO2MAN"
 #define R_PADMAN "rom0:PADMAN"
 
-
 int button_pressed(int b);
 int button_held(int b);
 int button_released(int b);
