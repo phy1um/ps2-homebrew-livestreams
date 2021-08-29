@@ -16,11 +16,11 @@ assets:
 	if ! [ -d dist ]; then mkdir dist; fi
 	$(MAKE) -C asset
 	cp asset/*.bin dist/
+	cp distfiles/* dist/
 
 $(BIN):
 	if ! [ -d dist ]; then mkdir dist; fi
-	export PLATFORM=ps2
-	$(MAKE) -C src test.elf
+	$(MAKE) PLATFORM=ps2 -C src test.elf
 	cp src/test.elf dist/test.elf
 
 # TODO(phy1um): update ISO building to include everything in dist/
