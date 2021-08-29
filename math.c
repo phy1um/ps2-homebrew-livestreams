@@ -84,3 +84,9 @@ void matrix_viewport(MATRIX out, float w, float h)
   out[7] = 224;
   matrix_tsp(out);
 }
+
+void vector_rotate_y(VECTOR out, float r)
+{
+  out[0] = (out[0] * cos(r)) + (out[2] * sin(r));
+  out[2] = (-1.f * out[0] * sin(r)) + (out[2] * cos(r));
+}

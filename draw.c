@@ -11,6 +11,8 @@
 
 #define ZMAX (1024*1024)
 
+static int cc = 0;
+
 void log_matrix(MATRIX m)
 {
   printf("Matrix = \n");
@@ -29,10 +31,12 @@ void mesh_transform(char *b, struct model_instance *inst, struct render_state *d
   matrix_unit(tmp);
   matrix_multiply(tmp, model, d->world_to_screen);
 
-  info("Matrix info");
-  log_matrix(d->world_to_screen);
-  log_matrix(model);
-  log_matrix(tmp);
+  if (cc % 100 == 0) {
+    info("Matrix info");
+    log_matrix(d->world_to_screen);
+    log_matrix(model);
+    log_matrix(tmp);
+  }
   int stride = inst->m->vertex_size * 16;
   float d_avg = 0;
   for (int i = 0; i < inst->m->vertex_count; i++) {
@@ -43,7 +47,7 @@ void mesh_transform(char *b, struct model_instance *inst, struct render_state *d
     vector_apply(v, v, tmp);
     pos[0] = pos[0]/pos[3];
     pos[1] = pos[1]/pos[3];
-    pos[2] = pos[2];
+    pos[2] = pos[2]/pos[3];
     d_avg += pos[2];
      
     *((uint32_t*)pos) = ftoi4(pos[0]+d->offset_x);
@@ -65,7 +69,8 @@ void mesh_transform(char *b, struct model_instance *inst, struct render_state *d
 
     pos[3] = 0;
   }
-  info("avg depth = %f", d_avg / (1.0f * inst->m->vertex_count));
+  // info("avg depth = %f", d_avg / (1.0f * inst->m->vertex_count));
+  cc++;
 }
 
 void create_model_matrix(MATRIX tgt, VECTOR translate, VECTOR scale, VECTOR rotate)
@@ -82,6 +87,12 @@ void update_draw_matrix(struct render_state *d)
   d->up[1] = 1.0f;
   d->up[2] = 0;
   d->up[3] = 0;
+  
+  VECTOR camfwd = {0,0,-1,0};
+  vector_rotate_y(camfwd, d->camera_rotate_y);
+  //d->camera_tgt[0] = d->camera_pos[0] + camfwd[0];
+  //d->camera_tgt[1] = d->camera_pos[1] + camfwd[1];
+  d->camera_tgt[2] = d->camera_pos[2] - 1;
 
   MATRIX viewport, proj, cam;
   matrix_viewport(viewport, 640.f, 480.f);

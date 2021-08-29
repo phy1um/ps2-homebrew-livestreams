@@ -10,6 +10,8 @@ EE_LDFLAGS = -L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib
 
 PS2SDK=/usr/local/ps2dev/ps2sdk
 
+PS2HOST?=192.168.20.99
+
 ISO_TGT=test.iso
 
 ifdef PLATFORM
@@ -32,3 +34,11 @@ clean:
 .PHONY: run
 run:
 	PCSX2 --elf=$(PWD)/$(EE_BIN) 
+
+.PHONY: runps2
+runps2:
+	ps2client -h $(PS2HOST) -t 10 execee host:$(EE_BIN)
+
+.PHONY: resetps2
+resetps2:
+	ps2client -h $(PS2HOST) -t 5 reset

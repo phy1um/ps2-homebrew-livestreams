@@ -14,6 +14,7 @@ struct render_state {
   MATRIX world_to_screen;
   VECTOR camera_pos;
   VECTOR camera_tgt;
+  float camera_rotate_y;
   VECTOR up;
 };
 

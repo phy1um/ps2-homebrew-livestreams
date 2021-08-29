@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <math.h>
 
 #include <draw.h>
 #include <graph.h>
@@ -94,7 +95,6 @@ int main()
   inst.scale[1] = .8f;
   inst.scale[2] = .8f;
   inst.scale[3] = 1.0f;
-  inst.translate[2] = -10.f;
 
   pad_init();
 
@@ -113,27 +113,34 @@ int main()
     q = draw_enable_tests(q, 0, &st.zb);
     qword_t *model_verts_start = q;
     memcpy(q, m.buffer, m.buffer_len);
-    info("copied mesh buffer with len=%d", m.buffer_len);
+    // info("copied mesh buffer with len=%d", m.buffer_len);
     q += (m.buffer_len/16);
     q = draw_finish(q);
     mesh_transform((char*) (model_verts_start+MESH_HEADER_SIZE), &inst, &r);
     dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q-buf, 0, 0);
     // print_buffer(buf, q-buf); 
-    info("draw from buffer with length %d", q-buf);
+    // info("draw from buffer with length %d", q-buf);
 
     draw_wait_finish();
     graph_wait_vsync();
 
+#if 0
+    unsigned char joyx = joy_axis_value(AXIS_LEFT_X);
     float dx = (joy_axis_value(AXIS_LEFT_X) - 128) / 128.0f;
+    if ( fabs(dx) < 0.2f ) { dx = 0; }
+    float dz = (joy_axis_value(AXIS_LEFT_Y) - 128) / 128.0f;
+    if ( fabs(dz) < 0.2f ) { dz = 0; }
     int dy = button_held(DPAD_DOWN) - button_held(DPAD_UP);
-    int dz = button_held(BUTTON_L1) - button_held(BUTTON_L2); 
 
-    inst.translate[0] += 0.6f * dx;
-    inst.translate[1] += 0.6f * dy;
-    inst.translate[2] += 0.05f * dz;
+    info("joy %f,%f", dx, dz);
+#else
+    int dx = button_held(DPAD_RIGHT) - button_held(DPAD_LEFT);
+    int dz = button_held(DPAD_DOWN) - button_held(DPAD_UP);
+#endif
 
-    int cdx = button_held(BUTTON_R1) - button_held(BUTTON_R2);
-    r.camera_pos[0] += 0.1f * cdx;
+    r.camera_pos[0] += 0.02f * dx;
+    r.camera_pos[2] += 0.02f * dz;
+
   }
 }
 
