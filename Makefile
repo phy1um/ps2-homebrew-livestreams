@@ -1,11 +1,5 @@
-PS2SDK=/usr/local/ps2dev/ps2sdk
-
 ISO_TGT=test.iso
-EE_BIN=test.elf
-EE_OBJS=main.o gs.o mesh.o draw.o math.o pad.o
-EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d -lm -lpad
-EE_CFLAGS += -Wall --std=c99
-EE_LDFLAGS = -L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib
+BIN=dist/test.elf
 
 PS2HOST?=192.168.20.99
 
@@ -15,30 +9,40 @@ DOCKER?=sudo docker
 
 include .lintvars
 
-ifdef PLATFORM
-include $(PS2SDK)/samples/Makefile.eeglobal
-include $(PS2SDK)/samples/Makefile.pref
-endif
+dist: $(BIN) assets
 
+.PHONY: assets
+assets:
+	$(MAKE) -C asset
+	cp asset/*.bin dist/
+
+$(BIN):
+	$(MAKE) -C src test.elf
+	cp src/test.elf dist/test.elf
+
+# TODO(phy1um): update ISO building to include everything in dist/
 $(ISO_TGT): $(EE_BIN)
-	mkisofs -l -o $(ISO_TGT) $(EE_BIN) SYSTEM.CNF
+	mkisofs -l -o $(ISO_TGT) $(BIN) dist/SYSTEM.CNF
 
-.PHONY: docker-build
-docker-build:
-	$(DOCKER) run -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
+.PHONY: docker-elf
+docker-elf:
+	$(DOCKER) run -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
 
 
 .PHONY: clean
 clean:
-	rm -rf $(ISO_TGT) $(EE_BIN) $(EE_OBJS)
+	$(MAKE) -C src clean
+	$(MAKE) -C asset clean
+	rm -rf dist/*
 
 .PHONY: run
 run:
-	PCSX2 --elf=$(PWD)/$(EE_BIN) 
+	PCSX2 --elf=$(PWD)/$(BIN)
 
+# TODO(phy1um): this could be improved, hard-coded ELF name is bad
 .PHONY: runps2
 runps2:
-	ps2client -h $(PS2HOST) -t 10 execee host:$(EE_BIN)
+	cp dist && ps2client -h $(PS2HOST) -t 10 execee host:test.elf
 
 .PHONY: resetps2
 resetps2:
@@ -46,9 +50,10 @@ resetps2:
 
 .PHONY: lint
 lint:
-	cpplint --filter=$(CPPLINT_FILTERS) --counting=total --linelength=$(CPPLINT_LINE_LENGTH) --extensions=c,h *.c *.h
+	cpplint --filter=$(CPPLINT_FILTERS) --counting=total --linelength=$(CPPLINT_LINE_LENGTH) --extensions=c,h --recursive .
 
 .PHONY: format
 format:
 	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/workdir unibeautify/clang-format -i -sort-includes *.c *.h
+
 

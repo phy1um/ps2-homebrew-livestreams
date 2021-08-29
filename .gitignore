@@ -6,7 +6,6 @@ test.iso
 # Object files
 *.o
 *.ko
-*.obj
 *.elf
 
 # Linker output
@@ -53,3 +52,6 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# python stuff
+**/__pycache__/
+**/*.bin

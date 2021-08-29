@@ -13,7 +13,7 @@
 
 #include <inttypes.h>
 
-#include "draw.h"
+#include "ps2draw.h"
 #include "gs.h"
 #include "log.h"
 #include "mesh.h"

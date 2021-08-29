@@ -1,0 +1,26 @@
+name: Build
+on: 
+  push:
+    branches:
+      - main
+    tags:
+      - v*.*.*
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ps2dev/ps2dev
+    steps:
+      - uses: actions/checkout@v2
+      - run: apk add python3 make gmp-dev mpfr-dev mpc1-dev
+      - run: make assets
+      - run: echo "using PS2 SDK @ $PS2SDK"
+      - run: make dist/test.elf
+      - uses: actions/upload-artifact@v2
+        with: 
+          name: game package
+          path: dist/
+        if: ${{ github.ref == 'refs/head/main' || startsWith(github.ref, 'refs/tags') }}
+
+
