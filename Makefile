@@ -1,11 +1,5 @@
-PS2SDK=/usr/local/ps2dev/ps2sdk
-
 ISO_TGT=test.iso
-EE_BIN=test.elf
-EE_OBJS=main.o gs.o mesh.o draw.o math.o pad.o
-EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d -lm -lpad
-EE_CFLAGS += -Wall --std=c99
-EE_LDFLAGS = -L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib
+BIN=dist/test.elf
 
 PS2HOST?=192.168.20.99
 
@@ -15,30 +9,38 @@ DOCKER?=sudo docker
 
 include .lintvars
 
-ifdef PLATFORM
-include $(PS2SDK)/samples/Makefile.eeglobal
-include $(PS2SDK)/samples/Makefile.pref
-endif
+dist: $(BIN) assets
+
+.PHONY: assets
+assets:
+	$(MAKE) -C asset
+	cp asset/*.bin dist/
+
+$(BIN):
+	$(MAKE) -C src test.elf
+	cp src/test.elf dist/test.elf
 
 $(ISO_TGT): $(EE_BIN)
 	mkisofs -l -o $(ISO_TGT) $(EE_BIN) SYSTEM.CNF
 
-.PHONY: docker-build
-docker-build:
-	$(DOCKER) run -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
+.PHONY: docker-elf
+docker-elf:
+	$(DOCKER) run -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
 
 
 .PHONY: clean
 clean:
-	rm -rf $(ISO_TGT) $(EE_BIN) $(EE_OBJS)
+	$(MAKE) -C src clean
+	$(MAKE) -C asset clean
+	rm -rf dist/*
 
 .PHONY: run
 run:
-	PCSX2 --elf=$(PWD)/$(EE_BIN) 
+	PCSX2 --elf=$(PWD)/$(BIN)
 
 .PHONY: runps2
 runps2:
-	ps2client -h $(PS2HOST) -t 10 execee host:$(EE_BIN)
+	cp dist && ps2client -h $(PS2HOST) -t 10 execee host:$(BIN)
 
 .PHONY: resetps2
 resetps2:
