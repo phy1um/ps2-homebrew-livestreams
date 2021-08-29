@@ -40,7 +40,7 @@ int pad_init() {
   }
   padInit(0);
   padPortOpen(0, 0, &pad_buffer);
-  // TODO: check for dualshock controller
+  // TODO(phy1um): check for dualshock controller
   padSetMainMode(0, 0, 1, 3);
   return 1;
 }
