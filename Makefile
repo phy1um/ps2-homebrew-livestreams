@@ -20,8 +20,9 @@ $(BIN):
 	$(MAKE) -C src test.elf
 	cp src/test.elf dist/test.elf
 
+# TODO(phy1um): update ISO building to include everything in dist/
 $(ISO_TGT): $(EE_BIN)
-	mkisofs -l -o $(ISO_TGT) $(EE_BIN) SYSTEM.CNF
+	mkisofs -l -o $(ISO_TGT) $(BIN) dist/SYSTEM.CNF
 
 .PHONY: docker-elf
 docker-elf:
@@ -38,9 +39,10 @@ clean:
 run:
 	PCSX2 --elf=$(PWD)/$(BIN)
 
+# TODO(phy1um): this could be improved, hard-coded ELF name is bad
 .PHONY: runps2
 runps2:
-	cp dist && ps2client -h $(PS2HOST) -t 10 execee host:$(BIN)
+	cp dist && ps2client -h $(PS2HOST) -t 10 execee host:test.elf
 
 .PHONY: resetps2
 resetps2:
