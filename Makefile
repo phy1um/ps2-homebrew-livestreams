@@ -25,7 +25,7 @@ $(ISO_TGT): $(EE_BIN)
 
 .PHONY: docker-build
 docker-build:
-	docker run -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
+	$(DOCKER) run -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
 
 
 .PHONY: clean
