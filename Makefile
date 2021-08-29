@@ -13,11 +13,14 @@ dist: $(BIN) assets
 
 .PHONY: assets
 assets:
+	if ! [ -d dist ]; then mkdir dist; fi
 	$(MAKE) -C asset
 	cp asset/*.bin dist/
+	cp distfiles/* dist/
 
 $(BIN):
-	$(MAKE) -C src test.elf
+	if ! [ -d dist ]; then mkdir dist; fi
+	$(MAKE) PLATFORM=ps2 -C src test.elf
 	cp src/test.elf dist/test.elf
 
 # TODO(phy1um): update ISO building to include everything in dist/
@@ -33,7 +36,7 @@ docker-elf:
 clean:
 	$(MAKE) -C src clean
 	$(MAKE) -C asset clean
-	rm -rf dist/*
+	rm -rf dist/
 
 .PHONY: run
 run:
