@@ -90,10 +90,11 @@ int main()
 
   struct model_instance inst = {0};
   inst.m = &m;
-  inst.scale[0] = 10.0f;
-  inst.scale[1] = 10.0f;
-  inst.scale[2] = 10.0f;
+  inst.scale[0] = .8f;
+  inst.scale[1] = .8f;
+  inst.scale[2] = .8f;
   inst.scale[3] = 1.0f;
+  inst.translate[2] = -10.f;
 
   pad_init();
 
@@ -125,11 +126,14 @@ int main()
 
     float dx = (joy_axis_value(AXIS_LEFT_X) - 128) / 128.0f;
     int dy = button_held(DPAD_DOWN) - button_held(DPAD_UP);
-    int dz = button_held(BUTTON_L2) - button_held(BUTTON_L1); 
+    int dz = button_held(BUTTON_L1) - button_held(BUTTON_L2); 
 
-    inst.translate[0] += 1.4f * dx;
-    inst.translate[1] += 1.4f * dy;
-    inst.translate[2] += 0.2f * dz;
+    inst.translate[0] += 0.6f * dx;
+    inst.translate[1] += 0.6f * dy;
+    inst.translate[2] += 0.05f * dz;
+
+    int cdx = button_held(BUTTON_R1) - button_held(BUTTON_R2);
+    r.camera_pos[0] += 0.1f * cdx;
   }
 }
 
