@@ -13,10 +13,13 @@ dist: $(BIN) assets
 
 .PHONY: assets
 assets:
+	if ! [ -d dist ]; then mkdir dist; fi
 	$(MAKE) -C asset
 	cp asset/*.bin dist/
 
 $(BIN):
+	if ! [ -d dist ]; then mkdir dist; fi
+	export PLATFORM=ps2
 	$(MAKE) -C src test.elf
 	cp src/test.elf dist/test.elf
 
@@ -33,7 +36,7 @@ docker-elf:
 clean:
 	$(MAKE) -C src clean
 	$(MAKE) -C asset clean
-	rm -rf dist/*
+	rm -rf $(BIN) *.bin
 
 .PHONY: run
 run:

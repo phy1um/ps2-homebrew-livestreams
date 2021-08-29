@@ -6,8 +6,10 @@ EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d -lm -lpad
 EE_CFLAGS += -Wall --std=c99
 EE_LDFLAGS = -L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib
 
+ifeq ($(PLATFORM), ps2)
 include $(PS2SDK)/samples/Makefile.eeglobal
 include $(PS2SDK)/samples/Makefile.pref
+endif
 
 .PHONY: clean
 clean:
