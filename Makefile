@@ -46,7 +46,7 @@ resetps2:
 
 .PHONY: lint
 lint:
-	cpplint --filter=$(CPPLINT_FILTERS) --counting=total --linelength=$(CPPLINT_LINE_LENGTH) --extensions=c,h *.c *.h
+	cpplint --filter=$(CPPLINT_FILTERS) --counting=total --linelength=$(CPPLINT_LINE_LENGTH) --extensions=c,h --recursive .
 
 .PHONY: format
 format:
