@@ -36,7 +36,7 @@ docker-elf:
 clean:
 	$(MAKE) -C src clean
 	$(MAKE) -C asset clean
-	rm -rf $(BIN) *.bin
+	rm -rf dist/
 
 .PHONY: run
 run:
