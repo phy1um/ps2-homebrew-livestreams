@@ -4,9 +4,9 @@
 
 #include <stdint.h>
 
-#include "ps2draw.h"
 #include "log.h"
 #include "mesh.h"
+#include "ps2draw.h"
 #include "ps2math.h"
 
 #define ZMAX (1024 * 1024)
@@ -15,8 +15,8 @@ static int cc = 0;
 
 void log_matrix(MATRIX m) {
   printf("Matrix = \n");
-  printf("%.2f %.2f %.2f %.2f\n", m[0], m[4], m[8],  m[12]);
-  printf("%.2f %.2f %.2f %.2f\n", m[1], m[5], m[9],  m[13]);
+  printf("%.2f %.2f %.2f %.2f\n", m[0], m[4], m[8], m[12]);
+  printf("%.2f %.2f %.2f %.2f\n", m[1], m[5], m[9], m[13]);
   printf("%.2f %.2f %.2f %.2f\n", m[2], m[6], m[10], m[14]);
   printf("%.2f %.2f %.2f %.2f\n", m[3], m[7], m[11], m[15]);
 }
@@ -24,7 +24,7 @@ void log_matrix(MATRIX m) {
 int mesh_is_visible(struct model_instance *inst, struct render_state *d) {
   VECTOR v;
   vector_sub(v, d->camera_pos, inst->translate);
-  float dot = v[0]*d->fwd[0] + v[1]*d->fwd[1] + v[2]*d->fwd[2];
+  float dot = v[0] * d->fwd[0] + v[1] * d->fwd[1] + v[2] * d->fwd[2];
   return (dot > 0);
 }
 
@@ -40,7 +40,7 @@ void mesh_transform(char *b, struct model_instance *inst,
   matrix_multiply(tmp, tmp, d->v);
   matrix_multiply(tmp, tmp, d->p);
 
-  if ( cc == 0 ) {
+  if (cc == 0) {
     info("PROJECTION == ");
     log_matrix(d->p);
   }
@@ -63,13 +63,13 @@ void mesh_transform(char *b, struct model_instance *inst,
     pos[3] = 1.f;
 
     vector_apply(v, v, tmp);
-    pos[0] = pos[0]/pos[3]; 
-    pos[1] = pos[1]/pos[3];
+    pos[0] = pos[0] / pos[3];
+    pos[1] = pos[1] / pos[3];
     pos[2] = pos[2];
     d_avg += pos[2];
 
-    pos[0] = (pos[0]*200) ;
-    pos[1] = (pos[1]*200) ;
+    pos[0] = (pos[0] * 200);
+    pos[1] = (pos[1] * 200);
 
     *((uint32_t *)pos) = ftoi4(pos[0] + d->offset_x);
     *((uint32_t *)(pos + 1)) = ftoi4(pos[1] + d->offset_y);
@@ -90,7 +90,7 @@ void mesh_transform(char *b, struct model_instance *inst,
 
     pos[3] = 0;
   }
-  if ( cc % 100 == 0 ) {
+  if (cc % 100 == 0) {
     info("avg depth = %f", d_avg / (1.0f * inst->m->vertex_count));
   }
   cc++;
@@ -110,7 +110,10 @@ void update_draw_matrix(struct render_state *d) {
   d->up[2] = 0;
   d->up[3] = 0;
 
-  d->fwd[0] = 0; d->fwd[1] = 0; d->fwd[2] = -1.f; d->fwd[3] = 1.f;
+  d->fwd[0] = 0;
+  d->fwd[1] = 0;
+  d->fwd[2] = -1.f;
+  d->fwd[3] = 1.f;
   vector_rotate_y(d->fwd, d->camera_rotate_y);
 
   d->camera_tgt[0] = d->camera_pos[0] + d->fwd[0];

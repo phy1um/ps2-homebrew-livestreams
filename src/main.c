@@ -13,11 +13,11 @@
 
 #include <inttypes.h>
 
-#include "ps2draw.h"
 #include "gs.h"
 #include "log.h"
 #include "mesh.h"
 #include "pad.h"
+#include "ps2draw.h"
 
 #define OFFSET_X 2048
 #define OFFSET_Y 2048
@@ -109,7 +109,7 @@ int main() {
     q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H,
                    r.clear_col[0], r.clear_col[1], r.clear_col[2]);
     q = draw_enable_tests(q, 0, &st.zb);
-    if ( mesh_is_visible(&inst, &r) ) {
+    if (mesh_is_visible(&inst, &r)) {
       qword_t *model_verts_start = q;
       memcpy(q, m.buffer, m.buffer_len);
       // info("copied mesh buffer with len=%d", m.buffer_len);
@@ -141,7 +141,7 @@ int main() {
 
     r.camera_pos[0] += 0.2f * dx;
     r.camera_pos[2] += 0.2f * dz;
-    //r.camera_pos[1] += 0.1f * dy;
+    // r.camera_pos[1] += 0.1f * dy;
     r.camera_rotate_y += 0.01f * dy;
   }
 }
