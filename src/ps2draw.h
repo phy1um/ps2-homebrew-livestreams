@@ -9,9 +9,9 @@ struct render_state {
   float offset_x;
   float offset_y;
   char clear_col[3];
-  MATRIX world_view;
-  MATRIX view_screen;
   MATRIX world_to_screen;
+  MATRIX v;
+  MATRIX p;
   VECTOR camera_pos;
   VECTOR camera_tgt;
   float camera_rotate_y;

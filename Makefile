@@ -18,10 +18,14 @@ assets:
 	cp asset/*.bin dist/
 	cp distfiles/* dist/
 
-$(BIN):
+$(BIN): src/test.elf
 	if ! [ -d dist ]; then mkdir dist; fi
-	$(MAKE) PLATFORM=ps2 -C src test.elf
 	cp src/test.elf dist/test.elf
+
+.PHONY: src/test.elf
+src/test.elf:
+	$(MAKE) PLATFORM=ps2 -C src test.elf
+
 
 # TODO(phy1um): update ISO building to include everything in dist/
 $(ISO_TGT): $(EE_BIN)

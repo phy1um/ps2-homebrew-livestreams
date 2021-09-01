@@ -77,7 +77,7 @@ int main() {
   struct render_state r = {0};
 
   r.camera_pos[0] = 0.0f;
-  r.camera_pos[2] = 10.0f;
+  r.camera_pos[2] = 1.0f;
   r.camera_pos[3] = 1.0f;
 
   r.clear_col[0] = 0xb1;
@@ -89,10 +89,11 @@ int main() {
 
   struct model_instance inst = {0};
   inst.m = &m;
-  inst.scale[0] = .8f;
-  inst.scale[1] = .8f;
-  inst.scale[2] = .8f;
+  inst.scale[0] = 1.f;
+  inst.scale[1] = 1.f;
+  inst.scale[2] = 1.f;
   inst.scale[3] = 1.0f;
+  inst.translate[2] = 10.f;
 
   pad_init();
 
@@ -133,10 +134,13 @@ int main() {
 #else
     int dx = button_held(DPAD_RIGHT) - button_held(DPAD_LEFT);
     int dz = button_held(DPAD_DOWN) - button_held(DPAD_UP);
+    int dy = button_held(BUTTON_L1) - button_held(BUTTON_L2);
 #endif
 
-    r.camera_pos[0] += 0.02f * dx;
-    r.camera_pos[2] += 0.02f * dz;
+    r.camera_pos[0] += 0.2f * dx;
+    r.camera_pos[2] += 0.2f * dz;
+    //r.camera_pos[1] += 0.1f * dy;
+    r.camera_rotate_y += 0.01f * dy;
   }
 }
 
