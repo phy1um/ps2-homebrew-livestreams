@@ -18,10 +18,14 @@ assets:
 	cp asset/*.bin dist/
 	cp distfiles/* dist/
 
-$(BIN):
+$(BIN): src/test.elf
 	if ! [ -d dist ]; then mkdir dist; fi
-	$(MAKE) PLATFORM=ps2 -C src test.elf
 	cp src/test.elf dist/test.elf
+
+.PHONY: src/test.elf
+src/test.elf:
+	$(MAKE) PLATFORM=ps2 -C src test.elf
+
 
 # TODO(phy1um): update ISO building to include everything in dist/
 $(ISO_TGT): $(EE_BIN)
@@ -57,6 +61,6 @@ lint:
 
 .PHONY: format
 format:
-	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/workdir unibeautify/clang-format -i -sort-includes *.c *.h
+	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/workdir unibeautify/clang-format -i -sort-includes **/*.c **/*.h
 
 
