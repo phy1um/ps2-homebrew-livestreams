@@ -11,5 +11,6 @@ void matrix_proj(MATRIX out, float fov, float ar, float near, float far);
 void matrix_tsp(MATRIX t);
 
 void vector_rotate_y(VECTOR out, float r);
+void vector_sub(VECTOR out, VECTOR a, VECTOR b);
 
 #endif

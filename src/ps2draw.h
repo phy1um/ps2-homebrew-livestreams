@@ -14,8 +14,9 @@ struct render_state {
   MATRIX p;
   VECTOR camera_pos;
   VECTOR camera_tgt;
-  float camera_rotate_y;
+  VECTOR fwd;
   VECTOR up;
+  float camera_rotate_y;
 };
 
 struct model_instance {
@@ -30,5 +31,7 @@ void mesh_transform(char *b, struct model_instance *inst,
 void create_model_matrix(MATRIX tgt, VECTOR translate, VECTOR scale,
                          VECTOR rotate);
 void update_draw_matrix(struct render_state *d);
+
+int mesh_is_visible(struct model_instance *inst, struct render_state *d);
 
 #endif

@@ -21,6 +21,13 @@ void log_matrix(MATRIX m) {
   printf("%.2f %.2f %.2f %.2f\n", m[3], m[7], m[11], m[15]);
 }
 
+int mesh_is_visible(struct model_instance *inst, struct render_state *d) {
+  VECTOR v;
+  vector_sub(v, d->camera_pos, inst->translate);
+  float dot = v[0]*d->fwd[0] + v[1]*d->fwd[1] + v[2]*d->fwd[2];
+  return (dot > 0);
+}
+
 void mesh_transform(char *b, struct model_instance *inst,
                     struct render_state *d) {
   MATRIX tmp;
@@ -40,6 +47,7 @@ void mesh_transform(char *b, struct model_instance *inst,
 
   if (cc % 200 == 0) {
     info("###### Matrix info ######");
+    info("rotate=%f", d->camera_rotate_y);
     info(" view=");
     log_matrix(d->v);
     info(" mvp=");
@@ -57,7 +65,7 @@ void mesh_transform(char *b, struct model_instance *inst,
     vector_apply(v, v, tmp);
     pos[0] = pos[0]/pos[3]; 
     pos[1] = pos[1]/pos[3];
-    pos[2] = pos[2]/pos[3];
+    pos[2] = pos[2];
     d_avg += pos[2];
 
     pos[0] = (pos[0]*200) ;
@@ -102,12 +110,12 @@ void update_draw_matrix(struct render_state *d) {
   d->up[2] = 0;
   d->up[3] = 0;
 
-  VECTOR camfwd = {0,0,-1,1};
-  vector_rotate_y(camfwd, d->camera_rotate_y);
+  d->fwd[0] = 0; d->fwd[1] = 0; d->fwd[2] = -1.f; d->fwd[3] = 1.f;
+  vector_rotate_y(d->fwd, d->camera_rotate_y);
 
-  d->camera_tgt[0] = d->camera_pos[0] + camfwd[0];
-  d->camera_tgt[1] = d->camera_pos[1] + camfwd[1];
-  d->camera_tgt[2] = d->camera_pos[2] + camfwd[2];
+  d->camera_tgt[0] = d->camera_pos[0] + d->fwd[0];
+  d->camera_tgt[1] = d->camera_pos[1] + d->fwd[1];
+  d->camera_tgt[2] = d->camera_pos[2] + d->fwd[2];
   /*
   d->camera_tgt[0] = 0;
   d->camera_tgt[1] = 0;
