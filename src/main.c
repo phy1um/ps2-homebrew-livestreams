@@ -43,7 +43,11 @@ int print_buffer(qword_t *b, int len) {
   return 0;
 }
 
+int script_init();
+
+
 int main() {
+
   printf("Hello\n");
   qword_t *buf = malloc(20000 * 16);
   char *file_load_buffer = malloc(310 * 1024);
@@ -54,7 +58,7 @@ int main() {
   st.gmode = GRAPH_MODE_INTERLACED,
 
   // init DMAC
-      dma_channel_initialize(DMA_CHANNEL_GIF, 0, 0);
+  dma_channel_initialize(DMA_CHANNEL_GIF, 0, 0);
   dma_channel_fast_waits(DMA_CHANNEL_GIF);
 
   // initialize graphics mode
@@ -98,6 +102,8 @@ int main() {
   pad_init();
 
   graph_wait_vsync();
+
+
   while (1) {
     pad_frame_start();
     pad_poll();
@@ -143,6 +149,12 @@ int main() {
     r.camera_pos[2] += 0.2f * dz;
     // r.camera_pos[1] += 0.1f * dy;
     r.camera_rotate_y += 0.01f * dy;
+
+    if ( button_held(BUTTON_1) ) {
+      int sr = script_init();
+      info("SCRIPT LOADING: %d", sr);
+    }
+
   }
 }
 

@@ -7,6 +7,8 @@ DOCKER_IMG=ps2build
 DOCKERFLAGS=--user "$(shell id -u):$(shell id -g)"
 DOCKER?=sudo docker
 
+LUA_BRANCH=ee-v5.4.4
+
 include .lintvars
 
 dist: $(BIN) assets
@@ -24,7 +26,7 @@ $(BIN): src/test.elf
 
 .PHONY: src/test.elf
 src/test.elf:
-	$(MAKE) PLATFORM=ps2 -C src test.elf
+	$(MAKE) platform=PS2 -C src test.elf
 
 
 # TODO(phy1um): update ISO building to include everything in dist/
@@ -33,11 +35,11 @@ $(ISO_TGT): $(EE_BIN)
 
 .PHONY: docker-elf
 docker-elf:
-	$(DOCKER) run -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
+	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
 
 
 .PHONY: clean
-clean:
+clean: 
 	$(MAKE) -C src clean
 	$(MAKE) -C asset clean
 	rm -rf dist/
@@ -63,4 +65,12 @@ lint:
 format:
 	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/workdir unibeautify/clang-format -i -sort-includes **/*.c **/*.h
 
+deps:
+	git clone https://github.com/ps2dev/lua --depth 1 --branch $(LUA_BRANCH) --single-branch src/lua
+
+lua-samples:
+	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make -C src/lua/sample
+
+docker-image:
+	$(DOCKER) build -t $(DOCKER_IMG) .
 

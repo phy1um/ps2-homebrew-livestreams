@@ -1,12 +1,14 @@
 PS2SDK=/usr/local/ps2dev/ps2sdk
 
 EE_BIN=test.elf
-EE_OBJS=main.o gs.o mesh.o draw.o math.o pad.o
-EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d -lm -lpad
-EE_CFLAGS += -Wall --std=c99
-EE_LDFLAGS = -L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib
+EE_OBJS=main.o gs.o mesh.o draw.o math.o pad.o testlua.o
+EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d -lm -lpad -llua
+EE_CFLAGS+=-Wall --std=c99 -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
 
-ifeq ($(PLATFORM), ps2)
+EE_INCS+=-I$(PS2SDK)/ports/include
+EE_LDFLAGS=-L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib -L$(PS2SDK)/ports/lib
+
+ifeq ($(platform), PS2)
 include $(PS2SDK)/samples/Makefile.eeglobal
 include $(PS2SDK)/samples/Makefile.pref
 endif
@@ -14,5 +16,7 @@ endif
 .PHONY: clean
 clean:
 	rm -rf $(EE_BIN) $(EE_OBJS)
+	make -C lua -f makefile clean
+
 
 
