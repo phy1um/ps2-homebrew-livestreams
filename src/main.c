@@ -8,8 +8,6 @@
 #include <dma_tags.h>
 #include <draw.h>
 #include <graph.h>
-#include <gs_gp.h>
-#include <gs_psm.h>
 
 #include <inttypes.h>
 
@@ -18,6 +16,8 @@
 #include "mesh.h"
 #include "pad.h"
 #include "ps2draw.h"
+#include "drawstate.h"
+#include "script.h"
 
 #define OFFSET_X 2048
 #define OFFSET_Y 2048
@@ -25,7 +25,7 @@
 #define VID_W 640
 #define VID_H 448
 
-#define TGT_FILE "host:cube.bin"
+#define TGT_FILE "host:MIT_teapot.bin"
 
 #define fatalerror(st, msg, ...)                                               \
   printf("FATAL: " msg "\n", ##__VA_ARGS__);                                   \
@@ -43,9 +43,6 @@ int print_buffer(qword_t *b, int len) {
   return 0;
 }
 
-int script_init();
-
-
 int main() {
 
   printf("Hello\n");
@@ -53,43 +50,37 @@ int main() {
   char *file_load_buffer = malloc(310 * 1024);
   int file_load_buffer_len = 310 * 1024;
 
-  struct draw_state st = {0};
-  st.width = VID_W, st.height = VID_H, st.vmode = graph_get_region(),
-  st.gmode = GRAPH_MODE_INTERLACED,
-
   // init DMAC
   dma_channel_initialize(DMA_CHANNEL_GIF, 0, 0);
   dma_channel_fast_waits(DMA_CHANNEL_GIF);
 
-  // initialize graphics mode
-  gs_init(&st, GS_PSM_32, GS_PSMZ_24);
+  // TODO: make constant in lua out of this
+  // st.gmode = GRAPH_MODE_INTERLACED;
+  void *lua = script_load("host:entry.lua");
+  script_simple_call(lua, "ps2_init");
 
   struct model m = {0};
   m.r = 0xff;
   int bytes_read = load_file(TGT_FILE, file_load_buffer, file_load_buffer_len);
   if (bytes_read <= 0) {
-    fatalerror(&st, "failed to load file %s", TGT_FILE);
+    fatalerror(drawstate_gs_state(), "failed to load file %s", TGT_FILE);
   }
   if (bytes_read % 16 != 0) {
-    fatalerror(&st, "lengt of model file %s was not 0 %% 16", TGT_FILE);
+    fatalerror(drawstate_gs_state(), "lengt of model file %s was not 0 %% 16", TGT_FILE);
   }
 
   if (!model_load(&m, file_load_buffer, bytes_read)) {
-    fatalerror(&st, "failed to process model");
+    fatalerror(drawstate_gs_state(), "failed to process model");
   }
 
-  struct render_state r = {0};
+  struct render_state *r = drawstate_get();
 
-  r.camera_pos[0] = 0.0f;
-  r.camera_pos[2] = 1.0f;
-  r.camera_pos[3] = 1.0f;
+  r->clear_col[0] = 0xb1;
+  r->clear_col[1] = 0xce;
+  r->clear_col[2] = 0xcb;
 
-  r.clear_col[0] = 0xb1;
-  r.clear_col[1] = 0xce;
-  r.clear_col[2] = 0xcb;
-
-  r.offset_x = OFFSET_X;
-  r.offset_y = OFFSET_Y;
+  r->offset_x = OFFSET_X;
+  r->offset_y = OFFSET_Y;
 
   struct model_instance inst = {0};
   inst.m = &m;
@@ -103,7 +94,6 @@ int main() {
 
   graph_wait_vsync();
 
-
   while (1) {
     pad_frame_start();
     pad_poll();
@@ -111,21 +101,18 @@ int main() {
     dma_wait_fast();
     qword_t *q = buf;
     memset(buf, 0, 20000 * 16);
-    q = draw_disable_tests(q, 0, &st.zb);
+    q = drawstate_ztest(q, 0);
     q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H,
-                   r.clear_col[0], r.clear_col[1], r.clear_col[2]);
-    q = draw_enable_tests(q, 0, &st.zb);
-    if (mesh_is_visible(&inst, &r)) {
+                   r->clear_col[0], r->clear_col[1], r->clear_col[2]);
+    q = drawstate_ztest(q, 1);
+    if (mesh_is_visible(&inst, r)) {
       qword_t *model_verts_start = q;
       memcpy(q, m.buffer, m.buffer_len);
-      // info("copied mesh buffer with len=%d", m.buffer_len);
-      mesh_transform((char *)(model_verts_start + MESH_HEADER_SIZE), &inst, &r);
+      mesh_transform((char *)(model_verts_start + MESH_HEADER_SIZE), &inst, r);
       q += (m.buffer_len / 16);
     }
     q = draw_finish(q);
     dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q - buf, 0, 0);
-    // print_buffer(buf, q-buf);
-    // info("draw from buffer with length %d", q-buf);
 
     draw_wait_finish();
     graph_wait_vsync();
@@ -145,15 +132,10 @@ int main() {
     int dy = button_held(BUTTON_L1) - button_held(BUTTON_L2);
 #endif
 
-    r.camera_pos[0] += 0.2f * dx;
-    r.camera_pos[2] += 0.2f * dz;
-    // r.camera_pos[1] += 0.1f * dy;
-    r.camera_rotate_y += 0.01f * dy;
-
-    if ( button_held(BUTTON_1) ) {
-      int sr = script_init();
-      info("SCRIPT LOADING: %d", sr);
-    }
+    r->camera_pos[0] += 0.2f * dx;
+    r->camera_pos[2] += 0.2f * dz;
+    // r->camera_pos[1] += 0.1f * dy;
+    r->camera_rotate_y += 0.01f * dy;
 
   }
 }

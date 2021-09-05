@@ -5,6 +5,8 @@
 #define MESH_HEADER_SIZE 3
 #define myftoi4(x) (((uint64_t)(x)) << 4)
 
+#include <math3d.h>
+
 struct render_state {
   float offset_x;
   float offset_y;
