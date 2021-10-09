@@ -11,6 +11,7 @@ struct draw_state {
   int gmode;
   framebuffer_t fb;
   zbuffer_t zb;
+  char clear_col[3];
 };
 
 int gs_init(struct draw_state *ds, int psm, int psmz);

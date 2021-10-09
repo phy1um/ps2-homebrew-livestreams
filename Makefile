@@ -5,7 +5,7 @@ PS2HOST?=192.168.20.99
 
 DOCKER_IMG=ps2build
 DOCKERFLAGS=--user "$(shell id -u):$(shell id -g)"
-DOCKER?=sudo docker
+DOCKER?=docker
 
 LUA_BRANCH=ee-v5.4.4
 
@@ -28,6 +28,11 @@ $(BIN): src/test.elf
 src/test.elf:
 	$(MAKE) platform=PS2 -C src test.elf
 
+
+.PHONY: scripts
+scripts:
+	if ! [ -d dist/script ]; then mkdir -p dist/script; fi
+	cp script/* dist/script
 
 # TODO(phy1um): update ISO building to include everything in dist/
 $(ISO_TGT): $(EE_BIN)

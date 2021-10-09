@@ -45,3 +45,9 @@ int script_end(struct lua_State *L) {
   return 0;
 }
 
+void script_define_constants(struct lua_State *L) {
+  lua_pushinteger(L, 0);
+  lua_setglobal(L, "GS_NONINTERLACED");
+  lua_pushinteger(L, 1);
+  lua_setglobal(L, "GS_INTERLACED");
+}

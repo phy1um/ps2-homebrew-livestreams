@@ -54,8 +54,6 @@ int main() {
   dma_channel_initialize(DMA_CHANNEL_GIF, 0, 0);
   dma_channel_fast_waits(DMA_CHANNEL_GIF);
 
-  // TODO: make constant in lua out of this
-  // st.gmode = GRAPH_MODE_INTERLACED;
   void *lua = script_load("host:entry.lua");
   script_simple_call(lua, "ps2_init");
 
@@ -73,11 +71,12 @@ int main() {
     fatalerror(drawstate_gs_state(), "failed to process model");
   }
 
+  struct draw_state *draw_state = drawstate_gs_state();
   struct render_state *r = drawstate_get();
 
-  r->clear_col[0] = 0xb1;
-  r->clear_col[1] = 0xce;
-  r->clear_col[2] = 0xcb;
+  draw_state->clear_col[0] = 0xb1;
+  draw_state->clear_col[1] = 0xce;
+  draw_state->clear_col[2] = 0xcb;
 
   r->offset_x = OFFSET_X;
   r->offset_y = OFFSET_Y;
@@ -95,23 +94,26 @@ int main() {
   graph_wait_vsync();
 
   while (1) {
+
     pad_frame_start();
     pad_poll();
     update_draw_matrix(&r);
     dma_wait_fast();
+
     qword_t *q = buf;
     memset(buf, 0, 20000 * 16);
-    q = drawstate_ztest(q, 0);
-    q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H,
-                   r->clear_col[0], r->clear_col[1], r->clear_col[2]);
-    q = drawstate_ztest(q, 1);
+
+    q = gs_frame_start(draw_state, q);
+
     if (mesh_is_visible(&inst, r)) {
       qword_t *model_verts_start = q;
       memcpy(q, m.buffer, m.buffer_len);
       mesh_transform((char *)(model_verts_start + MESH_HEADER_SIZE), &inst, r);
       q += (m.buffer_len / 16);
     }
-    q = draw_finish(q);
+
+    q = gs_frame_end(draw_state, q);
+
     dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q - buf, 0, 0);
 
     draw_wait_finish();

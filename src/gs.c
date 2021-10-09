@@ -55,3 +55,23 @@ int gs_init(struct draw_state *ds, int psm, int psmz) {
 
   return 0;
 }
+
+qword_t * gs_frame_start(struct draw_state *ds, qword_t *q) {
+  if (!ds) {
+    logerror("cannot run frame_start on NULL draw state");
+    return q;
+  }
+
+  float halfw = ds->width / 2.f;
+  float halfh = ds->height / 2.f;
+
+  q = draw_disable_tests(q, 0, &ds->zb);
+  q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - half, ds->width, ds->height,
+    ds->clear_col[0], ds->clear_col[1], ds->clear_col[2]);
+  return draw_enable_tests(q, 0, &ds->zb);
+
+}
+
+qword_t * gs_frame_end(struct draw_state *ds, qword_t *q) {
+  return draw_finish(q);
+}
