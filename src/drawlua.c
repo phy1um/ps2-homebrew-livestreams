@@ -89,6 +89,8 @@ static int drawlua_start_frame(lua_State *l) {
   float halfw = st->fb.width / 2.f;
   float halfh = st->fb.height / 2.f;
 
+  info("clear screen :: (%d, %d, %d)", st->clear_r, st->clear_g, st->clear_b);
+
   qword_t *q = (qword_t *) (ptr + head);
   q = draw_disable_tests(q, 0, &st->zb);
   q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - halfh, width, height,
@@ -152,9 +154,9 @@ static int drawlua_new_drawbuffer(lua_State *l) {
   lua_setfield(l, -2, "frameStart");
   lua_pushcfunction(l, drawlua_end_frame);
   lua_setfield(l, -2, "frameEnd");
-  luaL_getmetatable(l, "ps2.buffer");
   lua_pushcfunction(l, drawbuffer_free);
   lua_setfield(l, -2, "free");
-  lua_setmetatable(l, -2);
+  luaL_getmetatable(l, "ps2.buffer");
+    lua_setmetatable(l, -2);
   return 1;
 }

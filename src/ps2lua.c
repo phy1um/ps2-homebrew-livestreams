@@ -3,6 +3,7 @@
 #include <lauxlib.h>
 
 #include <draw.h>
+#include <dma.h>
 #include <graph.h>
 
 #include "log.h"
@@ -10,6 +11,7 @@
 #include "script.h"
 
 static int ps2luaprog_start_nil(lua_State *l) {
+  info("default start...");
   return 0;
 }
 
@@ -31,13 +33,14 @@ int ps2luaprog_onstart(lua_State *l) {
   lua_getglobal(l, "PS2PROG"); 
   lua_pushstring(l, "start");
   lua_gettable(l, -2);
-  lua_call(l, 0, 0);
-  /*
+  int type = lua_type(l, -1);
+  info("start fn has type :: %s (%d)", lua_typename(l, type), type);
+  int rc = lua_pcall(l, 0, 0, 0);
   if ( rc ) {
-    const char *err = lua_tostring(L, -1);
-    logerr("lua execution error -- %s", err);
+    const char *err = lua_tostring(l, -1);
+    logerr("lua execution error (start event) -- %s", err);
   }
-  */
+
   return 0;
 }
 
@@ -45,13 +48,15 @@ int ps2luaprog_onframe(lua_State *l) {
   lua_getglobal(l, "PS2PROG"); 
   lua_pushstring(l, "frame");
   lua_gettable(l, -2);
-  lua_call(l, 0, 0);
-  /*
+  int type = lua_type(l, -1);
+  info("frame fn has type :: %s (%d)", lua_typename(l, type), type);
+  int rc = lua_pcall(l, 0, 0, 0);
+
   if ( rc ) {
     const char *err = lua_tostring(l, -1);
-    logerr("lua execution error -- %s", err);
+    logerr("lua execution error (frame event) -- %s", err);
   }
-  */
+
   return 0;
 }
 
@@ -96,8 +101,13 @@ int main(int argc, char *argv[]) {
 
   ps2luaprog_onstart(L);
   while( ps2luaprog_is_running(L) ) {
+    dma_wait_fast();
+    info("ON FRAME");
     ps2luaprog_onframe(L);
+    info("WAIT DRAW");
     draw_wait_finish();
+    info("WAIT VSYNC");
     graph_wait_vsync();
   }
+  info("main loop ended");
 }

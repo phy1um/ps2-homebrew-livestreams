@@ -7,9 +7,9 @@
 struct gs_state {
   framebuffer_t fb;
   zbuffer_t zb;
-  char clear_r;
-  char clear_g;
-  char clear_b;
+  unsigned char clear_r;
+  unsigned char clear_g;
+  unsigned char clear_b;
 };
 
 
