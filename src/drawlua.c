@@ -27,11 +27,13 @@ static int buffer_pushint(lua_State *l) {
   // ASSUME 4byte int
   if (head%4 != 0) {
     // TODO: manually bitmask etc
-    logerr("cannot write int to buffer, head%%4 != 0");
+    logerr("cannot write int to buffer, head%%4 != 0 (%d|%d)", head, head%4);
     return 0;
   }
+  info("db write int %d @ %d", value, head);
   ptr[head/4] = value;
-  lua_pushinteger(l, head+1);
+  info("db head -> %d", head+4);
+  lua_pushinteger(l, head+4);
   lua_setfield(l, 1, "head");
   return 0;
 }
@@ -95,9 +97,10 @@ static int drawlua_start_frame(lua_State *l) {
   q = draw_disable_tests(q, 0, &st->zb);
   q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - halfh, width, height,
     st->clear_r, st->clear_g, st->clear_b);
-  q = draw_enable_tests(q, 0, &st->zb);
+  //q = draw_enable_tests(q, 0, &st->zb);
 
   head = (char*)q - ptr;
+  info("db head -> %d", head);
   lua_pushinteger(l, head);
   lua_setfield(l, 1, "head");
   return 0;
@@ -127,6 +130,7 @@ static int drawlua_end_frame(lua_State *l) {
   q = draw_finish(q);
 
   head = (char*)q - ptr;
+  info("db head -> %d", head);
   lua_pushinteger(l, head);
   lua_setfield(l, 1, "head");
   return 0;

@@ -50,7 +50,7 @@ clean:
 	rm -rf dist/
 
 .PHONY: run
-run:
+run: scripts
 	PCSX2 --elf=$(PWD)/$(BIN)
 
 # TODO(phy1um): this could be improved, hard-coded ELF name is bad

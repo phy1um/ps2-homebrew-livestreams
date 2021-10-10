@@ -10,6 +10,8 @@
 
 #include "script.h"
 
+#define INIT_SCRIPT "host:script/draw.lua"
+
 static int ps2luaprog_start_nil(lua_State *l) {
   info("default start...");
   return 0;
@@ -84,11 +86,25 @@ int main(int argc, char *argv[]) {
 
   info("finished lua state setup");
 
-  info("loading file script/init.lua");
+  info("loading file " INIT_SCRIPT);
 
-  int rc = luaL_loadfile(L, "host:script/min.lua");
-  if ( rc ) {
-    logerr("failed to execute lua file %s", "host:script/min.lua");
+  int rc = luaL_loadfile(L, INIT_SCRIPT);
+  if ( rc == LUA_ERRSYNTAX ) {
+    logerr("failed to load " INIT_SCRIPT ": syntax error");
+    const char *err = lua_tostring(L, -1);
+    logerr("err: %s", err);
+    return -1;
+  }
+  else if ( rc == LUA_ERRMEM ) {
+    logerr("faild to allocate memory for " INIT_SCRIPT);
+    return -1;
+  }
+  else if ( rc == LUA_ERRFILE ) {
+    logerr("could not open/read file " INIT_SCRIPT);
+    return -1;
+  }
+  else if ( rc ) {
+    logerr("unknown error loading " INIT_SCRIPT);
     return -1;
   }
 
