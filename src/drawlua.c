@@ -12,7 +12,7 @@
 
 static int drawlua_new_drawbuffer(lua_State *l);
 
-static const unsigned int DRAW_BUFFER_MAX_SIZE = 2 * 1024;
+static const unsigned int DRAW_BUFFER_MAX_SIZE = 5 * 1024;
 char *static_draw_buffer;
 
 static int buffer_pushint(lua_State *l) {
@@ -30,9 +30,9 @@ static int buffer_pushint(lua_State *l) {
     logerr("cannot write int to buffer, head%%4 != 0 (%d|%d)", head, head%4);
     return 0;
   }
-  info("db write int %d @ %d", value, head);
+  // info("db write int %d @ %d", value, head);
   ptr[head/4] = value;
-  info("db head -> %d", head+4);
+  // info("db head -> %d", head+4);
   lua_pushinteger(l, head+4);
   lua_setfield(l, 1, "head");
   return 0;
@@ -100,7 +100,7 @@ static int drawlua_start_frame(lua_State *l) {
   //q = draw_enable_tests(q, 0, &st->zb);
 
   head = (char*)q - ptr;
-  info("db head -> %d", head);
+  // info("db head -> %d", head);
   lua_pushinteger(l, head);
   lua_setfield(l, 1, "head");
   return 0;
@@ -130,7 +130,7 @@ static int drawlua_end_frame(lua_State *l) {
   q = draw_finish(q);
 
   head = (char*)q - ptr;
-  info("db head -> %d", head);
+  // info("db head -> %d", head);
   lua_pushinteger(l, head);
   lua_setfield(l, 1, "head");
   return 0;
@@ -144,7 +144,10 @@ static int drawbuffer_free(lua_State *l) {
 static int drawlua_new_drawbuffer(lua_State *l) {
   int size = lua_tointeger(l, 1);
   if ( size >= DRAW_BUFFER_MAX_SIZE ) {
-    // TODO: error
+    logerr("invalid drawbuffer size: %d must be smaller than %d", size, DRAW_BUFFER_MAX_SIZE);
+    lua_pushstring(l, "drawbuffer size is too big");
+    lua_error(l);
+    return 0;
   }
   lua_createtable(l, 0, 5);
   lua_pushinteger(l, size);
@@ -161,6 +164,6 @@ static int drawlua_new_drawbuffer(lua_State *l) {
   lua_pushcfunction(l, drawbuffer_free);
   lua_setfield(l, -2, "free");
   luaL_getmetatable(l, "ps2.buffer");
-    lua_setmetatable(l, -2);
+  lua_setmetatable(l, -2);
   return 1;
 }

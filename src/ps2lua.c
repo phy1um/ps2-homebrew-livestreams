@@ -120,9 +120,9 @@ int main(int argc, char *argv[]) {
     dma_wait_fast();
     info("ON FRAME");
     ps2luaprog_onframe(L);
-    info("WAIT DRAW");
+    // info("WAIT DRAW");
     draw_wait_finish();
-    info("WAIT VSYNC");
+    // info("WAIT VSYNC");
     graph_wait_vsync();
   }
   info("main loop ended");
