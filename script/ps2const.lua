@@ -1,0 +1,14 @@
+
+return {
+  PRIM = {
+    POINT=0x0,
+    LINE=0x1,
+    LINE_STRIP=0x2,
+    TRI=0x3,
+    TRI_FAN=0x4,
+    TRI_STRIP=0x5,
+    SPRITE=0x6
+  },
+  ENABLE=0x1,
+  DISABLE=0x0,
+}
