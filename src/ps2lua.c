@@ -66,6 +66,38 @@ int ps2luaprog_is_running(lua_State *l) {
   return 1;
 }
 
+static int runfile(lua_State *l, const char *fname) {
+  info("running lua file %s", fname);
+  int rc = luaL_loadfile(l, fname);
+  if ( rc == LUA_ERRSYNTAX ) {
+    logerr("failed to load %s: syntax error", fname);
+    const char *err = lua_tostring(l, -1);
+    logerr("err: %s", err);
+    return -1;
+  }
+  else if ( rc == LUA_ERRMEM ) {
+    logerr("faild to allocate memory for %s", fname);
+    return -1;
+  }
+  else if ( rc == LUA_ERRFILE ) {
+    logerr("could not open/read file %s", fname);
+    return -1;
+  }
+  else if ( rc ) {
+    logerr("unknown error loading %s", fname);
+    return -1;
+  }
+
+  rc = lua_pcall(l, 0, 0, 0);
+  if ( rc ) {
+    const char *err = lua_tostring(l, -1);
+    logerr("lua execution error -- %s", err);
+    return -1;
+  }
+
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
   info("startup");
   struct lua_State *L;
@@ -86,34 +118,8 @@ int main(int argc, char *argv[]) {
 
   info("finished lua state setup");
 
-  info("loading file " INIT_SCRIPT);
-
-  int rc = luaL_loadfile(L, INIT_SCRIPT);
-  if ( rc == LUA_ERRSYNTAX ) {
-    logerr("failed to load " INIT_SCRIPT ": syntax error");
-    const char *err = lua_tostring(L, -1);
-    logerr("err: %s", err);
-    return -1;
-  }
-  else if ( rc == LUA_ERRMEM ) {
-    logerr("faild to allocate memory for " INIT_SCRIPT);
-    return -1;
-  }
-  else if ( rc == LUA_ERRFILE ) {
-    logerr("could not open/read file " INIT_SCRIPT);
-    return -1;
-  }
-  else if ( rc ) {
-    logerr("unknown error loading " INIT_SCRIPT);
-    return -1;
-  }
-
-  rc = lua_pcall(L, 0, 0, 0);
-  if ( rc ) {
-    const char *err = lua_tostring(L, -1);
-    logerr("lua execution error -- %s", err);
-    return -1;
-  }
+  runfile(L, "host:script/ps2init.lua");
+  runfile(L, INIT_SCRIPT);
 
   ps2luaprog_onstart(L);
   while( ps2luaprog_is_running(L) ) {

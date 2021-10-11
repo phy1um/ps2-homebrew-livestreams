@@ -6,6 +6,7 @@ local gif = {
 }
 
 function gif.tag(b, flg, nloop, eop, regs) 
+  local lpp = b.head
   if #regs == 0 then return end
   -- print("GIFTAG: pushing " .. string.format("0x%x", nloop))
   if eop then
@@ -41,6 +42,8 @@ function gif.tag(b, flg, nloop, eop, regs)
     -- print("GIFTAG: pushing regword " .. string.format("0x%x", reg))
     reg = 0
   end
+
+  return lpp
 end
 
 function gif.setAd(b, reg, v1, v2)

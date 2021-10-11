@@ -43,6 +43,36 @@ static int buffer_copy(lua_State *l) {
   return 0;
 }
 
+static int buffer_read(lua_State *l) {
+  int index = lua_tointeger(l, 2);
+  if (index % 4 != 0) {
+    lua_pushstring(l, "invalid read index, not ==0 %%4");
+    lua_error(l);
+    return 1;
+  }
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 1);
+  int *ptr = (int *) lua_touserdata(l, -1);
+  int res = ptr[index/4];
+  lua_pushinteger(l,,res);
+  return 1;
+}
+
+static int buffer_write(lua_State *l) {
+  int index = lua_tointeger(l, 2);
+  if (index % 4 != 0) {
+    lua_pushstring(l, "invalid read index, not ==0 %%4");
+    lua_error(l);
+    return 1;
+  }
+  int value = lua_tointeger(l, 3);
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 1);
+  int *ptr = (int *) lua_touserdata(l, -1);
+  ptr[index/4] = value;
+  return 0;
+}
+
 int drawlua_init(lua_State *l) {
   luaL_newmetatable(l, "ps2.buffer");  
   lua_createtable(l, 0, 5);
@@ -50,6 +80,10 @@ int drawlua_init(lua_State *l) {
   lua_setfield(l, -2, "pushint");
   lua_pushcfunction(l, buffer_copy);
   lua_setfield(l, -2, "copy");
+  lua_pushcfunction(l, buffer_read);
+  lua_setfield(l, -2, "read");  
+  lua_pushcfunction(l, buffer_write);
+  lua_setfield(l, -2, "write");
   lua_setfield(l, -2, "__index");
   lua_pop(l, 1);
 
