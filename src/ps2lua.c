@@ -10,7 +10,7 @@
 
 #include "script.h"
 
-#define INIT_SCRIPT "host:script/draw.lua"
+#define INIT_SCRIPT "host:script/ps2init.lua"
 
 static int ps2luaprog_start_nil(lua_State *l) {
   info("default start...");
@@ -99,7 +99,16 @@ static int runfile(lua_State *l, const char *fname) {
 }
 
 int main(int argc, char *argv[]) {
-  info("startup");
+  info("startup - argc = %d", argc);
+  for (int i = 0; i < argc; i++) {
+    info("arg %d) %s", i, argv[i]);
+  }
+  char *startup = "host:script/main.lua";
+  if (argc > 1) {
+    info("setting entrypoint to %s", argv[1]);
+    startup = argv[1];
+  }
+
   struct lua_State *L;
   L = luaL_newstate();
   if ( !L ) {
@@ -118,8 +127,8 @@ int main(int argc, char *argv[]) {
 
   info("finished lua state setup");
 
-  runfile(L, "host:script/ps2init.lua");
   runfile(L, INIT_SCRIPT);
+  runfile(L, startup);
 
   ps2luaprog_onstart(L);
   while( ps2luaprog_is_running(L) ) {

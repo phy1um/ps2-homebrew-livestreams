@@ -54,7 +54,7 @@ static int buffer_read(lua_State *l) {
   lua_gettable(l, 1);
   int *ptr = (int *) lua_touserdata(l, -1);
   int res = ptr[index/4];
-  lua_pushinteger(l,,res);
+  lua_pushinteger(l,res);
   return 1;
 }
 
@@ -104,9 +104,11 @@ static int drawlua_start_frame(lua_State *l) {
   lua_pushstring(l, "head");
   lua_gettable(l, 1);
   int head = lua_tointeger(l, -1);
+  /*
   lua_pushstring(l, "size");
   lua_gettable(l, 1);
   int size = lua_tointeger(l, -1);
+  */
   lua_pushstring(l, "ptr");
   lua_gettable(l, 1);
   char *ptr = (char *) lua_touserdata(l, -1);
@@ -153,12 +155,6 @@ static int drawlua_end_frame(lua_State *l) {
   lua_pushstring(l, "ptr");
   lua_gettable(l, 1);
   char *ptr = (char *) lua_touserdata(l, -1);
-
-  // gs is arg #2
-  lua_pushstring(l, "state");
-  lua_gettable(l, 2);
-
-  struct gs_state *st = (struct gs_state *) lua_touserdata(l, -1);
 
   qword_t *q = (qword_t *) (ptr + head);
   q = draw_finish(q);
