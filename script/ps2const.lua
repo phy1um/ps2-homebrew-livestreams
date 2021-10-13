@@ -7,7 +7,17 @@ return {
     TRI=0x3,
     TRI_FAN=0x4,
     TRI_STRIP=0x5,
-    SPRITE=0x6
+    SPRITE=0x6,
+  },
+  REG = {
+    PRIM=0x0,
+    BITBLTBUF=0x50,
+    TRXPOS=0x51,
+    TRXREG=0x52,
+    TRXDIR=0x53,
+    TEXFLUSH=0x3F,
+    TEX0 = 0x6,
+    TEX1 = 0x7,
   },
   ENABLE=0x1,
   DISABLE=0x0,

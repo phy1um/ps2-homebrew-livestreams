@@ -66,6 +66,10 @@ resetps2:
 lint:
 	cpplint --filter=$(CPPLINT_FILTERS) --counting=total --linelength=$(CPPLINT_LINE_LENGTH) --extensions=c,h --recursive .
 
+.PHONY: lualint
+lualint:
+	luac5.1 -p script/*.lua
+
 .PHONY: format
 format:
 	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/workdir unibeautify/clang-format -i -sort-includes **/*.c **/*.h

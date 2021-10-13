@@ -38,6 +38,52 @@ static int buffer_pushint(lua_State *l) {
   return 0;
 }
 
+static int buffer_settex(lua_State *l) {
+  int reg= lua_tointeger(l, 2);
+  int tbp= lua_tointeger(l, 3);
+  int tbw= lua_tointeger(l, 4);
+  int psm= lua_tointeger(l, 5);
+  int tw = lua_tointeger(l, 6);
+  int th = lua_tointeger(l, 7);
+  int tcc= lua_tointeger(l, 8);
+  int tfx= lua_tointeger(l, 9);
+
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 1);
+  int *ptr = (int *) lua_touserdata(l, -1);
+  lua_pushstring(l, "head");
+  lua_gettable(l, 1);
+  int head = lua_tointeger(l, -1);
+  // TODO: check size
+  // ASSUME 4byte int
+  if (head%4 != 0) {
+    // TODO: manually bitmask etc
+    logerr("cannot write int to buffer, head%%4 != 0 (%d|%d)", head, head%4);
+    return 0;
+  }
+
+  int *base = ptr + (head/4);
+
+  int v1 = tbp | (tbw<<14) | (psm<<20) | (tw<<26) | ((th&0x3) << 30);
+  int v2 = ((th&0x5)>>2) | (tcc<<2) | (tfx<<3);
+  int v3 = 0x6+reg;
+  int v4 = 0;
+  *(base) = v1;
+  *(base+1) = v2;
+  *(base+2) = v3;
+  *(base+3) = v4;
+
+  info("write tex0 :: %08x %08x %08x %08x", v1, v2, v3, v4);
+  info("head -> %d", head+16);
+
+  lua_pushinteger(l, head+16);
+  lua_setfield(l, 1, "head");
+
+  info("backtrack tex0 :: %08x %08x %08x %08x", base[0], base[1], base[2], base[3]);
+  return 0;
+
+}
+
 static int buffer_copy(lua_State *l) {
   info("UNIMPLEMENTED");
   return 0;
@@ -76,10 +122,16 @@ static int buffer_write(lua_State *l) {
 int drawlua_init(lua_State *l) {
   luaL_newmetatable(l, "ps2.buffer");  
   lua_createtable(l, 0, 5);
+
   lua_pushcfunction(l, buffer_pushint);
   lua_setfield(l, -2, "pushint");
+
+  lua_pushcfunction(l, buffer_settex);
+  lua_setfield(l, -2, "settex");
+
   lua_pushcfunction(l, buffer_copy);
   lua_setfield(l, -2, "copy");
+
   lua_pushcfunction(l, buffer_read);
   lua_setfield(l, -2, "read");  
   lua_pushcfunction(l, buffer_write);

@@ -38,7 +38,7 @@ static int dma_send_buffer(lua_State *l) {
   int channel = lua_tointeger(l, 2);
 
   // print buffer for debugging
-  // print_buffer(ptr, head/16);
+  print_buffer(ptr, head/16);
 
   // info("DMA send :: sending %d qwords on channel %d", head/16, channel);
   dma_channel_send_normal(channel, ptr, head/16, 0, 0);
