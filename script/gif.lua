@@ -20,8 +20,8 @@ function gif.tag(b, flg, nloop, eop, regs)
   if nreg > 16 then error("invalid gif tag: nreg = " .. #regs) end
   if nreg == 16 then nreg = 0 end
   local w2 = (math.floor(nreg * 2^28) + flg)
-  print("GIFTAG: pushing " .. string.format("0x%x", w2) .. " :: " .. w2)
-  print("GIFTAG: flag = " .. flg)
+  --print("GIFTAG: pushing " .. string.format("0x%x", w2) .. " :: " .. w2)
+  --print("GIFTAG: flag = " .. flg)
   b:pushint(w2)
   local reg = 0
   local regc = 0

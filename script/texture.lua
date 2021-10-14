@@ -17,42 +17,27 @@ end
 
 local gs = nil
 --local tex = makeTex(64, 64, 0x800000ff)
-local tt = {
-  basePtr = 0,
-  width = 64,
-  height = 64,
-  data = nil,
-  format = GS.PSM32
-}
+local testTex = {}
+local fnt = nil
 
-function PS2PROG.start()
-  tt.data = TGA.load("host:font.tga", 64, 64)
-  print("loaded tga: size = " .. tt.data.size .. " head = " .. tt.data.head)
 
-  DMA.init(DMA.GIF)
-  gs = GS.newState(640, 448, GS.INTERLACED, GS.NTSC)
-  local fb = VRAM.buffer(640, 440, GS.PSM24, 256)
-  local zb = VRAM.buffer(640, 440, GS.PSMZ24, 256)
-  print("setting new buffers")
-  gs:setBuffers(fb, zb)
-  gs:clearColour(0x2b, 0x2b, 0x2b)
+-- CURRENT TEXTURE LOADER CANNOT BE USED MID-FRAME!!!!!
+function loadTexture(fname, w, h)
+  print("LOAD TEX: " .. fname .. " @ PSM32")
+  local tt = {
+    basePtr = 0,
+    width = w,
+    height = h,
+    data = nil,
+    format = GS.PSM32
+  }
 
-  --[[
-  print("detailing texture")
-  local width = 64
-  local height = 64
-  for i=0,width,1 do
-    for j=0,height,1 do
-      local r = 0x0f
-      local g = 50 + math.floor(200 * j/height)
-      tex[j*width + i] = 0x80000000 + math.floor(r + (g*2^8))
-    end
-  end
-  ]]
+  tt.data = TGA.load(fname, w, h)
 
-  local texVramSize = 1024
+  -- only works for power of 2 textures @ psm32!!!!!
+  local texVramSize = w*h*4
   tt.basePtr = VRAM.alloc(texVramSize, 256)
-  print("got texture VRAM addr = " .. tt.basePtr)
+  print("LOAD TEX: got texture VRAM addr = " .. tt.basePtr)
 
   -- ib = RM.tmpBuffer(1000)
   ib = RM.getDrawBuffer(5000)
@@ -63,20 +48,19 @@ function PS2PROG.start()
   GIF.trxReg(ib,tt.width,tt.height)
   GIF.trxDir(ib, 0)
 
+  -- ASSUMPTION about format!
   local eeSize = tt.width*tt.height*4
   local qwc = math.floor(eeSize / 16)
-  print("image sent in " .. qwc .. " qwords")
   if qwc % 16 ~= 0 then qwc = qwc + 1 end
   local blocksize = math.floor(4496/16)
   local packets = math.floor(qwc / blocksize)
   local remain = qwc % blocksize
-  -- print("transmitting")
-  print("transmitting in " .. packets .. " packets with " .. remain .. " left")
+  print("LOAD TEX: transmitting in " .. packets .. " packets with " .. remain .. " left")
 
   local tb = 0
   while packets > 0 do
     GIF.tag(ib, GIF.IMAGE, blocksize, false, {0}) 
-    print("copy from TT " .. tb*blocksize*16 .. " to IB " .. ib.head .. " -- " .. blocksize*16)
+    print("LOAD TEX: copy from TT " .. tb*blocksize*16 .. " to IB " .. ib.head .. " -- " .. blocksize*16)
     tt.data:copy(ib, ib.head, tb*blocksize*16, blocksize*16)
     ib.head = ib.head + blocksize*16
     DMA.send(ib, DMA.GIF)
@@ -93,11 +77,23 @@ function PS2PROG.start()
     ib.head = ib.head + remain*16
   end
 
-  print("adding texflush")
   GIF.texflush(ib)
-
-  print("dma sending")
   DMA.send(ib, DMA.GIF)
+  print("LOAD TEX: DMA send")
+
+  return tt
+end
+
+function PS2PROG.start()
+  testTex = loadTexture("host:test.tga", 64, 64)
+  fnt = loadTexture("host:bigfont.tga", 256, 64)
+  DMA.init(DMA.GIF)
+  gs = GS.newState(640, 448, GS.INTERLACED, GS.NTSC)
+  local fb = VRAM.buffer(640, 440, GS.PSM24, 256)
+  local zb = VRAM.buffer(640, 440, GS.PSMZ24, 256)
+  print("setting new buffers")
+  gs:setBuffers(fb, zb)
+  gs:clearColour(0x2b, 0x2b, 0x2b)
 
 end
 
@@ -106,7 +102,8 @@ function PS2PROG.frame()
   local db = D2D:getBuffer()
   db:frameStart(gs)
   D2D:setColour(255,255,255,0x80)
-  D2D:rectuv(tt, -200, -200, 200, 200, 0, 0, 1, 1)
+  D2D:sprite(testTex, -200, -200, 200, 200, 0, 0, 1, 1)
+  D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)
   db = D2D:getBuffer()
   db:frameEnd(gs)
   D2D:kick()

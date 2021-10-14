@@ -44,7 +44,7 @@ function draw:rect(x, y, w, h)
   draw:triangle(x, y+h, x+w, y+h, x+w, y)
 end
 
-function draw:rectuv(tex, x, y, w, h, u1, v1, u2, v2)
+function draw:sprite(tex, x, y, w, h, u1, v1, u2, v2)
   if self.loopCount > 10000 then self:kick() end
   if self.buf.size - self.buf.head < 80 then self:kick() end
   if self.state ~= DRAW_SPRITE or self.currentTexPtr ~= tex.basePtr then
@@ -54,7 +54,7 @@ function draw:rectuv(tex, x, y, w, h, u1, v1, u2, v2)
     GIF.tag(self.buf, GIF.PACKED, 4, false, {0xe})
     GIF.texA(self.buf, 0x80, 0x80)
     GIF.tex1(self.buf, true, 0, true, 0, 0)
-    self.buf:settex(0, pb, pw, tex.format, math.floor(log2(tex.width)), math.floor(log2(tex.height)), 0, 1, 0, 0, 0)
+    self.buf:settex(0, pb, pw, tex.format, math.floor(log2(tex.width)), math.floor(log2(tex.height)), 0, 3, 0, 0, 0)
     -- GIF.mipTbp1(self.buf, 0, pb, pw, pb, pw, pb, pw)
     -- GIF.mipTbp2(self.buf, 0, pb, pw, pb, pw, pb, pw)
     GIF.primAd(self.buf, P.PRIM.SPRITE, false, true, false)
