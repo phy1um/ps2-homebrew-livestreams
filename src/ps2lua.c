@@ -12,6 +12,8 @@
 
 #define INIT_SCRIPT "host:script/ps2init.lua"
 
+int lua_tga_init(lua_State *l);
+
 static int ps2luaprog_start_nil(lua_State *l) {
   info("default start...");
   return 0;
@@ -120,7 +122,7 @@ int main(int argc, char *argv[]) {
   ps2luaprog_init(L);
   dma_lua_init(L);
   gs_lua_init(L);
-
+  lua_tga_init(L);
 
   //TODO: better abstraction for drawlua_*
   drawlua_init(L);

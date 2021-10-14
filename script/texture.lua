@@ -16,16 +16,19 @@ end
 
 
 local gs = nil
-local tex = makeTex(64, 64, 0x800000ff)
+--local tex = makeTex(64, 64, 0x800000ff)
 local tt = {
   basePtr = 0,
   width = 64,
   height = 64,
-  data = tex,
+  data = nil,
   format = GS.PSM32
 }
 
 function PS2PROG.start()
+  tt.data = TGA.load("host:test.tga", 64, 64)
+  print("loaded tga: size = " .. tt.data.size .. " head = " .. tt.data.head)
+
   DMA.init(DMA.GIF)
   gs = GS.newState(640, 448, GS.INTERLACED, GS.NTSC)
   local fb = VRAM.buffer(640, 440, GS.PSM24, 256)
@@ -34,6 +37,7 @@ function PS2PROG.start()
   gs:setBuffers(fb, zb)
   gs:clearColour(0x2b, 0x2b, 0x2b)
 
+  --[[
   print("detailing texture")
   local width = 64
   local height = 64
@@ -44,6 +48,7 @@ function PS2PROG.start()
       tex[j*width + i] = 0x80000000 + math.floor(r + (g*2^8))
     end
   end
+  ]]
 
   local texVramSize = 1024
   tt.basePtr = VRAM.alloc(texVramSize, 256)
@@ -66,17 +71,14 @@ function PS2PROG.start()
   local packets = math.floor(qwc / blocksize)
   local remain = qwc % blocksize
   -- print("transmitting")
-  print("transmitting in " .. packets .. " packets with " .. remain .. " lefte")
+  print("transmitting in " .. packets .. " packets with " .. remain .. " left")
 
   local tb = 0
   while packets > 0 do
     GIF.tag(ib, GIF.IMAGE, blocksize, false, {0}) 
-    for i=1,blocksize,1 do
-      ib:pushint(tex[tb*blocksize*4 + i])
-      ib:pushint(tex[tb*blocksize*4 + i+1])
-      ib:pushint(tex[tb*blocksize*4 + i+2])
-      ib:pushint(tex[tb*blocksize*4 + i+3])
-    end
+    print("copy from TT " .. tb*blocksize*4 .. " to IB " .. ib.head .. " -- " .. blocksize*16)
+    tt.data:copy(ib, ib.head, tb*blocksize*4, blocksize*16)
+    ib.head = ib.head + blocksize*16
     DMA.send(ib, DMA.GIF)
     ib = RM.getDrawBuffer(5000)
     packets = packets - 1
@@ -86,12 +88,9 @@ function PS2PROG.start()
   if remain > 0 then
     local base = tb*blocksize*4
     GIF.tag(ib, GIF.IMAGE, remain, false, {1})
-    for i=1,remain,1 do
-      ib:pushint(tex[base + i])
-      ib:pushint(tex[base + i + 1])
-      ib:pushint(tex[base + i + 2])
-      ib:pushint(tex[base + i + 3])
-    end
+    print("copy from TT " .. base .. " to IB " .. ib.head .. " -- " .. remain*16)
+    tt.data:copy(ib, ib.head, base, remain*16)
+    ib.head = ib.head + remain*16
   end
 
   print("adding texflush")

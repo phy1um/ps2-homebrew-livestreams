@@ -5,6 +5,7 @@
 #include <tamtypes.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "log.h"
 #include "script.h"
@@ -142,7 +143,24 @@ static int buffer_pushmiptbp(lua_State *l) {
 }
 
 static int buffer_copy(lua_State *l) {
-  info("UNIMPLEMENTED");
+  // arg 1 = buffer from
+  // arg 2 = buffer TO
+  // arg 3 = buffer TO offset
+  // arg 4 = buffer FROM offset
+  // arg 5 = n bytes
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 1);
+  char *ptr_from = lua_touserdata(l, -1);
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 2);
+  char *ptr_to = lua_touserdata(l, -1);
+
+  int to_offset = lua_tointeger(l, 3);
+  int from_offset = lua_tointeger(l, 4);
+  int n = lua_tointeger(l, 5);
+
+  memcpy(ptr_to + to_offset, ptr_from + from_offset, n);
+
   return 0;
 }
 
