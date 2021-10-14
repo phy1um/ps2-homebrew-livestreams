@@ -15,7 +15,9 @@ function vram.alloc(b, align)
 end
 
 function vram.size(w, h, psm, align)
-  w = vpa(w, 64) 
+  if w%align ~= 0 then
+    w = vpa(w, 64) 
+  end
   local size = w*h
   if psm == GS.PSM16 or psm == GS.PSM16S or psm == GS.PSMZ16 or psm == GS.PSMZ16S then
     math.floor(width*height*0.5)

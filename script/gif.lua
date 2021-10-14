@@ -72,11 +72,39 @@ function gif.trxDir(b, dir)
   gif.setAd(b, P.REG.TRXDIR, dir, 0)
 end
 
+function gif.tex1(b, lcm, mxl, mtba, l, k)
+  local v1 = mxl * 4
+  if lcm then v1 = v1 + 1 end
+  if mtba then v1 = v1 + 2^8 end
+  v1 = v1 + math.floor(l * (2^18))
+  gif.setAd(b, P.REG.TEX1, v1, k)
+end
+
+function gif.texA(b, a0, a1)
+  gif.setAd(b, P.REG.TEXA, a0, a1)
+end
+
+function gif.tex2(b, v)
+  gif.setAd(b, P.REG.TEX2, v, 0)
+end
+
+function gif.mipTbp1(b, ctx, p1, w1, p2, w2, p3, w3)
+  b:setMipTbp(p1, w1, p2, w2, p3, w3)
+  b:pushint(P.REG.MIPTBP1 + ctx) 
+  b:pushint(0)
+end
+
+function gif.mipTbp2(b, ctx, p1, w1, p2, w2, p3, w3)
+  b:setMipTbp(p1, w1, p2, w2, p3, w3)
+  b:pushint(P.REG.MIPTBP2 + ctx) 
+  b:pushint(0)
+end
+
 function gif.primAd(b, primType, shaded, textured, aa)
   local bits = primType
-  if shaded then bits = bits + 0x4 end
-  if textured then bits = bits + 0x8 end
-  if aa then bits = bits + 0x40 end
+  if shaded then bits = bits + 0x8 end
+  if textured then bits = bits + 0x10 end
+  if aa then bits = bits + 0x80 end
   gif.setAd(b, P.REG.PRIM, bits, 0)
 end
 
@@ -95,9 +123,18 @@ function gif.packedXYZ2(b, x, y, z)
 end
 
 function gif.packedUV(b, u, v)
-  b:pushint(u)
-  b:pushint(v)
+  local vv = u + math.floor(v * 2^16)
+  print("u,v -> " .. vv)
+  b:pushint(vv)
   b:pushint(0)
+  b:pushint(0)
+  b:pushint(0)
+end
+
+function gif.packedST(b, s, t)
+  b:pushfloat(s)
+  b:pushfloat(t)
+  b:pushfloat(0.0)
   b:pushint(0)
 end
 

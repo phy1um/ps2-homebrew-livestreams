@@ -16,21 +16,18 @@ end
 
 
 local gs = nil
-local testTexBuf = nil
-local tex = makeTex(64, 64, 0xff)
-local testTexBuf = 0
+local tex = makeTex(64, 64, 0x800000ff)
 local tt = {
   basePtr = 0,
   width = 64,
   height = 64,
   data = tex,
+  format = GS.PSM32
 }
 
 function PS2PROG.start()
   DMA.init(DMA.GIF)
   gs = GS.newState(640, 448, GS.INTERLACED, GS.NTSC)
-  --local fb = gs:alloc(640, 448, GS.PSM24)
-  --local zb = gs:alloc(640, 448, GS.PSMZ24)
   local fb = VRAM.buffer(640, 440, GS.PSM24, 256)
   local zb = VRAM.buffer(640, 440, GS.PSMZ24, 256)
   print("setting new buffers")
@@ -42,27 +39,26 @@ function PS2PROG.start()
   local height = 64
   for i=0,width,1 do
     for j=0,height,1 do
-      if (i+j)%2 == 0 then
-        tex[j*width + i] = 0xff00
-      end
+      local r = 0x0f
+      local g = 50 + math.floor(200 * j/height)
+      tex[j*width + i] = 0x80000000 + math.floor(r + (g*2^8))
     end
   end
+
   local texVramSize = 1024
-  testTexBuf = VRAM.alloc(texVramSize, 256)
-  tt.basePtr = math.floor(testTexBuf/64)
-  print("got texture VRAM addr = " .. testTexBuf)
+  tt.basePtr = VRAM.alloc(texVramSize, 256)
+  print("got texture VRAM addr = " .. tt.basePtr)
 
   -- ib = RM.tmpBuffer(1000)
-  local taddr = math.floor(testTexBuf/256)
   ib = RM.getDrawBuffer(5000)
 
   GIF.tag(ib, GIF.PACKED, 4, false, {0xe})
-  GIF.bitBltBuf(ib, math.floor(testTexBuf/64), math.floor(width/64), GS.PSM24)
+  GIF.bitBltBuf(ib, math.floor(tt.basePtr/64), math.floor(tt.width/64), tt.format)
   GIF.trxPos(ib,0,0,0,0,0)
-  GIF.trxReg(ib,width,height)
+  GIF.trxReg(ib,tt.width,tt.height)
   GIF.trxDir(ib, 0)
 
-  local eeSize = width*height*4
+  local eeSize = tt.width*tt.height*4
   local qwc = math.floor(eeSize / 16)
   print("image sent in " .. qwc .. " qwords")
   if qwc % 16 ~= 0 then qwc = qwc + 1 end
@@ -84,10 +80,11 @@ function PS2PROG.start()
     DMA.send(ib, DMA.GIF)
     ib = RM.getDrawBuffer(5000)
     packets = packets - 1
+    tb = tb + 1
   end
 
   if remain > 0 then
-    local base = math.floor(qwc/blocksize)*blocksize*4
+    local base = tb*blocksize*4
     GIF.tag(ib, GIF.IMAGE, remain, false, {1})
     for i=1,remain,1 do
       ib:pushint(tex[base + i])
@@ -110,7 +107,7 @@ function PS2PROG.frame()
   local db = D2D:getBuffer()
   db:frameStart(gs)
   D2D:setColour(255,255,255,0x80)
-  D2D:rectuv(tt, -200, -200, 200, 200, 0, 0, 2^14-1, 2^14 - 1)
+  D2D:rectuv(tt, -200, -200, 200, 200, 0, 0, 1, 1)
   db = D2D:getBuffer()
   db:frameEnd(gs)
   D2D:kick()

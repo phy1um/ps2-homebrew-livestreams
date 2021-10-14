@@ -38,6 +38,30 @@ static int buffer_pushint(lua_State *l) {
   return 0;
 }
 
+static int buffer_pushfloat(lua_State *l) {
+  float value = (float) lua_tointeger(l, 2);
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 1);
+  float *ptr = (float *) lua_touserdata(l, -1);
+  lua_pushstring(l, "head");
+  lua_gettable(l, 1);
+  int head = lua_tointeger(l, -1);
+  // TODO: check size
+  // ASSUME 4byte int
+  if (head%4 != 0) {
+    // TODO: manually bitmask etc
+    logerr("cannot write int to buffer, head%%4 != 0 (%d|%d)", head, head%4);
+    return 0;
+  }
+  // info("db write int %d @ %d", value, head);
+  ptr[head/4] = value;
+  // info("db head -> %d", head+4);
+  lua_pushinteger(l, head+4);
+  lua_setfield(l, 1, "head");
+  return 0;
+}
+
+
 static int buffer_settex(lua_State *l) {
   int reg= lua_tointeger(l, 2);
   int tbp= lua_tointeger(l, 3);
@@ -65,7 +89,7 @@ static int buffer_settex(lua_State *l) {
   int *base = ptr + (head/4);
 
   int v1 = tbp | (tbw<<14) | (psm<<20) | (tw<<26) | ((th&0x3) << 30);
-  int v2 = ((th&0x5)>>2) | (tcc<<2) | (tfx<<3);
+  int v2 = ((th&0x5)>>2) | (tcc<<1) | (tfx<<2);
   int v3 = 0x6+reg;
   int v4 = 0;
   *(base) = v1;
@@ -81,7 +105,40 @@ static int buffer_settex(lua_State *l) {
 
   info("backtrack tex0 :: %08x %08x %08x %08x", base[0], base[1], base[2], base[3]);
   return 0;
+}
 
+static int buffer_pushmiptbp(lua_State *l) {
+  int p1 = lua_tointeger(l, 2);
+  int w1 = lua_tointeger(l, 3);
+  int p2 = lua_tointeger(l, 4);
+  int w2 = lua_tointeger(l, 5);
+  int p3 = lua_tointeger(l, 6);
+  int w3 = lua_tointeger(l, 7);
+
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 1);
+  int *ptr = (int *) lua_touserdata(l, -1);
+  lua_pushstring(l, "head");
+  lua_gettable(l, 1);
+  int head = lua_tointeger(l, -1);
+  
+  if (head%4 != 0) {
+    logerr("buffer head must be =0%%4, got %d", head%4);
+    lua_pushstring(l, "buffer write failed");
+    lua_error(l);
+    return 1;
+  }
+
+  int v1 = p1 | (w1 << 14) | (p2 << 20);
+  int overflow = (p2&0x1000) >> 12;
+  int v2 = overflow | (w2 << 2) | (p3 << 8) | (w3 << 22);
+
+  (ptr+head)[0] = v1;
+  (ptr+head)[1] = v2;
+
+  lua_pushinteger(l, head+8);
+  lua_setfield(l, 1, "head");
+  return 0;
 }
 
 static int buffer_copy(lua_State *l) {
@@ -126,8 +183,15 @@ int drawlua_init(lua_State *l) {
   lua_pushcfunction(l, buffer_pushint);
   lua_setfield(l, -2, "pushint");
 
+  lua_pushcfunction(l, buffer_pushfloat);
+  lua_setfield(l, -2, "pushfloat");
+
+
   lua_pushcfunction(l, buffer_settex);
   lua_setfield(l, -2, "settex");
+
+  lua_pushcfunction(l, buffer_pushmiptbp);
+  lua_setfield(l, -2, "setMipTbp");
 
   lua_pushcfunction(l, buffer_copy);
   lua_setfield(l, -2, "copy");

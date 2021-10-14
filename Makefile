@@ -55,8 +55,8 @@ run: scripts
 
 # TODO(phy1um): this could be improved, hard-coded ELF name is bad
 .PHONY: runps2
-runps2:
-	cp dist && ps2client -h $(PS2HOST) -t 10 execee host:test.elf
+runps2: scripts
+	ps2client -h $(PS2HOST) -t 10 execee host:test.elf
 
 .PHONY: resetps2
 resetps2:
