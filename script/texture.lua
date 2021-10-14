@@ -26,7 +26,7 @@ local tt = {
 }
 
 function PS2PROG.start()
-  tt.data = TGA.load("host:test.tga", 64, 64)
+  tt.data = TGA.load("host:font.tga", 64, 64)
   print("loaded tga: size = " .. tt.data.size .. " head = " .. tt.data.head)
 
   DMA.init(DMA.GIF)
@@ -76,8 +76,8 @@ function PS2PROG.start()
   local tb = 0
   while packets > 0 do
     GIF.tag(ib, GIF.IMAGE, blocksize, false, {0}) 
-    print("copy from TT " .. tb*blocksize*4 .. " to IB " .. ib.head .. " -- " .. blocksize*16)
-    tt.data:copy(ib, ib.head, tb*blocksize*4, blocksize*16)
+    print("copy from TT " .. tb*blocksize*16 .. " to IB " .. ib.head .. " -- " .. blocksize*16)
+    tt.data:copy(ib, ib.head, tb*blocksize*16, blocksize*16)
     ib.head = ib.head + blocksize*16
     DMA.send(ib, DMA.GIF)
     ib = RM.getDrawBuffer(5000)
@@ -86,7 +86,7 @@ function PS2PROG.start()
   end
 
   if remain > 0 then
-    local base = tb*blocksize*4
+    local base = tb*blocksize*16
     GIF.tag(ib, GIF.IMAGE, remain, false, {1})
     print("copy from TT " .. base .. " to IB " .. ib.head .. " -- " .. remain*16)
     tt.data:copy(ib, ib.head, base, remain*16)

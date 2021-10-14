@@ -40,7 +40,7 @@ static int buffer_pushint(lua_State *l) {
 }
 
 static int buffer_pushfloat(lua_State *l) {
-  float value = (float) lua_tointeger(l, 2);
+  float value = (float) lua_tonumber(l, 2);
   lua_pushstring(l, "ptr");
   lua_gettable(l, 1);
   float *ptr = (float *) lua_touserdata(l, -1);

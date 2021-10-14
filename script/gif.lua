@@ -134,7 +134,7 @@ end
 function gif.packedST(b, s, t)
   b:pushfloat(s)
   b:pushfloat(t)
-  b:pushfloat(0.0)
+  b:pushfloat(1.0)
   b:pushint(0)
 end
 

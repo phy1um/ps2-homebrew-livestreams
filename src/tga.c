@@ -25,6 +25,7 @@ struct __attribute__((__packed__)) tga_header {
   uint8_t descriptor;
 };
 
+char tmp_buffer[256*256*4];
 int load_tga_to_raw(const char *fname, void *buffer) {
   info("loading TGA %s", fname);
   FILE *f = fopen(fname, "rb");
@@ -38,7 +39,16 @@ int load_tga_to_raw(const char *fname, void *buffer) {
   // bytes per pixel from bits per pixel
   int bpp = header.bps/8;
   info("reading image data - %d bytes", header.width*header.height*bpp);
-  rc = fread(buffer, bpp, header.width*header.height*bpp, f);
+  rc = fread(tmp_buffer, bpp, header.width*header.height*bpp, f);
+  char *to = (char *) buffer;
+  for ( int i = 0; i < header.width; i++ ) {
+    for ( int j = 0; j < header.height; j++ ) {
+      to[ (j*header.width + i) *4 + 3 ] = tmp_buffer[ (j*header.width + i) *4 + 3 ];
+      to[ (j*header.width + i) *4 + 2 ] = tmp_buffer[ (j*header.width + i) *4 + 0 ];
+      to[ (j*header.width + i) *4 + 1 ] = tmp_buffer[ (j*header.width + i) *4 + 1 ];
+      to[ (j*header.width + i) *4 + 0 ] = tmp_buffer[ (j*header.width + i) *4 + 2 ];
+    }
+  }
   fclose(f);
   return 1;
 }

@@ -5,6 +5,7 @@
 #include <draw.h>
 #include <dma.h>
 #include <graph.h>
+#include <math.h>
 
 #include "log.h"
 
@@ -23,6 +24,13 @@ static int ps2luaprog_frame_nil(lua_State *l) {
   return 0;
 }
 
+static int ps2lua_log2(lua_State *l) {
+  int n = lua_tointeger(l, 1);
+  float res = log2f(n);
+  lua_pushnumber(l, res);
+  return 1;
+}
+
 int ps2luaprog_init(lua_State *l) {
   lua_createtable(l, 0, 2);
   lua_pushcfunction(l, ps2luaprog_start_nil);
@@ -30,6 +38,8 @@ int ps2luaprog_init(lua_State *l) {
   lua_pushcfunction(l, ps2luaprog_frame_nil);
   lua_setfield(l, -2, "frame");
   lua_setglobal(l, "PS2PROG");
+  lua_pushcfunction(l, ps2lua_log2);
+  lua_setglobal(l, "log2");
   return 0;
 }
 
