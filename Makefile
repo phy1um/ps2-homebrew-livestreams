@@ -34,7 +34,6 @@ src/test.elf:
 .PHONY: scripts
 scripts:
 	if ! [ -d dist/script ]; then mkdir -p dist/script; fi
-	./fennel -c script/main.fnl > script/bundle.lua
 	cp script/* dist/script
 
 # TODO(Tom Marks): update ISO building to include everything in dist/
@@ -72,6 +71,7 @@ lint:
 .PHONY: lualint
 lualint:
 	luac5.1 -p script/*.lua
+	./fennel -c script/*.fnl > /dev/null
 
 .PHONY: format
 format:

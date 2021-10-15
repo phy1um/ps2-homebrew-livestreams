@@ -1,8 +1,10 @@
 
 local libs = {}
-local SEARCH_PATH = "host:script/"
+local SEARCH_PATH = "host:script/?.lua"
 
-function require(name)
+--[[
+local myreq = function(name)
+  print("require " .. name)
   local l = libs[name]
   if l ~= nil then
     return l
@@ -13,4 +15,28 @@ function require(name)
   end
 end
 
+require = myreq
+
+function loadFnl(name)
+  local f = myreq("fennel")
+  print("loaded fennel")
+  local l = libs[name]
+  if l ~= nil then
+    return l
+  else
+    l = f.dofile(SEARCH_PATH .. "foo" .. ".fnl")
+    libs[name] = l
+    return l
+  end
+end
+]]
+
+print("setting up package searchers")
+--table.insert(package.serchers or package.loaders, function
+package.path = SEARCH_PATH
+local fennel = require ("fennel")
+fennel.path = "host:script/?.fnl"
+table.insert(package.loaders or package.searchers, fennel.searcher)
+
 return function() end
+
