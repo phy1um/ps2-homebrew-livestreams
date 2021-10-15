@@ -41,6 +41,8 @@ function draw:setColour(r,g,b,a)
 end
 
 function draw:rect(x, y, w, h)
+  x = math.floor(x)
+  y = math.floor(y)
   draw:triangle(x, y, x+w, y, x, y+h)
   draw:triangle(x, y+h, x+w, y+h, x+w, y)
 end
