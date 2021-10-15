@@ -2,6 +2,8 @@
 ;; (local GIF (require "gif"))
 
 (local D2D (require "draw2d"))
+(local VRAM (require "vram"))
+
 (var gs nil)
 (var font nil)
 
@@ -35,8 +37,8 @@
   (set font (D2D.loadTexture "host:bigfont.tga" 256 64))
   (DMA.init DMA.GIF)
   (set gs (GS.newState 640 448 GS.INTERLACED GS.NTSC))
-  (let [fb (gs:alloc 640 448 GS.PSM24)
-        zb (gs:alloc 640 448 GS.PSMZ24)]
+  (let [fb (VRAM.buffer 640 448 GS.PSM24 256)
+        zb (VRAM.buffer 640 448 GS.PSMZ24 256)]
     (gs:setBuffers fb zb)
     (gs:clearColour 0x2b 0x2b 0x2b)))
 
