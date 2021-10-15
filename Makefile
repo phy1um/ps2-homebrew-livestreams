@@ -18,6 +18,7 @@ assets:
 	if ! [ -d dist ]; then mkdir dist; fi
 	$(MAKE) -C asset
 	cp asset/*.bin dist/
+	cp asset/*.tga dist/
 	cp distfiles/* dist/
 
 $(BIN): src/test.elf
