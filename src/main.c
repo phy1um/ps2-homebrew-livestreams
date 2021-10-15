@@ -1,167 +1,161 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
-#include <dma.h>
-#include <dma_tags.h>
 #include <draw.h>
+#include <dma.h>
 #include <graph.h>
+#include <math.h>
 
-#include <inttypes.h>
-
-#include "gs.h"
 #include "log.h"
-#include "mesh.h"
-#include "pad.h"
-#include "ps2draw.h"
-#include "drawstate.h"
+
 #include "script.h"
+#include "pad.h"
 
-#define OFFSET_X 2048
-#define OFFSET_Y 2048
+#define INIT_SCRIPT "host:script/ps2init.lua"
 
-#define VID_W 640
-#define VID_H 448
+int lua_tga_init(lua_State *l);
 
-#define TGT_FILE "host:MIT_teapot.bin"
-
-#define fatalerror(st, msg, ...)                                               \
-  printf("FATAL: " msg "\n", ##__VA_ARGS__);                                   \
-  error_forever(st);                                                           \
-  ((void)0)
-void error_forever(struct draw_state *st);
-
-int print_buffer(qword_t *b, int len) {
-  printf("-- buffer\n");
-  for (int i = 0; i < len; i++) {
-    printf("%016llx %016llx\n", b->dw[0], b->dw[1]);
-    b++;
-  }
-  printf("-- /buffer\n");
+static int ps2luaprog_start_nil(lua_State *l) {
+  info("default start...");
   return 0;
 }
 
-int main() {
+static int ps2luaprog_frame_nil(lua_State *l) {
+  return 0;
+}
 
-  printf("Hello\n");
-  qword_t *buf = malloc(20000 * 16);
-  char *file_load_buffer = malloc(310 * 1024);
-  int file_load_buffer_len = 310 * 1024;
+static int ps2lua_log2(lua_State *l) {
+  int n = lua_tointeger(l, 1);
+  float res = log2f(n);
+  lua_pushnumber(l, res);
+  return 1;
+}
 
-  // init DMAC
-  dma_channel_initialize(DMA_CHANNEL_GIF, 0, 0);
-  dma_channel_fast_waits(DMA_CHANNEL_GIF);
+int ps2luaprog_init(lua_State *l) {
+  lua_createtable(l, 0, 2);
+  lua_pushcfunction(l, ps2luaprog_start_nil);
+  lua_setfield(l, -2, "start");
+  lua_pushcfunction(l, ps2luaprog_frame_nil);
+  lua_setfield(l, -2, "frame");
+  lua_setglobal(l, "PS2PROG");
+  lua_pushcfunction(l, ps2lua_log2);
+  lua_setglobal(l, "log2");
+  return 0;
+}
 
-  void *lua = script_load("host:entry.lua");
-  script_simple_call(lua, "ps2_init");
-
-  struct model m = {0};
-  m.r = 0xff;
-  int bytes_read = load_file(TGT_FILE, file_load_buffer, file_load_buffer_len);
-  if (bytes_read <= 0) {
-    fatalerror(drawstate_gs_state(), "failed to load file %s", TGT_FILE);
+int ps2luaprog_onstart(lua_State *l) {
+  lua_getglobal(l, "PS2PROG"); 
+  lua_pushstring(l, "start");
+  lua_gettable(l, -2);
+  int type = lua_type(l, -1);
+  // info("start fn has type :: %s (%d)", lua_typename(l, type), type);
+  int rc = lua_pcall(l, 0, 0, 0);
+  if ( rc ) {
+    const char *err = lua_tostring(l, -1);
+    logerr("lua execution error (start event) -- %s", err);
   }
-  if (bytes_read % 16 != 0) {
-    fatalerror(drawstate_gs_state(), "lengt of model file %s was not 0 %% 16", TGT_FILE);
+
+  return 0;
+}
+
+int ps2luaprog_onframe(lua_State *l) {
+  lua_getglobal(l, "PS2PROG"); 
+  lua_pushstring(l, "frame");
+  lua_gettable(l, -2);
+  int type = lua_type(l, -1);
+  // info("frame fn has type :: %s (%d)", lua_typename(l, type), type);
+  //
+  int rc = lua_pcall(l, 0, 0, 0);
+
+  if ( rc ) {
+    const char *err = lua_tostring(l, -1);
+    logerr("lua execution error (frame event) -- %s", err);
   }
 
-  if (!model_load(&m, file_load_buffer, bytes_read)) {
-    fatalerror(drawstate_gs_state(), "failed to process model");
+  return 0;
+}
+
+int ps2luaprog_is_running(lua_State *l) {
+  return 1;
+}
+
+static int runfile(lua_State *l, const char *fname) {
+  info("running lua file %s", fname);
+  int rc = luaL_loadfile(l, fname);
+  if ( rc == LUA_ERRSYNTAX ) {
+    logerr("failed to load %s: syntax error", fname);
+    const char *err = lua_tostring(l, -1);
+    logerr("err: %s", err);
+    return -1;
+  }
+  else if ( rc == LUA_ERRMEM ) {
+    logerr("faild to allocate memory for %s", fname);
+    return -1;
+  }
+  else if ( rc == LUA_ERRFILE ) {
+    logerr("could not open/read file %s", fname);
+    return -1;
+  }
+  else if ( rc ) {
+    logerr("unknown error loading %s", fname);
+    return -1;
   }
 
-  struct draw_state *draw_state = drawstate_gs_state();
-  struct render_state *r = drawstate_get();
+  rc = lua_pcall(l, 0, 0, 0);
+  if ( rc ) {
+    const char *err = lua_tostring(l, -1);
+    logerr("lua execution error -- %s", err);
+    return -1;
+  }
 
-  draw_state->clear_col[0] = 0xb1;
-  draw_state->clear_col[1] = 0xce;
-  draw_state->clear_col[2] = 0xcb;
+  return 0;
+}
 
-  r->offset_x = OFFSET_X;
-  r->offset_y = OFFSET_Y;
+int main(int argc, char *argv[]) {
+  info("startup - argc = %d", argc);
+  for (int i = 0; i < argc; i++) {
+    info("arg %d) %s", i, argv[i]);
+  }
+  char *startup = "host:script/main.lua";
+  if (argc > 1) {
+    info("setting entrypoint to %s", argv[1]);
+    startup = argv[1];
+  }
 
-  struct model_instance inst = {0};
-  inst.m = &m;
-  inst.scale[0] = 1.f;
-  inst.scale[1] = 1.f;
-  inst.scale[2] = 1.f;
-  inst.scale[3] = 1.0f;
-  inst.translate[2] = 10.f;
+  struct lua_State *L;
+  L = luaL_newstate();
+  if ( !L ) {
+    logerr("failed to start lua state");
+    return -1;
+  }
+  luaL_openlibs(L);
 
-  pad_init();
+  ps2luaprog_init(L);
+  dma_lua_init(L);
+  gs_lua_init(L);
+  lua_tga_init(L);
+  pad_lua_init(L);
 
-  graph_wait_vsync();
+  //TODO: better abstraction for drawlua_*
+  drawlua_init(L);
 
-  while (1) {
+  info("finished lua state setup");
 
+  runfile(L, INIT_SCRIPT);
+  runfile(L, startup);
+
+  ps2luaprog_onstart(L);
+  while( ps2luaprog_is_running(L) ) {
     pad_frame_start();
     pad_poll();
-    update_draw_matrix(&r);
     dma_wait_fast();
-
-    qword_t *q = buf;
-    memset(buf, 0, 20000 * 16);
-
-    q = gs_frame_start(draw_state, q);
-
-    if (mesh_is_visible(&inst, r)) {
-      qword_t *model_verts_start = q;
-      memcpy(q, m.buffer, m.buffer_len);
-      mesh_transform((char *)(model_verts_start + MESH_HEADER_SIZE), &inst, r);
-      q += (m.buffer_len / 16);
-    }
-
-    q = gs_frame_end(draw_state, q);
-
-    dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q - buf, 0, 0);
-
+    info("ON FRAME");
+    ps2luaprog_onframe(L);
+    info("WAIT DRAW");
     draw_wait_finish();
+    info("WAIT VSYNC");
     graph_wait_vsync();
-
-#if 0
-    unsigned char joyx = joy_axis_value(AXIS_LEFT_X);
-    float dx = (joy_axis_value(AXIS_LEFT_X) - 128) / 128.0f;
-    if ( fabs(dx) < 0.2f ) { dx = 0; }
-    float dz = (joy_axis_value(AXIS_LEFT_Y) - 128) / 128.0f;
-    if ( fabs(dz) < 0.2f ) { dz = 0; }
-    int dy = button_held(DPAD_DOWN) - button_held(DPAD_UP);
-
-    info("joy %f,%f", dx, dz);
-#else
-    int dx = button_held(DPAD_RIGHT) - button_held(DPAD_LEFT);
-    int dz = button_held(DPAD_DOWN) - button_held(DPAD_UP);
-    int dy = button_held(BUTTON_L1) - button_held(BUTTON_L2);
-#endif
-
-    r->camera_pos[0] += 0.2f * dx;
-    r->camera_pos[2] += 0.2f * dz;
-    // r->camera_pos[1] += 0.1f * dy;
-    r->camera_rotate_y += 0.01f * dy;
-
   }
+  info("main loop ended");
 }
-
-void error_forever(struct draw_state *st) {
-  qword_t *buf = malloc(1200);
-  while (1) {
-    dma_wait_fast();
-    qword_t *q = buf;
-    memset(buf, 0, 1200);
-    q = draw_disable_tests(q, 0, &st->zb);
-    q = draw_clear(q, 0, 2048.0f - 320, 2048.0f - 244, VID_W, VID_H, 0xff, 0,
-                   0);
-    q = draw_finish(q);
-    dma_channel_send_normal(DMA_CHANNEL_GIF, buf, q - buf, 0, 0);
-    draw_wait_finish();
-    graph_wait_vsync();
-    sleep(2);
-  }
-}
-
-/*
- *
- * xxxx xxxx xxxx . yyyy
- * 0100 0000 0000 . 0000
- *
-2 */

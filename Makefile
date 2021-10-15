@@ -4,7 +4,7 @@ BIN=dist/test.elf
 PS2HOST?=192.168.20.99
 
 DOCKER_IMG=ps2build
-DOCKERFLAGS=--user "$(shell id -u):$(shell id -g)"
+DOCKERFLAGS=--user "$(1000):$(1000)"
 DOCKER?=docker
 
 LUA_BRANCH=ee-v5.4.4
