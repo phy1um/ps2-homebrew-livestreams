@@ -3,8 +3,8 @@
 #include <gs_psm.h>
 
 #include "drawstate.h"
-#include "ps2draw.h"
 #include "gs.h"
+#include "ps2draw.h"
 
 static struct draw_state st = {0};
 static struct render_state r = {0};
@@ -33,8 +33,8 @@ int drawstate_camera_rotate(float x, float y, float z) {
   r.camera_rotate_y += y;
 }
 
-qword_t * drawstate_ztest(qword_t *q, int enable) {
-  if ( enable ) {
+qword_t *drawstate_ztest(qword_t *q, int enable) {
+  if (enable) {
     return draw_enable_tests(q, 0, &st.zb);
   } else {
     return draw_disable_tests(q, 0, &st.zb);

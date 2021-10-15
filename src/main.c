@@ -11,12 +11,12 @@
 
 #include <inttypes.h>
 
+#include "drawstate.h"
 #include "gs.h"
 #include "log.h"
 #include "mesh.h"
 #include "pad.h"
 #include "ps2draw.h"
-#include "drawstate.h"
 #include "script.h"
 
 #define OFFSET_X 2048
@@ -64,7 +64,8 @@ int main() {
     fatalerror(drawstate_gs_state(), "failed to load file %s", TGT_FILE);
   }
   if (bytes_read % 16 != 0) {
-    fatalerror(drawstate_gs_state(), "lengt of model file %s was not 0 %% 16", TGT_FILE);
+    fatalerror(drawstate_gs_state(), "lengt of model file %s was not 0 %% 16",
+               TGT_FILE);
   }
 
   if (!model_load(&m, file_load_buffer, bytes_read)) {
@@ -138,7 +139,6 @@ int main() {
     r->camera_pos[2] += 0.2f * dz;
     // r->camera_pos[1] += 0.1f * dy;
     r->camera_rotate_y += 0.01f * dy;
-
   }
 }
 

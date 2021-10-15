@@ -1,10 +1,10 @@
-#include <lua.h>
-#include "script.h"
-#include "ps2draw.h"
 #include "drawstate.h"
+#include "ps2draw.h"
+#include "script.h"
+#include <lua.h>
 
-#include <gs_psm.h>
 #include <graph.h>
+#include <gs_psm.h>
 
 static int lua_gs_init(lua_State *L) {
   int width = lua_tointeger(L, 1);
@@ -17,14 +17,14 @@ static int lua_camera_step(lua_State *L) {
   double x = lua_tonumber(L, 1);
   double y = lua_tonumber(L, 2);
   double z = lua_tonumber(L, 3);
-  drawstate_camera_step(x,y,z);
+  drawstate_camera_step(x, y, z);
 }
 
 static int lua_camera_jump(lua_State *L) {
   double x = lua_tonumber(L, 1);
   double y = lua_tonumber(L, 2);
   double z = lua_tonumber(L, 3);
-  drawstate_camera_jump(x,y,z);
+  drawstate_camera_jump(x, y, z);
 }
 
 int lua_drawstate_init(lua_State *L) {
@@ -45,7 +45,7 @@ int lua_drawstate_constant_table(lua_State *L) {
 }
 
 // GS.interlaced / nonInterlaced
-// 
+//
 int lua_drawstate_new(lua_State *L, int w, int h, int i) {
   lua_createtable(L, 0, 4);
   FIELD_INT("interlace", i);
@@ -55,7 +55,3 @@ int lua_drawstate_new(lua_State *L, int w, int h, int i) {
   FIELD_CFUNC("init", lua_gs_init);
   return 1;
 }
-
-
-
-

@@ -1,29 +1,29 @@
 #include <lua.h>
 
+#include <dma.h>
 #include <draw.h>
 #include <graph.h>
-#include <inttypes.h>
 #include <gs_psm.h>
-#include <dma.h>
+#include <inttypes.h>
 
 #include <stdlib.h>
 #include <string.h>
 
-#include "script.h"
 #include "log.h"
+#include "script.h"
 
 static int gslua_clear_col(lua_State *l) {
   lua_pushstring(l, "state");
   lua_gettable(l, 1);
-  struct gs_state *st = (struct gs_state *) lua_touserdata(l, -1);
+  struct gs_state *st = (struct gs_state *)lua_touserdata(l, -1);
   lua_pop(l, 1);
-  if ( !st ) {
-    logerr("GS state was NULL"); 
+  if (!st) {
+    logerr("GS state was NULL");
     return 0;
   }
   int r = lua_tointeger(l, 2);
   int g = lua_tointeger(l, 3);
-  int b = lua_tointeger(l, 4); 
+  int b = lua_tointeger(l, 4);
   st->clear_r = r;
   st->clear_g = g;
   st->clear_b = b;
@@ -51,7 +51,7 @@ static int gslua_set_buffers(lua_State *l) {
   // get fields from SELF argument (#1)
   lua_pushstring(l, "state");
   lua_gettable(l, 1);
-  struct gs_state *st = (struct gs_state *) lua_touserdata(l, -1);
+  struct gs_state *st = (struct gs_state *)lua_touserdata(l, -1);
   lua_pop(l, 1);
   // get fields from FB argument (#2)
   lua_pushstring(l, "width");
@@ -90,7 +90,7 @@ static int gslua_set_buffers(lua_State *l) {
   st->fb.mask = 0;
   st->zb.address = zb_addr;
   st->zb.zsm = zb_fmt;
-  //st->zb.method = ZTEST_METHOD_GREATER_EQUAL;
+  // st->zb.method = ZTEST_METHOD_GREATER_EQUAL;
   st->zb.method = ZTEST_METHOD_ALLPASS;
   st->zb.mask = 0;
   graph_set_framebuffer_filtered(st->fb.address, fb_width, fb_fmt, 0, 0);
@@ -98,14 +98,13 @@ static int gslua_set_buffers(lua_State *l) {
 
   // init draw state
   qword_t *head = malloc(20 * 16);
-  memset(head, 0, 20*16);
+  memset(head, 0, 20 * 16);
   qword_t *q = head;
   q = draw_setup_environment(q, 0, &st->fb, &st->zb);
   q = draw_primitive_xyoffset(q, 0, 2048 - (st->fb.width / 2),
                               2048 - (st->fb.height / 2));
   q = draw_finish(q);
-  dma_channel_send_normal(DMA_CHANNEL_GIF, head, q - head, 0,
-                          0);
+  dma_channel_send_normal(DMA_CHANNEL_GIF, head, q - head, 0, 0);
   draw_wait_finish();
   free(head);
 
@@ -113,8 +112,8 @@ static int gslua_set_buffers(lua_State *l) {
 }
 
 static int gslua_new_state(lua_State *l) {
-  int width = lua_tointeger(l, 1); 
-  int height = lua_tointeger(l, 2); 
+  int width = lua_tointeger(l, 1);
+  int height = lua_tointeger(l, 2);
   int interlace = lua_tointeger(l, 3);
   int mode = lua_tointeger(l, 4);
   // create table with GS state
@@ -144,8 +143,8 @@ static int gslua_new_state(lua_State *l) {
   return 1;
 }
 
-#define bind(n, b) \
-  lua_pushinteger(l, b);\
+#define bind(n, b)                                                             \
+  lua_pushinteger(l, b);                                                       \
   lua_setfield(l, -2, n)
 int gs_lua_init(lua_State *l) {
   lua_createtable(l, 0, 16);
@@ -182,5 +181,3 @@ int gs_lua_init(lua_State *l) {
   lua_setglobal(l, "GS");
   return 0;
 }
-
-

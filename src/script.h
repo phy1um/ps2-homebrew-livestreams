@@ -12,8 +12,6 @@ struct gs_state {
   unsigned char clear_b;
 };
 
-
-
 int gs_lua_init(lua_State *l);
 int dma_lua_init(lua_State *l);
 int drawlua_init(lua_State *l);

@@ -1,15 +1,15 @@
+#include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
-#include <lauxlib.h>
 
-#include "script.h"
 #include "log.h"
+#include "script.h"
 
-struct lua_State * script_load(const char *file) {
+struct lua_State *script_load(const char *file) {
   info("init lua with entrypoint %s", file);
   struct lua_State *L;
   L = luaL_newstate();
-  if ( !L ) {
+  if (!L) {
     logerr("failed to start lua state");
     return 0;
   }
@@ -17,12 +17,12 @@ struct lua_State * script_load(const char *file) {
   lua_drawstate_init(L);
 
   int rc = luaL_loadfile(L, file);
-  if ( rc ) {
+  if (rc) {
     logerr("failed to execute lua file %s", file);
     return 0;
   }
   rc = lua_pcall(L, 0, 0, 0);
-  if ( rc ) {
+  if (rc) {
     const char *err = lua_tostring(L, -1);
     logerr("lua execution error -- %s", err);
     return 0;
@@ -32,7 +32,7 @@ struct lua_State * script_load(const char *file) {
 
 int script_simple_call(struct lua_State *L, const char *fn) {
   lua_getglobal(L, fn);
-  if ( lua_pcall(L, 0, 0, 0) != 0 ) {
+  if (lua_pcall(L, 0, 0, 0) != 0) {
     const char *err = lua_tostring(L, -1);
     logerr("lua error calling %s -- %s", fn, err);
     return 1;
@@ -41,7 +41,7 @@ int script_simple_call(struct lua_State *L, const char *fn) {
 }
 
 int script_end(struct lua_State *L) {
-  lua_close(L); 
+  lua_close(L);
   return 0;
 }
 

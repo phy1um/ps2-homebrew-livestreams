@@ -1,16 +1,16 @@
+#include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
-#include <lauxlib.h>
 
-#include <draw.h>
 #include <dma.h>
+#include <draw.h>
 #include <graph.h>
 #include <math.h>
 
 #include "log.h"
 
-#include "script.h"
 #include "pad.h"
+#include "script.h"
 
 #define INIT_SCRIPT "host:script/ps2init.lua"
 
@@ -21,9 +21,7 @@ static int ps2luaprog_start_nil(lua_State *l) {
   return 0;
 }
 
-static int ps2luaprog_frame_nil(lua_State *l) {
-  return 0;
-}
+static int ps2luaprog_frame_nil(lua_State *l) { return 0; }
 
 static int ps2lua_log2(lua_State *l) {
   int n = lua_tointeger(l, 1);
@@ -45,13 +43,13 @@ int ps2luaprog_init(lua_State *l) {
 }
 
 int ps2luaprog_onstart(lua_State *l) {
-  lua_getglobal(l, "PS2PROG"); 
+  lua_getglobal(l, "PS2PROG");
   lua_pushstring(l, "start");
   lua_gettable(l, -2);
   int type = lua_type(l, -1);
   // info("start fn has type :: %s (%d)", lua_typename(l, type), type);
   int rc = lua_pcall(l, 0, 0, 0);
-  if ( rc ) {
+  if (rc) {
     const char *err = lua_tostring(l, -1);
     logerr("lua execution error (start event) -- %s", err);
   }
@@ -60,7 +58,7 @@ int ps2luaprog_onstart(lua_State *l) {
 }
 
 int ps2luaprog_onframe(lua_State *l) {
-  lua_getglobal(l, "PS2PROG"); 
+  lua_getglobal(l, "PS2PROG");
   lua_pushstring(l, "frame");
   lua_gettable(l, -2);
   int type = lua_type(l, -1);
@@ -68,7 +66,7 @@ int ps2luaprog_onframe(lua_State *l) {
   //
   int rc = lua_pcall(l, 0, 0, 0);
 
-  if ( rc ) {
+  if (rc) {
     const char *err = lua_tostring(l, -1);
     logerr("lua execution error (frame event) -- %s", err);
   }
@@ -76,34 +74,29 @@ int ps2luaprog_onframe(lua_State *l) {
   return 0;
 }
 
-int ps2luaprog_is_running(lua_State *l) {
-  return 1;
-}
+int ps2luaprog_is_running(lua_State *l) { return 1; }
 
 static int runfile(lua_State *l, const char *fname) {
   info("running lua file %s", fname);
   int rc = luaL_loadfile(l, fname);
-  if ( rc == LUA_ERRSYNTAX ) {
+  if (rc == LUA_ERRSYNTAX) {
     logerr("failed to load %s: syntax error", fname);
     const char *err = lua_tostring(l, -1);
     logerr("err: %s", err);
     return -1;
-  }
-  else if ( rc == LUA_ERRMEM ) {
+  } else if (rc == LUA_ERRMEM) {
     logerr("faild to allocate memory for %s", fname);
     return -1;
-  }
-  else if ( rc == LUA_ERRFILE ) {
+  } else if (rc == LUA_ERRFILE) {
     logerr("could not open/read file %s", fname);
     return -1;
-  }
-  else if ( rc ) {
+  } else if (rc) {
     logerr("unknown error loading %s", fname);
     return -1;
   }
 
   rc = lua_pcall(l, 0, 0, 0);
-  if ( rc ) {
+  if (rc) {
     const char *err = lua_tostring(l, -1);
     logerr("lua execution error -- %s", err);
     return -1;
@@ -125,7 +118,7 @@ int main(int argc, char *argv[]) {
 
   struct lua_State *L;
   L = luaL_newstate();
-  if ( !L ) {
+  if (!L) {
     logerr("failed to start lua state");
     return -1;
   }
@@ -137,7 +130,7 @@ int main(int argc, char *argv[]) {
   lua_tga_init(L);
   pad_lua_init(L);
 
-  //TODO: better abstraction for drawlua_*
+  // TODO: better abstraction for drawlua_*
   drawlua_init(L);
 
   info("finished lua state setup");
@@ -146,7 +139,7 @@ int main(int argc, char *argv[]) {
   runfile(L, startup);
 
   ps2luaprog_onstart(L);
-  while( ps2luaprog_is_running(L) ) {
+  while (ps2luaprog_is_running(L)) {
     pad_frame_start();
     pad_poll();
     dma_wait_fast();
