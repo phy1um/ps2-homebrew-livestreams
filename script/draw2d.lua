@@ -63,12 +63,16 @@ function draw:sprite(tex, x, y, w, h, u1, v1, u2, v2)
     self.loopCount = 0
     self.state = DRAW_SPRITE
   end
+  local ix = math.floor(x)
+  local iy = math.floor(y)
+  local ix2 = math.floor(x+w)
+  local iy2 = math.floor(y+h)
   GIF.packedST(self.buf, u1, v1)
   GIF.packedRGBAQ(self.buf, self.col.r, self.col.g, self.col.b, self.col.a)
-  GIF.packedXYZ2(self.buf, 0x8000 + (x*16), 0x8000 + (y*16), 0)
+  GIF.packedXYZ2(self.buf, 0x8000 + (ix*16), 0x8000 + (iy*16), 0)
   GIF.packedST(self.buf, u2, v2)
   GIF.packedRGBAQ(self.buf, self.col.r, self.col.g, self.col.b, self.col.a)
-  GIF.packedXYZ2(self.buf, 0x8000 + ((x+w)*16), 0x8000 + ((y+h)*16), 0)
+  GIF.packedXYZ2(self.buf, 0x8000 + (ix2*16), 0x8000 + (iy2*16), 0)
   self.loopCount = self.loopCount + 1
 end
 

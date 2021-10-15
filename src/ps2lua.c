@@ -10,6 +10,7 @@
 #include "log.h"
 
 #include "script.h"
+#include "pad.h"
 
 #define INIT_SCRIPT "host:script/ps2init.lua"
 
@@ -48,7 +49,7 @@ int ps2luaprog_onstart(lua_State *l) {
   lua_pushstring(l, "start");
   lua_gettable(l, -2);
   int type = lua_type(l, -1);
-  info("start fn has type :: %s (%d)", lua_typename(l, type), type);
+  // info("start fn has type :: %s (%d)", lua_typename(l, type), type);
   int rc = lua_pcall(l, 0, 0, 0);
   if ( rc ) {
     const char *err = lua_tostring(l, -1);
@@ -63,7 +64,8 @@ int ps2luaprog_onframe(lua_State *l) {
   lua_pushstring(l, "frame");
   lua_gettable(l, -2);
   int type = lua_type(l, -1);
-  info("frame fn has type :: %s (%d)", lua_typename(l, type), type);
+  // info("frame fn has type :: %s (%d)", lua_typename(l, type), type);
+  //
   int rc = lua_pcall(l, 0, 0, 0);
 
   if ( rc ) {
@@ -133,6 +135,7 @@ int main(int argc, char *argv[]) {
   dma_lua_init(L);
   gs_lua_init(L);
   lua_tga_init(L);
+  pad_lua_init(L);
 
   //TODO: better abstraction for drawlua_*
   drawlua_init(L);
@@ -144,6 +147,8 @@ int main(int argc, char *argv[]) {
 
   ps2luaprog_onstart(L);
   while( ps2luaprog_is_running(L) ) {
+    pad_frame_start();
+    pad_poll();
     dma_wait_fast();
     info("ON FRAME");
     ps2luaprog_onframe(L);

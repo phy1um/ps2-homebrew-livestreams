@@ -97,12 +97,14 @@ function PS2PROG.start()
 
 end
 
+xx = -200
+local dt = 1/60
 function PS2PROG.frame()
   D2D:newBuffer()
   local db = D2D:getBuffer()
   db:frameStart(gs)
   D2D:setColour(0x80,0x80,0x80,0x80)
-  D2D:sprite(testTex, -200, -200, 200, 200, 0, 0, 1, 1)
+  D2D:sprite(testTex, xx, -200, 200, 200, 0, 0, 1, 1)
   D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)
   db = D2D:getBuffer()
   db:frameEnd(gs)
@@ -110,6 +112,9 @@ function PS2PROG.frame()
   print("tris/frame = " .. D2D.rawtri .. ", KC=" .. D2D.kc)
   D2D.rawtri = 0
   D2D.kc = 0
+
+  if PAD.held(PAD.LEFT) then xx = xx - 50*dt end
+  if PAD.held(PAD.RIGHT) then xx = xx + 50*dt end
   --db:free()
 end
 

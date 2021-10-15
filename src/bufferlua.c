@@ -90,6 +90,7 @@ static int buffer_settex(lua_State *l) {
   int *base = ptr + (head/4);
 
   int v1 = tbp | (tbw<<14) | (psm<<20) | (tw<<26) | ((th&0x3) << 30);
+  // TODO: 0x5??? i must mean 0x4
   int v2 = ((th&0x5)>>2) | (tcc<<1) | (tfx<<2);
   int v3 = 0x6+reg;
   int v4 = 0;
@@ -98,13 +99,13 @@ static int buffer_settex(lua_State *l) {
   *(base+2) = v3;
   *(base+3) = v4;
 
-  info("write tex0 :: %08x %08x %08x %08x", v1, v2, v3, v4);
-  info("head -> %d", head+16);
+  // info("write tex0 :: %08x %08x %08x %08x", v1, v2, v3, v4);
+  // info("head -> %d", head+16);
 
   lua_pushinteger(l, head+16);
   lua_setfield(l, 1, "head");
 
-  info("backtrack tex0 :: %08x %08x %08x %08x", base[0], base[1], base[2], base[3]);
+  // info("backtrack tex0 :: %08x %08x %08x %08x", base[0], base[1], base[2], base[3]);
   return 0;
 }
 
@@ -261,7 +262,7 @@ static int drawlua_start_frame(lua_State *l) {
   float halfw = st->fb.width / 2.f;
   float halfh = st->fb.height / 2.f;
 
-  info("clear screen :: (%d, %d, %d)", st->clear_r, st->clear_g, st->clear_b);
+  // info("clear screen :: (%d, %d, %d)", st->clear_r, st->clear_g, st->clear_b);
 
   qword_t *q = (qword_t *) (ptr + head);
   q = draw_disable_tests(q, 0, &st->zb);
