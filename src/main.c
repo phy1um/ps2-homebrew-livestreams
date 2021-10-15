@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
   lua_tga_init(L);
   pad_lua_init(L);
 
-  // TODO: better abstraction for drawlua_*
+  // TODO(Tom Marks): better abstraction for drawlua_*
   drawlua_init(L);
 
   info("finished lua state setup");
