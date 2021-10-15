@@ -1,2 +1,2 @@
 
-dofile("host:script/texture.lua")
+dofile("host:script/bundle.lua")

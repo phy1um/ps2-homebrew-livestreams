@@ -13,7 +13,7 @@
 
 static int drawlua_new_drawbuffer(lua_State *l);
 
-static const unsigned int DRAW_BUFFER_MAX_SIZE = 5 * 1024;
+static const unsigned int DRAW_BUFFER_MAX_SIZE = 20 * 1024;
 char *static_draw_buffer;
 
 static int buffer_pushint(lua_State *l) {

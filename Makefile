@@ -32,6 +32,7 @@ src/test.elf:
 .PHONY: scripts
 scripts:
 	if ! [ -d dist/script ]; then mkdir -p dist/script; fi
+	./fennel -c script/main.fnl > script/bundle.lua
 	cp script/* dist/script
 
 # TODO(phy1um): update ISO building to include everything in dist/
