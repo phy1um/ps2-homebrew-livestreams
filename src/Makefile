@@ -16,7 +16,6 @@ endif
 .PHONY: clean
 clean:
 	rm -rf $(EE_BIN) $(EE_OBJS)
-	make -C lua -f makefile clean
 
 
 

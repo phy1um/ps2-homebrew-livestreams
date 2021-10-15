@@ -153,5 +153,4 @@ int main(int argc, char *argv[]) {
   }
 
   info("main loop ended");
-
 }
