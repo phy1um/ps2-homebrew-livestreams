@@ -80,7 +80,7 @@ static int gslua_set_buffers(lua_State *l) {
   lua_pop(l, 1);
 
   if (!st) {
-    // TODO: error
+    // TODO(Tom Marks): error
   }
 
   st->fb.address = fb_addr;

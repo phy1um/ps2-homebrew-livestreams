@@ -14,11 +14,13 @@ include .lintvars
 dist: $(BIN) assets
 
 .PHONY: assets
-assets:
+assets: scripts
 	if ! [ -d dist ]; then mkdir dist; fi
 	$(MAKE) -C asset
 	cp asset/*.bin dist/
+	cp asset/*.tga dist/
 	cp distfiles/* dist/
+	cp LICENSE dist/
 
 $(BIN): src/test.elf
 	if ! [ -d dist ]; then mkdir dist; fi
@@ -35,7 +37,7 @@ scripts:
 	./fennel -c script/main.fnl > script/bundle.lua
 	cp script/* dist/script
 
-# TODO(phy1um): update ISO building to include everything in dist/
+# TODO(Tom Marks): update ISO building to include everything in dist/
 $(ISO_TGT): $(EE_BIN)
 	mkisofs -l -o $(ISO_TGT) $(BIN) dist/SYSTEM.CNF
 
@@ -54,7 +56,7 @@ clean:
 run: scripts
 	PCSX2 --elf=$(PWD)/$(BIN) 
 
-# TODO(phy1um): this could be improved, hard-coded ELF name is bad
+# TODO(Tom Marks): this could be improved, hard-coded ELF name is bad
 .PHONY: runps2
 runps2: scripts
 	ps2client -h $(PS2HOST) -t 10 execee host:test.elf

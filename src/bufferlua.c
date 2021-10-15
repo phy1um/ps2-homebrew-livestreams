@@ -23,10 +23,10 @@ static int buffer_pushint(lua_State *l) {
   lua_pushstring(l, "head");
   lua_gettable(l, 1);
   int head = lua_tointeger(l, -1);
-  // TODO: check size
+  // TODO(Tom Marks): check size
   // ASSUME 4byte int
   if (head % 4 != 0) {
-    // TODO: manually bitmask etc
+    // TODO(Tom Marks): manually bitmask etc
     logerr("cannot write int to buffer, head%%4 != 0 (%d|%d)", head, head % 4);
     return 0;
   }
@@ -46,10 +46,10 @@ static int buffer_pushfloat(lua_State *l) {
   lua_pushstring(l, "head");
   lua_gettable(l, 1);
   int head = lua_tointeger(l, -1);
-  // TODO: check size
+  // TODO(Tom Marks): check size
   // ASSUME 4byte int
   if (head % 4 != 0) {
-    // TODO: manually bitmask etc
+    // TODO(Tom Marks): manually bitmask etc
     logerr("cannot write int to buffer, head%%4 != 0 (%d|%d)", head, head % 4);
     return 0;
   }
@@ -77,10 +77,10 @@ static int buffer_settex(lua_State *l) {
   lua_pushstring(l, "head");
   lua_gettable(l, 1);
   int head = lua_tointeger(l, -1);
-  // TODO: check size
+  // TODO(Tom Marks): check size
   // ASSUME 4byte int
   if (head % 4 != 0) {
-    // TODO: manually bitmask etc
+    // TODO(Tom Marks): manually bitmask etc
     logerr("cannot write int to buffer, head%%4 != 0 (%d|%d)", head, head % 4);
     return 0;
   }
@@ -88,7 +88,7 @@ static int buffer_settex(lua_State *l) {
   int *base = ptr + (head / 4);
 
   int v1 = tbp | (tbw << 14) | (psm << 20) | (tw << 26) | ((th & 0x3) << 30);
-  // TODO: 0x5??? i must mean 0x4
+  // TODO(Tom Marks): 0x5??? i must mean 0x4
   int v2 = ((th & 0x5) >> 2) | (tcc << 1) | (tfx << 2);
   int v3 = 0x6 + reg;
   int v4 = 0;
@@ -301,7 +301,7 @@ static int drawlua_end_frame(lua_State *l) {
 
 static int drawbuffer_free(lua_State *l) { return 0; }
 
-// TODO: document this can only be called ONCE
+// TODO(Tom Marks): document this can only be called ONCE
 static int drawlua_new_drawbuffer(lua_State *l) {
   int size = lua_tointeger(l, 1);
   if (size >= DRAW_BUFFER_MAX_SIZE) {
