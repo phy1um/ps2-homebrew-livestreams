@@ -38,9 +38,9 @@
     (gs:clearColour 0x2b 0x2b 0x2b))
   (set state (game.new-state))
   (print "creating entity")
-  (PLAYER.new state -20 -50 255 0 0 E.right)
-  (PLAYER.new state -200 -10 0 255 0 E.right)
-  (PLAYER.new state 300 -10 100 40 100 E.left))
+  (state:spawn (PLAYER.new -20 -50 255 0 0 E.right))
+  (state:spawn (PLAYER.new -200 -10 0 255 0 E.right))
+  (state:spawn (PLAYER.new 300 -10 100 40 100 E.left)),
 
 (global *dt* (/ 1 60))
 (print "overriding on-frame handler")

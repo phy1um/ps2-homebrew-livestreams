@@ -4,10 +4,8 @@
 
 (local game {})
 
-(fn new-entity [state create update draw]
-  (let [t (create)]
-    (set t.update update)
-    (set t.draw draw)
+(fn spawn [state spawn]
+  (let [t (spawn)]
     (set t.id (state:next-id))
     (table.insert state.entities t)))
 
