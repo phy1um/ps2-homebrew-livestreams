@@ -1,9 +1,10 @@
 (local D2D (require "draw2d"))
 (local u {
-  "x" (string.char 0)
-  "square" (string.char 1)
-  "circle" (string.char 2)
-  "triangle" (string.char 3)
+  :x (string.char 0)
+  :square (string.char 1)
+  :circle (string.char 2)
+  :triangle (string.char 3)
+  :font nil
 })
 
 (fn getCharInd [c]
@@ -14,17 +15,18 @@
         (+ 96 c)
       0))
 
-(fn drawString [font s x y]
+(fn drawString [s x y]
   (if (> (length s) 0)
     (let [ci (getCharInd (string.byte s))
         ts (* (% ci 32) 0.03125)
         tt (* (math.floor (/ ci 32)) 0.25)]
-      (D2D:sprite font x y 8 16 ts tt (+ ts 0.03125) (+ tt 0.25))
-      (drawString font (string.sub s 2) (+ x 8) y))))
+      (D2D:sprite u.font x y 8 16 ts tt (+ ts 0.03125) (+ tt 0.25))
+      (drawString (string.sub s 2) (+ x 8) y))))
 
-(fn u.printLines [font x y ...]
+(fn u.printLines [x y ...]
   (each [i v (ipairs [...])]
-    (print v)
-    (drawString font v x (+ y (* i 16)))))
+    ;; (print v)
+    (drawString v x (+ y (* i 16)))))
 
 u
+

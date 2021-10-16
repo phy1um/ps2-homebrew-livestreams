@@ -16,10 +16,9 @@ local draw = {
   loopCount = 0,
   tagLoopPtr = 0,
   currentTexPtr = 0,
-  buf = nil,
+  buf = {},
   kc = 0,
   rawtri = 0,
-
 }
 
 function draw:newBuffer()
