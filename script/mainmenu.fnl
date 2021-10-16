@@ -1,7 +1,7 @@
 (local T (require "text"))
 (local D2D (require "draw2d"))
 (local E (require "events"))
-(local game (require "game"))
+(local state (require "state"))
 
 (var *debounce-time* 0.07)
 
@@ -13,7 +13,7 @@
               "Credits"
             ]
     :actions [
-              (fn [state] (print "go to main game"))
+              (fn [state] (print "go to main state"))
               (fn [state] (print "show tutorial"))
               (fn [state] (print "credits.."))
             ]
@@ -76,8 +76,8 @@
    })
 
 (fn new []
-  (let [fallthrough (game.new-state) 
-        menu (game.new-state)]
+  (let [fallthrough (state.new-state) 
+        menu (state.new-state)]
     (menu:spawn menu-bg)
     (menu:spawn menu-controller)
     (fallthrough:spawn fallthrough-message)

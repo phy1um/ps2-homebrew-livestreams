@@ -4,7 +4,7 @@
 (local D2D (require "draw2d"))
 (local VRAM (require "vram"))
 
-(local game (require "game"))
+(local S (require "state"))
 
 (print "loading utils")
 (local T (require "text"))
@@ -81,7 +81,7 @@
     (gs:setBuffers fb zb)
     (gs:clearColour 0x2b 0x2b 0x2b))
   (set state (menu.new)))
-  ;(set state (game.new-state))
+  ;(set state (S.new-state))
   ;(print "creating entity")
   ;(state:spawn (PLAYER.new -20 -50 255 0 0 E.right))
   ;(state:spawn (new-roamer -120 0 300 20 30 40 50 E.right)))
@@ -90,12 +90,12 @@
 (print "overriding on-frame handler")
 (fn PS2PROG.frame []
   (local events (get-events))
-  (set state (game.update *dt* state events))
+  (set state (S.update *dt* state events))
   (D2D:newBuffer)
   (let [db (D2D:getBuffer)]
     (db:frameStart gs)
     (D2D:setColour 0xff 0xff 0xff 0x80)
-    (game.draw state)
+    (S.draw state)
     (D2D:setColour 255 255 255 0x80)
     (T.printLines -300 -220 (.. "tris/frame=" D2D.rawtri ", KC=" (+ D2D.kc 1)))
     (let [db (D2D:getBuffer)]

@@ -2,7 +2,7 @@
 (local D2D (require "draw2d"))
 (local E (require "events"))
 
-(local game {})
+(local state {})
 
 (fn spawn [state spawn]
   (let [t (spawn)]
@@ -21,7 +21,7 @@
 (fn pop [this-state]
   this-state.next-state)
 
-(fn game.new-state []
+(fn state.new-state []
   { :entities [] 
     :colliders []
     :do-pop false
@@ -37,7 +37,7 @@
     :next-state nil
   })
 
-(fn game.update [dt state events]
+(fn state.update [dt state events]
   (let [new-entities 
         (icollect [_ ent (ipairs state.entities)]
           (ent:update dt state events))
@@ -65,8 +65,8 @@
         : pop
        })))
 
-(fn game.draw [state]
+(fn state.draw [state]
   (each [i ent (ipairs state.entities)]
     (ent:draw)))
 
-game
+state

@@ -1,6 +1,6 @@
 (local fennel (require "fennel"))
 
-(local game (require "game"))
+(local state (require "state"))
 (local D2D (require "draw2d"))
 (local T (require "text"))
 (local E (require "events"))
@@ -9,26 +9,19 @@
 (var events [])
 
 (var key-map {
-              :up false
-              :down false
-              :left false
-              :right false
+              :w false
+              :s false
+              :a false
+              :d false
+              :x false
               })
 
 (fn love.keypressed [key]
-  (if (= key "w") (set key-map.up true))
-  (if (= key "a") (set key-map.left true))
-  (if (= key "d") (set key-map.right true))
-  (if (= key "s") (set key-map.down true))
-  (if (= key "escape") (love.event.quit 0)))
+  (if (= key "escape") (love.event.quit 0))
+  (tset key-map key true))
 
 (fn love.keyreleased [key]
-  ;;(print (.. "[UP] " key))
-  (if (= key "w") (set key-map.up false))
-  (if (= key "a") (set key-map.left false))
-  (if (= key "d") (set key-map.right false))
-  (if (= key "s") (set key-map.down false)))
-
+  (tset key-map key false))
 
 (global PS2PROG {})
 
@@ -45,7 +38,7 @@
             })
 
 (global PAD {
-             :UP "up" :LEFT "left" :DOWN "down" :RIGHT "right"
+             :UP "w" :LEFT "a" :DOWN "s" :RIGHT "d" :X "x"
              :held (fn [i]
                      (. key-map i))
              })
