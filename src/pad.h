@@ -2,17 +2,21 @@
 #ifndef PAD_H
 #define PAD_H
 
-#define BUTTON_1 0
-#define BUTTON_2 1
-#define BUTTON_L1 2
-#define BUTTON_R1 3
-#define BUTTON_L2 4
-#define BUTTON_R2 5
-#define DPAD_DOWN 6
-#define DPAD_LEFT 7
-#define DPAD_RIGHT 8
-#define DPAD_UP 9
-#define BTN_MAX 10
+#include <lua.h>
+
+#define BUTTON_X 0
+#define BUTTON_SQUARE 1
+#define BUTTON_TRIANGLE 2
+#define BUTTON_CIRCLE 3
+#define BUTTON_L1 4
+#define BUTTON_R1 5
+#define BUTTON_L2 6
+#define BUTTON_R2 7
+#define DPAD_DOWN 8
+#define DPAD_LEFT 9
+#define DPAD_RIGHT 10
+#define DPAD_UP 11
+#define BTN_MAX 12
 
 #define AXIS_LEFT_X 0
 #define AXIS_LEFT_Y 1
@@ -31,5 +35,7 @@ unsigned char joy_axis_value(int a);
 int pad_init();
 void pad_poll();
 void pad_frame_start();
+
+int pad_lua_init(lua_State *l);
 
 #endif
