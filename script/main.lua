@@ -9,6 +9,7 @@ if love ~= nil then
     if p == "text" then p = "lovedraw" end
     return coreRequire(p, ...)
   end
+  table.unpack = unpack
   print("loading love2d main")
   print("inserting fennel searchers")
   table.insert(package.loaders or package.searchers, fennel.make_searcher{correlate=true})

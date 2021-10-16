@@ -4,13 +4,19 @@
 (local E (require "events"))
 (local D2D (require "draw2d"))
 
+(fn fclamp [x min max]
+  (if (> x max) max
+    (< x min) min
+    x))
 
 (fn new [x y r g b d] 
     (fn [] 
       { : x : y :w 24 :h 24 
        :col {: r : g : b} :dir d 
        :v 50 :dx 0 :dy 0 
+       :health 5
        :type "player"
+       :solid true
 
       :update (fn [me dt state events]
         (set me.dx 0)
@@ -31,13 +37,17 @@
                            me.w 
                            me.h 
                            (fn [other]
-                             (let [cdx (- me.x other.x)
-                                   cdy (- me.y other.y)]
-                             (set me.x (+ py (* dt 2 cdx)))
-                             (set me.y (+ py (* dt 2 cdy)))))))))
+                             (print other.type)
+                             (if (= other.type "bad") (set me.health (- me.health 1)))))))
+        (if (>= me.health 0) me
+          (do
+            ; player dead logic here
+            nil)))
+
       :draw (fn [me]
         (D2D:setColour me.col.r me.col.g me.col.b 0x80)
         ; (T.printLines me.x (- me.y 30) (.. me.dx ", " me.dy) )
+        (T.printLines me.x (- me.y 30) (.. "HP: " me.health))
         (D2D:rect me.x me.y me.w me.h))
     }))
 

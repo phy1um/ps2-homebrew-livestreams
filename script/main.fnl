@@ -10,6 +10,7 @@
 (local T (require "text"))
 (local E (require "events"))
 (local PLAYER (require "player"))
+(local menu (require "mainmenu"))
 
 (var gs nil)
 (var font nil)
@@ -23,6 +24,7 @@
     (if (= true (PAD.held PAD.DOWN)) (table.insert evs E.down))
     (if (= true (PAD.held PAD.LEFT)) (table.insert evs E.left))
     (if (= true (PAD.held PAD.RIGHT)) (table.insert evs E.right))
+    (if (= true (PAD.held PAD.X)) (table.insert evs E.a0))
     evs))
 
 (fn eventToString [e]
@@ -37,6 +39,7 @@
     { :x sx :y sy :w 20 :h 20 :dir d
       :col {: r : g : b} :v 61 :dx 0 :dy 0
       :type "bad"
+      :solid true
       :update (fn [me dt state events]
                 (let [nd 
                       (if 
@@ -55,7 +58,8 @@
                              0)]
                     (set me.x (+ me.x dx))
                     (set me.y (+ me.y dy))
-                    (set me.dir nd))))
+                    (set me.dir nd)))
+                me)
       :draw (fn [me]
         (D2D:setColour me.col.r me.col.g me.col.b 0x80)
         (let [ddx (- me.x sx)]
@@ -76,10 +80,11 @@
         zb (VRAM.buffer 640 448 GS.PSMZ24 256)]
     (gs:setBuffers fb zb)
     (gs:clearColour 0x2b 0x2b 0x2b))
-  (set state (game.new-state))
-  (print "creating entity")
-  (state:spawn (PLAYER.new -20 -50 255 0 0 E.right))
-  (state:spawn (new-roamer -120 0 300 20 30 40 50 E.right)))
+  (set state (menu.new)))
+  ;(set state (game.new-state))
+  ;(print "creating entity")
+  ;(state:spawn (PLAYER.new -20 -50 255 0 0 E.right))
+  ;(state:spawn (new-roamer -120 0 300 20 30 40 50 E.right)))
 
 (global *dt* (/ 1 60))
 (print "overriding on-frame handler")
