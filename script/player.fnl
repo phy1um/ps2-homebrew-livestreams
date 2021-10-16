@@ -10,6 +10,7 @@
       { : x : y :w 24 :h 24 
        :col {: r : g : b} :dir d 
        :v 50 :dx 0 :dy 0 
+       :type "player"
 
       :update (fn [me dt state events]
         (set me.dx 0)

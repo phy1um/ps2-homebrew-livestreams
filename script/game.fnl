@@ -20,7 +20,7 @@
                  (set state.id-state (+ state.id-state 1))
                  n))
     : add-col
-    : new-entity
+    : spawn 
     :id-state 100 })
 
 (fn game.update [dt state events]

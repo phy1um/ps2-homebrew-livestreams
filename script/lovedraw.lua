@@ -2,6 +2,12 @@
 local draw = {
   kc = 0,
   rawtri = 0,
+  events = {},
+  font = nil,
+  x = "X",
+  square = "[]",
+  circle = "O",
+  triange = "/\\",
 }
 
 function draw:newBuffer()
@@ -9,23 +15,34 @@ function draw:newBuffer()
 end
 
 function draw:getBuffer()
-  return {}
+  return {
+    frameStart = function() end,
+    frameEnd = function() end,
+  }
 end
 
 function draw:setColour(r,g,b,a)
-  love.graphics.setColor(r,g,b,255)
+  table.insert(self.events, function()
+    love.graphics.setColor(r,g,b,255)
+  end)
 end
 
 function draw:rect(x, y, w, h)
-  love.graphics.rectangle("fill", x+320, y+240, w, h)
+  table.insert(self.events, function()
+    love.graphics.rectangle("fill", x+320, y+240, w, h)
+  end)
 end
 
 function draw:sprite(tex, x, y, w, h, u1, v1, u2, v2)
-  love.graphics.rectangle("fill", x+320, y+240, w, h)
+  table.insert(self.events, function()
+    love.graphics.rectangle("fill", x+320, y+240, w, h)
+  end)
 end
 
 function draw:triangle(x1, y1, x2, y2, x3, y3)
-  love.graphics.print("tri", x1+320, y1+240)
+  table.insert(self.events, function()
+    love.graphics.print("tri", x1+320, y1+240)
+  end)
 end
 
 function draw:kick()
@@ -37,6 +54,22 @@ end
 function draw.loadTexture(fname, w, h)
 end
 
+function draw:doLoveDraw()
+  for i,e in ipairs(self.events) do
+    e()
+  end
+  self.events = {}
+end
+
+function draw.printLines(x, y, ...)
+  local narg = select("#", ...)
+  for i=1,narg,1 do
+    local e = select(i, ...)
+    table.insert(draw.events, function()
+      love.graphics.print(e, x+320, (y+ 240 + (i * 16)))
+    end)
+  end
+end
 
 return draw
 

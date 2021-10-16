@@ -1,3 +1,4 @@
+(local fennel (require "fennel"))
 
 (local game (require "game"))
 (local D2D (require "draw2d"))
@@ -15,45 +16,50 @@
               })
 
 (fn love.keypressed [key]
-  (print (.. "[DOWN] " key))
-  (if (= key "w") (set key-map.up true)
-    (= key "a") (set key-map.left true)
-    (= key "d") (set key-map.right true)
-    (= key "s") (set key-map.down true)))
+  (if (= key "w") (set key-map.up true))
+  (if (= key "a") (set key-map.left true))
+  (if (= key "d") (set key-map.right true))
+  (if (= key "s") (set key-map.down true))
+  (if (= key "escape") (love.event.quit 0)))
 
 (fn love.keyreleased [key]
-  (print (.. "[UP] " key))
-  (if (= key "w") (set key-map.up false)
-    (= key "a") (set key-map.left false)
-    (= key "d") (set key-map.right false)
-    (= key "s") (set key-map.down false)))
+  ;;(print (.. "[UP] " key))
+  (if (= key "w") (set key-map.up false))
+  (if (= key "a") (set key-map.left false))
+  (if (= key "d") (set key-map.right false))
+  (if (= key "s") (set key-map.down false)))
 
-(fn get-events []
-  (each [k v (pairs key-map)]
-    (print k v))
-  (let [ev []]
-    (if key-map.up (table.insert ev E.up)
-        key-map.down (table.insert ev E.down)
-        key-map.left (table.insert ev E.left)
-        key-map.right (table.insert ev E.right))
-    ev))
 
-(var state {})
+(global PS2PROG {})
+
+(global DMA {
+             :init (fn [] nil)
+             :GIF 0
+             })
+
+(global GS {
+            :newState (fn [w h i mode] {
+                                        :setBuffers (fn [fb zb] nil)
+                                        :clearColour (fn [r g b a] nil)
+                                        })
+            })
+
+(global PAD {
+             :UP "up" :LEFT "left" :DOWN "down" :RIGHT "right"
+             :held (fn [i]
+                     (. key-map i))
+             })
+
+(fennel.dofile "main.fnl")
+
 
 (fn love.load []
-  (set state (game.new-state))
-  (PLAYER.new state -20 -50 255 0 0 E.right)
-  (PLAYER.new state -200 -10 0 255 0 E.right)
-  (PLAYER.new state 300 -10 100 40 100 E.left))
-
+  (PS2PROG.start))
+  
 
 (fn love.update [dt]
-  (let [events (get-events)]
-    (set state (game.update dt state events))
-    (D2D:setColour 0xff 0xff 0xff 0x80)
-    (set state.colliders [])))
-
+  (PS2PROG.frame))
+  
 (fn love.draw []
-  (love.graphics.print "hello world" 100 100)
-  (game.draw state))
+  (D2D:doLoveDraw))
 

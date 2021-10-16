@@ -25,6 +25,46 @@
     (if (= true (PAD.held PAD.RIGHT)) (table.insert evs E.right))
     evs))
 
+(fn eventToString [e]
+  (if (= e E.right) "right"
+      (= e E.left) "left"
+      (= e E.up) "up"
+      (= e E.down) "down"
+      "?"))
+
+(fn new-roamer [sx sy tx ty r g b d]
+  (fn []
+    { :x sx :y sy :w 20 :h 20 :dir d
+      :col {: r : g : b} :v 61 :dx 0 :dy 0
+      :type "bad"
+      :update (fn [me dt state events]
+                (let [nd 
+                      (if 
+                        (and (< me.x sx) (= me.dir E.left)) E.right
+                        (and (> me.x tx) (= me.dir E.right)) E.left
+                        (and (< me.y sy) (= me.dir E.down)) E.up
+                        (and (> me.y ty) (= me.dirt  E.up)) E.down
+                        me.dir)]
+                  (let [dx (if 
+                             (= nd E.left) (* -1 dt me.v)
+                             (= nd E.right) (* dt me.v)
+                             0)
+                        dy (if
+                              (= nd E.up) (* -1 dt me.v)
+                             (= nd E.down) (* dt me.v)
+                             0)]
+                    (set me.x (+ me.x dx))
+                    (set me.y (+ me.y dy))
+                    (set me.dir nd))))
+      :draw (fn [me]
+        (D2D:setColour me.col.r me.col.g me.col.b 0x80)
+        (let [ddx (- me.x sx)]
+          (T.printLines me.x (- me.y 30) (.. ddx " - " (eventToString me.dir))))
+        (D2D:rect me.x me.y me.w me.h))
+      }))
+
+
+
 
 (print "overriding start function")
 (fn PS2PROG.start []
@@ -39,8 +79,7 @@
   (set state (game.new-state))
   (print "creating entity")
   (state:spawn (PLAYER.new -20 -50 255 0 0 E.right))
-  (state:spawn (PLAYER.new -200 -10 0 255 0 E.right))
-  (state:spawn (PLAYER.new 300 -10 100 40 100 E.left)),
+  (state:spawn (new-roamer -120 0 300 20 30 40 50 E.right)))
 
 (global *dt* (/ 1 60))
 (print "overriding on-frame handler")
