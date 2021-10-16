@@ -26,15 +26,17 @@
                   me)
                 (let [actions (icollect [_ ev (ipairs events)]
                                         (if 
+                                          ; on cursor up
                                           (= ev E.up) 
                                           (fn [] 
-                                            (print "cursor up")
                                             (set me.cursor (math.max 1 (- me.cursor 1))))
+                                          ; on cursor down
                                           (= ev E.down) 
                                           (fn [] 
                                             (set me.cursor (math.min 
                                                              (length me.options) 
                                                              (+ me.cursor 1))))
+                                          ; on action
                                           (= ev E.a0)
                                             (. me.actions me.cursor)))]
                       (each [i a (ipairs actions)]
@@ -79,8 +81,7 @@
     (menu:spawn menu-bg)
     (menu:spawn menu-controller)
     (fallthrough:spawn fallthrough-message)
-    (fallthrough:push menu)
-    menu))
+    (fallthrough:push menu)))
 
 {
  : new

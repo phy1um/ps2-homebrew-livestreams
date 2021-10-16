@@ -103,7 +103,6 @@
       (D2D:kick)))
   (set D2D.rawtri 0)
   (set D2D.kc 0)
-  (set state.colliders [])
   (set counter (+ counter 1)))
 
 (print "ended main fennel file")

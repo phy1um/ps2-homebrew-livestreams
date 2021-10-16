@@ -14,6 +14,7 @@
   (table.insert state.colliders col))
 
 (fn push [this-state next-state]
+  (print "setting next state to " next-state)
   (set next-state.next-state this-state)
   next-state)
 
@@ -23,6 +24,7 @@
 (fn game.new-state []
   { :entities [] 
     :colliders []
+    :do-pop false
     :id-state 100 
     :next-id (fn [state] 
                (let [ n state.id-state ]
@@ -45,16 +47,23 @@
         (if (= ent.solid true)
           (let [{:hit hit :action act} (col ent)]
             (if (= true hit) (act ent))))))
-    {
-      :entities new-entities
-      :colliders []
-      :next-id state.next-id
-      :id-state state.id-state
-      : add-col
-      : spawn
-      : push
-      : pop
-     }))
+    (if 
+      ; return next state if we have flagged to pop
+      (= true state.do-pop) (do
+                              (print "popping state to " state.next-state)
+                              (state:pop))
+      ; otherwise return the successor to this state
+      {
+        :entities new-entities
+        :colliders []
+        :next-id state.next-id
+        :id-state state.id-state
+        :next-state state.next-state
+        : add-col
+        : spawn
+        : push
+        : pop
+       })))
 
 (fn game.draw [state]
   (each [i ent (ipairs state.entities)]
