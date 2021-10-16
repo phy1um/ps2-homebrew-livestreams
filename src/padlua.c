@@ -12,7 +12,6 @@
 #define pad_test(b, v)                                                         \
   do {                                                                         \
     if ((c & b)) {                                                             \
-      info("set button %d", v);                                                \
       btn_held[v] = 1;                                                         \
     }                                                                          \
   } while (0)
@@ -112,7 +111,7 @@ static int pad_lua_button_held(lua_State *l) {
   int button_id = lua_tointeger(l, 1);
   // TODO(Tom Marks): bounds check
   int v = btn_held[button_id];
-  info("TEST BTN %d = %d", button_id, v);
+  // info("TEST BTN %d = %d", button_id, v);
   lua_pushboolean(l, v);
   return 1;
 }

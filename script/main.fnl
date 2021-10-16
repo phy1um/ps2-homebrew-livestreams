@@ -9,6 +9,7 @@
 (print "loading utils")
 (local T (require "text"))
 (local E (require "events"))
+(local PLAYER (require "player"))
 
 (var gs nil)
 (var font nil)
@@ -16,57 +17,13 @@
 (var state {})
 
 (var counter 0)
-(fn get-events []
-  (if (> counter 60) [E.left] [E.up]))
-
-(fn point-in-rect [ax ay x y w h]
-  (and
-    (>= ax x)
-    (<= ax (+ x w))
-    (>= ay y)
-    (<= ay (+ y h))))
-
-(fn collider-rect [id x y w h onhit]
-  (fn [other]
-    (if (= other.id id) {:hit false}
-        (or
-          (point-in-rect other.x other.y x y w h)
-          (point-in-rect (+ other.x other.w) other.y x y w h)
-          (point-in-rect other.x (+ other.y other.h) x y w h)
-          (point-in-rect (+ other.x other.w) (+ other.y other.h) x y w h))
-      {:hit true :action onhit}
-      {:hit false})))
-
-(fn create-thing [state x y r g b d] 
-  (state:new-entity  
-    (fn [] 
-      { : x : y :w 24 :h 24 
-       :col {: r : g : b} :dir d 
-       :v 50 :dx 0 :dy 0 })
-    (fn [me dt state events]
-      (let [px me.x py me.y]
-        (if (= me.dir E.up) (set me.dy (* -1 dt me.v))
-            (= me.dir E.down) (set me.dy (* dt me.v))
-            (= me.dir E.left) (set me.dx (* -1 dt me.v))
-            (= me.dir E.right) (set me.dx (* dt me.v))
-            nil)
-        (set me.x (+ me.x me.dx))
-        (set me.y (+ me.y me.dy))
-        (state:add-col (collider-rect 
-                         me.id
-                         me.x 
-                         me.y 
-                         me.w 
-                         me.h 
-                         (fn [other]
-                           (let [cdx (- me.x other.x)
-                                 cdy (- me.y other.y)]
-                           (set me.x (+ py (* dt 2 cdx)))
-                           (set me.y (+ py (* dt 2 cdy)))))))))
-            (fn [me]
-      (D2D:setColour me.col.r me.col.g me.col.b 0x80)
-      (T.printLines me.x (- me.y 30) (.. me.dx ", " me.dy) )
-      (D2D:rect me.x me.y me.w me.h))))
+(fn get-events [] 
+  (let [evs []]
+    (if (= true (PAD.held PAD.UP)) (table.insert evs E.up))
+    (if (= true (PAD.held PAD.DOWN)) (table.insert evs E.down))
+    (if (= true (PAD.held PAD.LEFT)) (table.insert evs E.left))
+    (if (= true (PAD.held PAD.RIGHT)) (table.insert evs E.right))
+    evs))
 
 
 (print "overriding start function")
@@ -81,9 +38,9 @@
     (gs:clearColour 0x2b 0x2b 0x2b))
   (set state (game.new-state))
   (print "creating entity")
-  (create-thing state -20 -50 255 0 0 E.right)
-  (create-thing state -200 -10 0 255 0 E.right)
-  (create-thing state 300 -10 100 40 100 E.left))
+  (PLAYER.new state -20 -50 255 0 0 E.right)
+  (PLAYER.new state -200 -10 0 255 0 E.right)
+  (PLAYER.new state 300 -10 100 40 100 E.left))
 
 (global *dt* (/ 1 60))
 (print "overriding on-frame handler")
