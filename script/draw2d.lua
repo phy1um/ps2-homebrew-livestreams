@@ -54,6 +54,12 @@ function draw:rect(x, y, w, h)
   draw:triangle(x, y+h, x+w, y+h, x+w, y)
 end
 
+function toCoord(i)
+  local ii = math.floor(i)
+  local fi = math.floor((i%1)*0xf)
+  return 0x8000 + (ii*16) + fi
+end
+
 function draw:sprite(tex, x, y, w, h, u1, v1, u2, v2)
   if self.loopCount > 10000 then self:kick() end
   if self.buf.size - self.buf.head < 80 then self:kick() end
@@ -76,16 +82,12 @@ function draw:sprite(tex, x, y, w, h, u1, v1, u2, v2)
     self.loopCount = 0
     self.state = DRAW_SPRITE
   end
-  local ix = math.floor(x)
-  local iy = math.floor(y)
-  local ix2 = math.floor(x+w)
-  local iy2 = math.floor(y+h)
   GIF.packedST(self.buf, u1, v1)
   GIF.packedRGBAQ(self.buf, self.col.r, self.col.g, self.col.b, self.col.a)
-  GIF.packedXYZ2(self.buf, 0x8000 + (ix*16), 0x8000 + (iy*16), 0)
+  GIF.packedXYZ2(self.buf, toCoord(x), toCoord(y), 0)
   GIF.packedST(self.buf, u2, v2)
   GIF.packedRGBAQ(self.buf, self.col.r, self.col.g, self.col.b, self.col.a)
-  GIF.packedXYZ2(self.buf, 0x8000 + (ix2*16), 0x8000 + (iy2*16), 0)
+  GIF.packedXYZ2(self.buf, toCoord(x+w), toCoord(y+h), 0)
   self.loopCount = self.loopCount + 1
 end
 
@@ -103,9 +105,9 @@ function draw:triangle(x1, y1, x2, y2, x3, y3)
     self.state = DRAW_GEOM
   end
   GIF.packedRGBAQ(self.buf, self.col.r, self.col.g, self.col.b, self.col.a)
-  GIF.packedXYZ2(self.buf, 0x8000 + (x1*16), 0x8000 + (y1*16), 0)
-  GIF.packedXYZ2(self.buf, 0x8000 + (x2*16), 0x8000 + (y2*16), 0)
-  GIF.packedXYZ2(self.buf, 0x8000 + (x3*16), 0x8000 + (y3*16), 0)
+  GIF.packedXYZ2(self.buf, toCoord(x1), toCoord(y1), 0)
+  GIF.packedXYZ2(self.buf, toCoord(x2), toCoord(y2), 0)
+  GIF.packedXYZ2(self.buf, toCoord(x3), toCoord(y3), 0)
   self.loopCount = self.loopCount + 1
   self.rawtri = self.rawtri + 1
 end

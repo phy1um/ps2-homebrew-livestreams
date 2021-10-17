@@ -123,7 +123,7 @@
   (set state (state.update *dt* state events))
   (D2D:frameStart)
   (D2D:setColour 0xff 0xff 0xff 0x80)
-  (S.draw state)
+  (state:draw)
   (D2D:setColour 255 255 255 0x80)
   (T.printLines -300 -220 (.. "tris/frame=" D2D.prev.rawtri ", KC=" D2D.prev.kc))
   (D2D:frameEnd)

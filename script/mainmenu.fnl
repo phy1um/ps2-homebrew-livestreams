@@ -18,7 +18,7 @@
                 (let [game (. (reload "game") "new")
                       old-update state.update]
                   (set state.update (fn [_ state]
-                    (let [ns (state:push (game))]
+                    (let [ns (state:push (game 40 30))]
                       (set state.update old-update)
                       ns)))))
               

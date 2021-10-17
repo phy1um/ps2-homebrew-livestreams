@@ -11,9 +11,9 @@
 
 (fn new [x y r g b d] 
     (fn [] 
-      { : x : y :w 24 :h 24 
+      { : x : y :w 16 :h 16
        :col {: r : g : b} :dir d 
-       :v 50 :dx 0 :dy 0 
+       :v 90 :dx 0 :dy 0 
        :health 5
        :type "player"
        :solid true
@@ -28,8 +28,10 @@
                 (E.is ev E.type.left E.mod.hold) (set me.dx (* -1 dt me.v))
                 (E.is ev E.type.right E.mod.hold) (set me.dx (* dt me.v))
                 nil))
-          (set me.x (+ me.x me.dx))
-          (set me.y (+ me.y me.dy))
+          (if (state.m:tile-rect-free (+ me.x me.dx) (+ me.y me.dy) me.w me.h)
+            (do
+              (set me.x (+ me.x me.dx))
+              (set me.y (+ me.y me.dy))))
           (state:add-col (C.collider-rect 
                            me.id
                            me.x 

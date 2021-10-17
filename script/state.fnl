@@ -25,6 +25,11 @@
     (tset s1 k v)))
 
 
+(fn draw [state]
+  (each [i ent (ipairs state.entities)]
+    (ent:draw state)))
+
+
 (fn update [dt state events]
   (let [new-entities 
         (icollect [_ ent (ipairs state.entities)]
@@ -52,7 +57,11 @@
         : push
         : pop
         :update state.update 
+        :draw state.draw
+        :m state.m
        })))
+
+
 
 (fn state.new-state []
   { :entities [] 
@@ -68,12 +77,10 @@
     : push
     : pop
     : update
+    : draw
     :next-state nil
+    :m nil
   })
 
-
-(fn state.draw [state]
-  (each [i ent (ipairs state.entities)]
-    (ent:draw)))
 
 state
