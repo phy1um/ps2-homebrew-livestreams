@@ -2,9 +2,9 @@
 #include <lua.h>
 
 #include <draw.h>
-#include <tamtypes.h>
 #include <gs_gp.h>
 #include <gs_psm.h>
+#include <tamtypes.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -255,14 +255,16 @@ static int drawlua_start_frame(lua_State *l) {
 
   qword_t *q = (qword_t *)(ptr + head);
   q = draw_disable_tests(q, 0, &zb);
-  PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
+  PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
   q++;
-  PACK_GIFTAG(q, GS_SET_TEST(DRAW_ENABLE,ATEST_METHOD_NOTEQUAL,0x00,ATEST_KEEP_FRAMEBUFFER,
-    DRAW_DISABLE,DRAW_DISABLE,
-    DRAW_ENABLE,ZTEST_METHOD_ALLPASS), GS_REG_TEST);
+  PACK_GIFTAG(q,
+              GS_SET_TEST(DRAW_ENABLE, ATEST_METHOD_NOTEQUAL, 0x00,
+                          ATEST_KEEP_FRAMEBUFFER, DRAW_DISABLE, DRAW_DISABLE,
+                          DRAW_ENABLE, ZTEST_METHOD_ALLPASS),
+              GS_REG_TEST);
   q++;
-  q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - halfh, width, height,
-                 r, g, b);
+  q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - halfh, width, height, r, g,
+                 b);
 
   head = (char *)q - ptr;
   // info("db head -> %d", head);

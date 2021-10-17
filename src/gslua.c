@@ -6,9 +6,9 @@
 #include <gs_psm.h>
 #include <inttypes.h>
 
+#include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
 
 #include "log.h"
 #include "script.h"
@@ -25,13 +25,13 @@ static qword_t *flip_buffer;
 int gs_init() {
   info("init GS -- no framebuffer");
   st = calloc(1, sizeof(struct gs_state));
-  flip_buffer = memalign(64, 10*16);
+  flip_buffer = memalign(64, 10 * 16);
   return 0;
 }
 
 int gs_flip() {
   trace("GS FLIP START");
-  memset(flip_buffer, 0, 10*16);
+  memset(flip_buffer, 0, 10 * 16);
   framebuffer_t *fb = &st->fb[st->ctx];
   graph_set_framebuffer_filtered(fb->address, fb->width, fb->psm, 0, 0);
   st->ctx ^= 1;
@@ -85,7 +85,6 @@ static int gslua_set_buffers(lua_State *l) {
   lua_gettable(l, 3);
   int zb_fmt = lua_tointeger(l, -1);
   lua_pop(l, 1);
-
 
   st->fb[0].address = fb1_addr;
   st->fb[0].width = fb_width;
