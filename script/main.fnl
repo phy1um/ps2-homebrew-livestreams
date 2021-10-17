@@ -17,21 +17,50 @@
 
 (var state {})
 
-(var counter 0)
-(fn get-events [] 
+(var *btn-state* {})
+
+(var *binds* {})
+(tset *binds* PAD.UP E.type.up)
+(tset *binds* PAD.DOWN E.type.down)
+(tset *binds* PAD.LEFT E.type.left)
+(tset *binds* PAD.RIGHT E.type.right)
+(tset *binds* PAD.X E.type.a0)
+
+(each [_ v (pairs E.type)]
+  (tset *btn-state* v false))
+
+(var *buttons* [PAD.UP PAD.DOWN PAD.LEFT PAD.RIGHT PAD.X])
+
+(fn test-button [p e]
+  (let [ps (PAD.held p)
+        btn-state (. *btn-state* e)]
+    (let [res (if (= true ps)
+                ; if pad held 
+                (if (= false btn-state) 
+                  [(E.event e E.mod.hold) (E.event e E.mod.press)]
+                  [(E.event e E.mod.hold)])
+                ; else pad not held
+                (if (= true btn-state) 
+                  [(E.event e E.mod.release)]
+                  []))]
+      (tset *btn-state* e ps)
+      res)))
+
+(fn get-events []
   (let [evs []]
-    (if (= true (PAD.held PAD.UP)) (table.insert evs E.up))
-    (if (= true (PAD.held PAD.DOWN)) (table.insert evs E.down))
-    (if (= true (PAD.held PAD.LEFT)) (table.insert evs E.left))
-    (if (= true (PAD.held PAD.RIGHT)) (table.insert evs E.right))
-    (if (= true (PAD.held PAD.X)) (table.insert evs E.a0))
+    (each [p e (pairs *binds*)]
+      (let [xs (test-button p e)]
+        (each [_ x (ipairs xs)]
+          (table.insert evs x))))
     evs))
 
+(var counter 0)
+
 (fn eventToString [e]
-  (if (= e E.right) "right"
-      (= e E.left) "left"
-      (= e E.up) "up"
-      (= e E.down) "down"
+  (if (= e E.type.right) "right"
+      (= e E.type.left) "left"
+      (= e E.type.up) "up"
+      (= e E.type.down) "down"
       "?"))
 
 (fn new-roamer [sx sy tx ty r g b d]

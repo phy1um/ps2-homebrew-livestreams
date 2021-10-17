@@ -1,6 +1,5 @@
 
 (local D2D (require "draw2d"))
-(local E (require "events"))
 
 (local state {})
 

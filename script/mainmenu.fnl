@@ -43,7 +43,7 @@
 
             ]
     :cursor 1
-    :debounce 0.2
+    :debounce 0
     :update (fn [me dt state events] 
               (if (> me.debounce 0) 
                 (do
@@ -52,19 +52,21 @@
                 (let [actions (icollect [_ ev (ipairs events)]
                                         (if 
                                           ; on cursor up
-                                          (= ev E.up) 
+                                          (E.is ev E.type.up E.mod.press)
                                           (fn [] 
+                                            (print "move cursor " me.cursor (- me.cursor 1))
                                             (set me.cursor (math.max 1 (- me.cursor 1))))
                                           ; on cursor down
-                                          (= ev E.down) 
+                                          (E.is ev E.type.down E.mod.press)
                                           (fn [] 
                                             (set me.cursor (math.min 
                                                              (length me.options) 
                                                              (+ me.cursor 1))))
                                           ; on action
-                                          (= ev E.a0)
+                                          (E.is ev E.type.a0 E.mod.press)
                                             (. me.actions me.cursor)))]
                       (each [i a (ipairs actions)]
+                        (print "acting?")
                         (if (~= a nil) 
                           (do
                             (set me.debounce *debounce-time*)

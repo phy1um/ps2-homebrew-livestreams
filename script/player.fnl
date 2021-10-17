@@ -23,10 +23,10 @@
         (set me.dy 0)
         (let [px me.x py me.y]
           (each [i ev (ipairs events)]
-            (if (= ev E.up) (set me.dy (* -1 dt me.v))
-                (= ev E.down) (set me.dy (* dt me.v))
-                (= ev E.left) (set me.dx (* -1 dt me.v))
-                (= ev E.right) (set me.dx (* dt me.v))
+            (if (E.is ev E.type.up E.mod.hold) (set me.dy (* -1 dt me.v))
+                (E.is ev E.type.down E.mod.hold) (set me.dy (* dt me.v))
+                (E.is ev E.type.left E.mod.hold) (set me.dx (* -1 dt me.v))
+                (E.is ev E.type.right E.mod.hold) (set me.dx (* dt me.v))
                 nil))
           (set me.x (+ me.x me.dx))
           (set me.y (+ me.y me.dy))
