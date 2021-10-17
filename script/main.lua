@@ -2,6 +2,14 @@
 local coreRequire = require
 
 local fennel = require("fennel")
+
+function reload(p, ...)
+  if package.loaded[p] ~= nil then
+    package.loaded[p] = nil
+  end
+  return require(p, ...)
+end
+
 print("go go go")
 if love ~= nil then
   require = function(p, ...)

@@ -38,7 +38,8 @@
                            me.h 
                            (fn [other]
                              (print other.type)
-                             (if (= other.type "bad") (set me.health (- me.health 1)))))))
+                             (if (= other.type "bad") (set me.health (- me.health 1)))
+                             nil))))
         (if (>= me.health 0) me
           (do
             ; player dead logic here

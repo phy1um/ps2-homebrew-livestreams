@@ -57,6 +57,7 @@ function draw:sprite(tex, x, y, w, h, u1, v1, u2, v2)
     if self.state ~= DRAW_NONE then
       draw:updateLastTagLoops() 
     end
+    self.currentTexPtr = tex.basePtr
     local pb = math.floor(tex.basePtr/64)
     local pw = math.floor(tex.width/64)
     GIF.tag(self.buf, GIF.PACKED, 4, false, {0xe})

@@ -13,12 +13,37 @@
               "Credits"
             ]
     :actions [
-              (fn [state] (print "go to main state"))
-              (fn [state] (print "show tutorial"))
-              (fn [state] (print "credits.."))
+              (fn [state] 
+                (print "go to game state")
+                (let [game (. (reload "game") "new")
+                      old-update state.update]
+                  (set state.update (fn [_ state]
+                    (let [ns (state:push (game))]
+                      (set state.update old-update)
+                      ns)))))
+              
+              (fn [state] 
+                (print "show tutorial")
+                (let [tut (. (reload "tutorial") "new")
+                      old-update state.update]
+                  (set state.update (fn [_ state]
+                                      (let [ns (state:push (tut))]
+                                        (set state.update old-update)
+                                        ns)))))
+
+
+              (fn [state]                 
+                (print "show credits")
+                (let [credits (. (reload "credits") "new")
+                      old-update state.update]
+                  (set state.update (fn [_ state]
+                                      (let [ns (state:push (credits))]
+                                        (set state.update old-update)
+                                        ns)))))
+
             ]
     :cursor 1
-    :debounce 0
+    :debounce 0.2
     :update (fn [me dt state events] 
               (if (> me.debounce 0) 
                 (do

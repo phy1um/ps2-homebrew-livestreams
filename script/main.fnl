@@ -90,7 +90,7 @@
 (print "overriding on-frame handler")
 (fn PS2PROG.frame []
   (local events (get-events))
-  (set state (S.update *dt* state events))
+  (set state (state.update *dt* state events))
   (D2D:newBuffer)
   (let [db (D2D:getBuffer)]
     (db:frameStart gs)

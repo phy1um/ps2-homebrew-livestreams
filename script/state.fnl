@@ -21,23 +21,12 @@
 (fn pop [this-state]
   this-state.next-state)
 
-(fn state.new-state []
-  { :entities [] 
-    :colliders []
-    :do-pop false
-    :id-state 100 
-    :next-id (fn [state] 
-               (let [ n state.id-state ]
-                 (set state.id-state (+ state.id-state 1))
-                 n))
-    : add-col
-    : spawn 
-    : push
-    : pop
-    :next-state nil
-  })
+(fn merge [s1 s2]
+  (each [k v (pairs s2)]
+    (tset s1 k v)))
 
-(fn state.update [dt state events]
+
+(fn update [dt state events]
   (let [new-entities 
         (icollect [_ ent (ipairs state.entities)]
           (ent:update dt state events))
@@ -46,7 +35,7 @@
       (each [i ent (ipairs new-entities)]
         (if (= ent.solid true)
           (let [{:hit hit :action act} (col ent)]
-            (if (= true hit) (act ent))))))
+            (if (= true hit) (merge state (act ent)))))))
     (if 
       ; return next state if we have flagged to pop
       (= true state.do-pop) (do
@@ -63,7 +52,26 @@
         : spawn
         : push
         : pop
+        :update state.update 
        })))
+
+(fn state.new-state []
+  { :entities [] 
+    :colliders []
+    :do-pop false
+    :id-state 100 
+    :next-id (fn [state] 
+               (let [ n state.id-state ]
+                 (set state.id-state (+ state.id-state 1))
+                 n))
+    : add-col
+    : spawn 
+    : push
+    : pop
+    : update
+    :next-state nil
+  })
+
 
 (fn state.draw [state]
   (each [i ent (ipairs state.entities)]
