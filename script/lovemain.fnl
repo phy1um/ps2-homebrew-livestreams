@@ -31,10 +31,8 @@
              })
 
 (global GS {
-            :newState (fn [w h i mode] {
-                                        :setBuffers (fn [fb zb] nil)
-                                        :clearColour (fn [r g b a] nil)
-                                        })
+            :setOutput (fn [])
+            :setBuffers (fn [])
             })
 
 (global PAD {

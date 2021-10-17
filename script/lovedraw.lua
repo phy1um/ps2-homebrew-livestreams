@@ -8,6 +8,10 @@ local draw = {
   square = "[]",
   circle = "O",
   triange = "/\\",
+  prev = {
+    kc = 0,
+    rawtri = 0,
+  },
 }
 
 function draw:newBuffer()
@@ -70,6 +74,13 @@ function draw.printLines(x, y, ...)
     end)
   end
 end
+
+function draw.clearColour(r, g, b)
+end
+
+function draw.frameStart() end
+function draw.frameEnd() end
+
 
 return draw
 
