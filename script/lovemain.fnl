@@ -31,7 +31,8 @@
              })
 
 (global GS {
-            :setOutput (fn [])
+            :setOutput (fn [w h]
+                         (love.window.setMode w h))
             :setBuffers (fn [])
             })
 
