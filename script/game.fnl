@@ -57,9 +57,14 @@
               : h
               :tiles (make-tile-map w h)
               :tile-free (fn [m x y]
-                          (let [gx (math.floor (/ (+ x 320) *GRID*)) 
+                          (if 
+                            (or 
+                                (and (< x 0) (< y 0))
+                                (and (>= x w) (>= y h)))
+                              false                              
+                              (let [gx (math.floor (/ (+ x 320) *GRID*)) 
                                 gy (math.floor (/ (+ y 240) *GRID*))]
-                            (= 0 (m:tile-get gx gy))))
+                                (= 0 (m:tile-get gx gy)))))
               :tile-rect-free (fn [m x y w h]
                                 (and
                                   (m:tile-free x y)
@@ -68,14 +73,11 @@
                                   (m:tile-free (+ x w) (+ y h))))
               :tile-set (fn [m x y v]
                           (let [index (+ x (* w y))]
-                            (print "TM set " index v)
                             (tset m.tiles index v))
                           v)
               :tile-get (fn [m x y]
                           (let [index (+ x (* w y))]
-                            (print "GET " x y index)
                             (let [res (. m.tiles index)]
-                              (print " =" res)
                               res)))
               })
 
@@ -87,6 +89,8 @@
     (s.m:tile-set 10 14 6)
     (s.m:tile-set 10 15 6)
     (s.m:tile-set 10 16 6)
+    (for [i 0 32]
+      (s.m:tile-set i 20 2))
     (print "TILES = " s.m.tiles)
     s))
 
