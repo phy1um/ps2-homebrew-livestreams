@@ -1,4 +1,6 @@
 local gif = dofile("host:script/gif.lua")
+local VRAM = require("vram")
+local D2D = require("draw2d")
 
 local gs = nil
 
@@ -10,21 +12,20 @@ function writeToBuffer(b, ints)
 end
 
 function PS2PROG.start()
-  DMA.init(DMA.GIF)
-  gs = GS.newState(640, 448, GS.INTERLACED, GS.NTSC)
-  local fb = gs:alloc(640, 448, GS.PSM24)
-  local zb = gs:alloc(640, 448, GS.PSMZ24)
-  gs:setBuffers(fb, zb)
-  gs:clearColour(0, 255, 0)
+  dma.init(dma.gif)
+  gs.setoutput(640, 448, gs.interlaced, gs.ntsc)
+  local fb1 = vram.buffer(640, 448, gs.psm24, 256)
+  local fb2 = vram.buffer(640, 448, gs.psm24, 256)
+  local zb = vram.buffer(640, 448, gs.psmz24, 256)
+  gs.setbuffers(fb1, fb2, zb)
+  d2d:clearcolour(0x2b, 0x2b, 0x2b)
+
+
 end
 
 function PS2PROG.frame()
-  local db = RM.getDrawBuffer(5000)
-  db:frameStart(gs)
-  -- writeToBuffer(db, {0x8001, 0x10000000, 0xe, 0x0, 0x1, 0x0, 0x61, 0x0})
-  db:frameEnd(gs)
-  DMA.send(db, DMA.GIF)
-  db:free()
+  D2D:frameStart(gs)
+  D2D:frameEnd(gs)
 end
 
 

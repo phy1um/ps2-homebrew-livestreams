@@ -9,6 +9,7 @@
 
 #include "log.h"
 
+#include "gs.h"
 #include "pad.h"
 #include "script.h"
 
@@ -116,6 +117,8 @@ int main(int argc, char *argv[]) {
     startup = argv[1];
   }
 
+  gs_init();
+
   struct lua_State *L;
   L = luaL_newstate();
   if (!L) {
@@ -145,10 +148,14 @@ int main(int argc, char *argv[]) {
     dma_wait_fast();
     info("ON FRAME");
     ps2luaprog_onframe(L);
+    // may be required? -- dma_wait_fast();
     info("WAIT DRAW");
     draw_wait_finish();
     info("WAIT VSYNC");
     graph_wait_vsync();
+    info("FLIP");
+    gs_flip();
+    info("FLIPOUT");
   }
   info("main loop ended");
 }

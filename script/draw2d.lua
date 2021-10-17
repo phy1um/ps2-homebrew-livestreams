@@ -13,18 +13,21 @@ local draw = {
   col = {r=255, g=255, b=255, a=0x80},
   state = DRAW_NONE,
   loopCount = 0,
-  tagLoopPtr = 0,
+  tagLoopPtr = -1,
   currentTexPtr = 0,
   buf = nil,
   kc = 0,
   rawtri = 0,
-
+  prev = {
+    kc = 0,
+    rawtri = 0,
+  }
 }
 
 function draw:newBuffer()
   self.state = DRAW_NONE
   self.loopCount = 0
-  self.tagLoopPtr = 0
+  self.tagLoopPtr = -1
   self.buf = RM.getDrawBuffer(DB_SIZE)
   end
 
@@ -96,16 +99,38 @@ function draw:triangle(x1, y1, x2, y2, x3, y3)
 end
 
 function draw:kick()
-  local nloop = self.buf:read(self.tagLoopPtr) 
-  if nloop - 0x8000 > 0 then
-    print("kick EOP")
-    self.buf:write(self.tagLoopPtr, 0x8000 + self.loopCount)
-  else
-    self.buf:write(self.tagLoopPtr, self.loopCount)
+  if self.tagLoopPtr >= 0 then
+    local nloop = self.buf:read(self.tagLoopPtr) 
+    if nloop - 0x8000 > 0 then
+      print("kick EOP")
+      self.buf:write(self.tagLoopPtr, 0x8000 + self.loopCount)
+    else
+      self.buf:write(self.tagLoopPtr, self.loopCount)
+    end
   end
   DMA.send(self.buf, DMA.GIF)
   self:newBuffer()
   self.kc = self.kc + 1
+end
+
+function draw:frameStart(gs)
+  self.kc = 0
+  self.rawtri = 0
+  self:newBuffer() 
+  self.buf:frameStart(640, 448, self.clearR, self.clearG, self.clearB)
+end
+
+function draw:frameEnd(gs)
+  self.buf:frameEnd(gs)
+  self:kick()
+  self.prev.kc = self.kc
+  self.prev.rawtri = self.rawtri
+end
+
+function draw:clearColour(r, g, b)
+  self.clearR = r
+  self.clearG = g
+  self.clearB = b
 end
 
 return draw
