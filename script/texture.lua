@@ -88,30 +88,23 @@ function PS2PROG.start()
   testTex = loadTexture("host:test.tga", 64, 64)
   fnt = loadTexture("host:bigfont.tga", 256, 64)
   DMA.init(DMA.GIF)
-  gs = GS.newState(640, 448, GS.INTERLACED, GS.NTSC)
-  local fb = VRAM.buffer(640, 440, GS.PSM24, 256)
-  local zb = VRAM.buffer(640, 440, GS.PSMZ24, 256)
-  print("setting new buffers")
-  gs:setBuffers(fb, zb)
-  gs:clearColour(0x2b, 0x2b, 0x2b)
-
+  gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
+  local fb1 = VRAM.buffer(640, 448, GS.PSM24, 256)
+  local fb2 = VRAM.buffer(640, 448, GS.PSM24, 256)
+  local zb = VRAM.buffer(640, 448, GS.PSMZ24, 256)
+  GS.setBuffers(fb1, fb2, zb)
+  D2D:clearColour(0x2b, 0x2b, 0x2b)
 end
 
 xx = -200
 local dt = 1/60
 function PS2PROG.frame()
-  D2D:newBuffer()
-  local db = D2D:getBuffer()
-  db:frameStart(gs)
+  D2D:frameStart(gs)
   D2D:setColour(0x80,0x80,0x80,0x80)
   D2D:sprite(testTex, xx, -200, 200, 200, 0, 0, 1, 1)
   D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)
-  db = D2D:getBuffer()
-  db:frameEnd(gs)
-  D2D:kick()
-  print("tris/frame = " .. D2D.rawtri .. ", KC=" .. D2D.kc)
-  D2D.rawtri = 0
-  D2D.kc = 0
+  D2D:frameEnd(gs)
+  print("tris/frame = " .. D2D.prev.rawtri .. ", KC=" .. D2D.prev.kc)
 
   if PAD.held(PAD.LEFT) then xx = xx - 50*dt end
   if PAD.held(PAD.RIGHT) then xx = xx + 50*dt end

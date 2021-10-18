@@ -10,7 +10,12 @@
 #define logmsg(lvl, msg, ...) ((void)0)
 #endif
 
+#ifdef LOG_TRACE
 #define trace(msg, ...) logmsg("[TRCE]", msg, ##__VA_ARGS__)
+#else
+#define trace(msg, ...) ((void)0)
+#endif
+
 #define info(msg, ...) logmsg("[INFO]", msg, ##__VA_ARGS__)
 #define logerr(msg, ...) logmsg("[ERRO]", msg, ##__VA_ARGS__)
 

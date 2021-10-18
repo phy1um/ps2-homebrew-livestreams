@@ -2,6 +2,8 @@
 #include <lua.h>
 
 #include <draw.h>
+#include <gs_gp.h>
+#include <gs_psm.h>
 #include <tamtypes.h>
 
 #include <stdlib.h>
@@ -231,42 +233,38 @@ int drawlua_init(lua_State *l) {
   return 0;
 }
 
+zbuffer_t zb = {0};
 static int drawlua_start_frame(lua_State *l) {
   // drawbuffer is arg #1
   lua_pushstring(l, "head");
   lua_gettable(l, 1);
   int head = lua_tointeger(l, -1);
-  /*
-  lua_pushstring(l, "size");
-  lua_gettable(l, 1);
-  int size = lua_tointeger(l, -1);
-  */
+
   lua_pushstring(l, "ptr");
   lua_gettable(l, 1);
   char *ptr = (char *)lua_touserdata(l, -1);
 
-  // gs is arg #2
-  lua_pushstring(l, "state");
-  lua_gettable(l, 2);
-  struct gs_state *st = (struct gs_state *)lua_touserdata(l, -1);
-  lua_pushstring(l, "width");
-  lua_gettable(l, 2);
-  int width = lua_tointeger(l, -1);
-  lua_pushstring(l, "height");
-  lua_gettable(l, 2);
-  int height = lua_tointeger(l, -1);
+  int width = lua_tointeger(l, 2);
+  int height = lua_tointeger(l, 3);
+  int r = lua_tointeger(l, 4);
+  int g = lua_tointeger(l, 5);
+  int b = lua_tointeger(l, 6);
 
-  float halfw = st->fb.width / 2.f;
-  float halfh = st->fb.height / 2.f;
-
-  // info("clear screen :: (%d, %d, %d)", st->clear_r, st->clear_g,
-  // st->clear_b);
+  float halfw = width / 2.f;
+  float halfh = height / 2.f;
 
   qword_t *q = (qword_t *)(ptr + head);
-  q = draw_disable_tests(q, 0, &st->zb);
-  q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - halfh, width, height,
-                 st->clear_r, st->clear_g, st->clear_b);
-  // q = draw_enable_tests(q, 0, &st->zb);
+  q = draw_disable_tests(q, 0, &zb);
+  PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
+  q++;
+  PACK_GIFTAG(q,
+              GS_SET_TEST(DRAW_ENABLE, ATEST_METHOD_NOTEQUAL, 0x00,
+                          ATEST_KEEP_FRAMEBUFFER, DRAW_DISABLE, DRAW_DISABLE,
+                          DRAW_ENABLE, ZTEST_METHOD_ALLPASS),
+              GS_REG_TEST);
+  q++;
+  q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - halfh, width, height, r, g,
+                 b);
 
   head = (char *)q - ptr;
   // info("db head -> %d", head);
