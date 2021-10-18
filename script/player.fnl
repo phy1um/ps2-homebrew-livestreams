@@ -4,45 +4,37 @@
 (local E (require "events"))
 (local D2D (require "draw2d"))
 
-(fn fclamp [x min max]
-  (if (> x max) max
-    (< x min) min
-    x))
-
 (local *state-ground* 0)
 (local *state-fall* 1)
 (local *state-jump* 2)
 
 (local *stand-height* 2)
 
-(local *ground-speed* 12)
-(local *ground-friction* 0.1)
-(local *ground-accel* 12)
-(local *gravity* 0.1)
+(local *ground-speed* 3.1)
+(local *ground-friction* 2.1)
+(local *ground-accel* 2.4)
+(local *air-accel* 1.8)
+(local *gravity* 0.98)
+(local *jump-pulse-speed* -8)
 
-(fn sgn [x]
-  (if (> x 0) 1
-      (< x 0) -1
-      0))
 
 (fn friction [v f]
-  (print "frict " v f)
   (if 
     ; move toward 0 from +
-    (> 0 v)
+    (> v 0)
     (math.max 0 (- v f))
     ; move toward 0 from -
-    (< 0 v)
+    (< v 0)
     (math.min 0 (+ v f))
     0))
 
 (fn accel-to [a d t]
   (if 
     ; target > 0, go +
-    (> 0 t)
+    (> t 0)
     (math.min t (+ d a))
     ; target < 0, go -
-    (< 0 t)
+    (< t 0)
     (math.max t (- d a))
     ; target == 0, do friction instead
     (friction d a)))
@@ -71,7 +63,13 @@
       ; otherwise accelerate
       (set me.vx (accel-to *ground-accel* me.vx (* me.impulse-x *ground-speed*)))))
   (if (not (on-ground me 0 0 state)) (set me.action *state-fall*))
-  (set me.vy 0))
+  (if (> me.impulse-y 0)
+    (do
+      (set me.action *state-jump*)
+      (set me.y (- me.y *stand-height* 1))
+      (set me.vy *jump-pulse-speed*)
+      (set me.impulse-y 0))
+  (set me.vy 0)))
 
 (fn update-misc [me]
   (print "unknown player state")
@@ -79,12 +77,20 @@
 
 (fn update-fall [me dt state _]
   (let [dy 3]
-    (set me.vy (accel-to *gravity* me.vy dy)))
+    (let [newvy (accel-to *gravity* me.vy dy)]
+      ;(print "falling from " me.vy " to " newvy)
+      (set me.vy newvy)))
+  (set me.vx (accel-to *air-accel* me.vx (* me.impulse-x *ground-speed*)))
   (if (on-ground me 0 me.vy state)
     (do
       (set me.action *state-ground*)
       (move-to-ground me state me.vy))))
 
+(fn update-jump [me dt state ev]
+  (each [_ e (ipairs ev)]
+    (if (E.is e E.type.a0 E.mod.hold) (set me.vy *jump-pulse-speed*)))
+  (if (>= me.vy 0) (set me.action *state-fall*))
+  (update-fall me dt state ev))
 
 (fn new [x y r g b d] 
     (fn [] 
@@ -110,6 +116,8 @@
                       (update-stand me dt state events)
                     (= me.action *state-fall*)
                       (update-fall me dt state events)
+                    (= me.action *state-jump*)
+                      (update-jump me dt state events)
                     (update-misc me dt state events))
                 ; update position (if it is free!)
                 ; (print "speed " me.vx me.vy)

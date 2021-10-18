@@ -82,15 +82,10 @@
               })
 
     (s.m:tile-set 0 0 4)
-    (s.m:tile-set 10 10 4)
-    (s.m:tile-set 10 11 5)
-    (s.m:tile-set 10 12 6)
-    (s.m:tile-set 10 13 6)
-    (s.m:tile-set 10 14 6)
-    (s.m:tile-set 10 15 6)
-    (s.m:tile-set 10 16 6)
     (for [i 0 32]
       (s.m:tile-set i 20 2))
+    (for [i 0 12]
+      (s.m:tile-set i 17 3))
     (print "TILES = " s.m.tiles)
     s))
 
