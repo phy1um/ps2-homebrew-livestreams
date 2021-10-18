@@ -150,13 +150,13 @@ int main(int argc, char *argv[]) {
     // info("ON FRAME");
     ps2luaprog_onframe(L);
     // may be required? -- dma_wait_fast();
-    info("WAIT DRAW");
+    trace("WAIT DRAW");
     draw_wait_finish();
-    info("WAIT VSYNC");
+    trace("WAIT VSYNC");
     graph_wait_vsync();
-    info("FLIP");
+    trace("FLIP");
     gs_flip();
-    info("FLIPOUT");
+    trace("FLIPOUT");
   }
 
   info("main loop ended");
