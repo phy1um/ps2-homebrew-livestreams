@@ -23,8 +23,6 @@
 (local *left* 2)
 (local *right* 3)
 
-(local frame (R.get-uv 16 4 0))
-
 (fn bullet [x y dx dy]
   (fn []
   {
@@ -157,7 +155,8 @@
         ; (T.printLines me.x (- me.y 30) (.. me.dx ", " me.dy) )
         ; (T.printLines me.x (- me.y 30) (.. me.impulse-x "-x " me.action " :: " me.vx))
 
-        (D2D:sprite R.chars me.x me.y me.w me.h frame.u1 frame.v1 frame.u2 frame.v2))
+        (let [frame (. R.player-frames.down 1)] 
+          (D2D:sprite R.chars me.x me.y me.w me.h frame.u1 frame.v1 frame.u2 frame.v2)))
     }))
 
 {

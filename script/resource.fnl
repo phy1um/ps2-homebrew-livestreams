@@ -8,6 +8,50 @@
     { :u1 (* dx col) :u2 (* dx (+ col 1))
             :v1 (* dy row) :v2 (* dy (+ row 1)) }))
 
+(fn rect-to-uv [x y w h texw texh]
+  {
+   :u1 (/ x texw) 
+   :v1 (/ y texh)
+   :u2 (/ (+ x w) texw)
+   :v2 (/ (+ y h) texh)
+  })
+  
+
+(local player-frames
+  {
+   :down [(rect-to-uv 0 0 16 16 256 64)
+          (rect-to-uv 0 16 16 16 256 64)
+          (rect-to-uv 0 0 16 16 256 64)
+          (rect-to-uv 0 32 16 16 256 64)]
+   :up [(rect-to-uv 16 0 16 16 256 64)
+          (rect-to-uv 16 16 16 16 256 64)
+          (rect-to-uv 16 0 16 16 256 64)
+          (rect-to-uv 16 32 16 16 256 64)]
+   :right [(rect-to-uv 32 0 16 16 256 64)
+          (rect-to-uv 32 16 16 16 256 64)
+          (rect-to-uv 32 0 16 16 256 64)
+          (rect-to-uv 32 32 16 16 256 64)]
+   :left [(rect-to-uv 48 16 16 16 256 64)
+          (rect-to-uv 48 16 16 16 256 64)
+          (rect-to-uv 48 0 16 16 256 64)
+          (rect-to-uv 48 32 16 16 256 64)]
+   })
+
+(local bat-frames
+  {
+  :move [
+         (rect-to-uv 64 24 28 14 256 64)
+         (rect-to-uv 92 24 28 14 256 64)]
+  })
+
+(local crow-frames
+  {
+   :move [
+          (rect-to-uv 64 0 16 24 256 64)
+          (rect-to-uv 80 0 16 24 256 64)
+          (rect-to-uv 96 0 16 24 256 64)]
+   })
+
 
 {
   :chars nil
@@ -21,4 +65,7 @@
               (set self.font font)
               (set self.tiles tiles)))
   : get-uv
+  : player-frames
+  : bat-frames
+  : crow-frames
  }

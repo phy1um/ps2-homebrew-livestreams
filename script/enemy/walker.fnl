@@ -3,11 +3,10 @@
 (local V (require "vector"))
 (local R (require "resource"))
 
-(local frame (R.get-uv 16 4 20))
-
 (fn draw [me]
   (D2D:setColour 0x80 0x80 0x80 0x80)
-  (D2D:sprite R.chars me.x me.y me.w me.h frame.u1 frame.v1 frame.u2 frame.v2))
+  (let [frame (. R.crow-frames.move 1)]
+    (D2D:sprite R.chars me.x me.y me.w me.h frame.u1 frame.v1 frame.u2 frame.v2)))
 
 (fn update [me dt state]
   (if (> me.waiting-timer 0)
@@ -31,7 +30,7 @@
   (fn []
     {
       : x : y : speed
-      :w 16 :h 20
+      :w 16 :h 24
       :tx 0 :ty 0
       :waiting-timer 0.4
       :type "enemy"

@@ -6,11 +6,10 @@
 (local *seek* 0)
 (local *strafe* 1)
 
-(local frame (R.get-uv 16 4 4))
-
 (fn draw [me]
   (D2D:setColour 0x80 0x80 0x80 0x80)
-  (D2D:sprite R.chars me.x me.y me.w me.h frame.u1 frame.v1 frame.u2 frame.v2))
+  (let [frame (. R.bat-frames.move (if (> me.anim-timer 0.1) 1 2))]
+    (D2D:sprite R.chars me.x me.y me.w me.h frame.u1 frame.v1 frame.u2 frame.v2)))
 
 (fn move-seek [me v speed]
   (let [dv (V.vec-scale (V.vec-normalize v) speed)]
@@ -23,6 +22,9 @@
     (set me.x (+ me.x speed))))
 
 (fn update [me dt state]
+  (set me.anim-timer
+       (if (> me.anim-timer 0.2) 0
+         (+ me.anim-timer dt)))
   (if (> me.waiting-timer 0)
       ; we are waiting for something so spin our wheels
       (do
@@ -53,7 +55,7 @@
   (fn []
     {
       : x : y : speed
-      :w 14 :h 8
+      :w 28 :h 14
       :tx 0 :ty 0
       :waiting-timer 0.4
       :type "enemy"
@@ -61,6 +63,7 @@
       : health
       :state *seek*
       :state-timer 2.9
+      :anim-timer 0
       :hurt (fn [me d] 
               (let [dmg (if (~= nil d.power) d.power 1)]
                 (set me.health (- me.health dmg))))
