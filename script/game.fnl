@@ -2,11 +2,14 @@
 (local player (require "player"))
 (local C (require "col"))
 (local T (require "text"))
+(local R (require "resource"))
 (local D2D (require "draw2d"))
 (local es (require "enemy/walker"))
 (local bat (require "enemy/bat"))
 
 (local *GRID* 16)
+
+(local tile0 (R.get-uv 16 4 3))
 
 (fn tile-draw []
   {
@@ -20,7 +23,7 @@
                 (if (> v 0)
                   (do
                     (D2D:setColour 100 100 100 0x80)
-                    (D2D:rect wx wy *GRID* *GRID*))))))
+                    (D2D:sprite R.tiles wx wy *GRID* *GRID* tile0.u1 tile0.v1 tile0.u2 tile0.v2))))))
    })
 
 (fn make-tile-map [w h]

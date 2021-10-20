@@ -7,7 +7,6 @@
 
 (fn draw [me]
   (D2D:setColour 0x80 0x80 0x80 0x80)
-  (print frame.u1 frame.v1 frame.u2 frame.v2)
   (D2D:sprite R.chars me.x me.y me.w me.h frame.u1 frame.v1 frame.u2 frame.v2))
 
 (fn update [me dt state]
