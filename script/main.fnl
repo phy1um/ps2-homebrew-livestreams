@@ -128,7 +128,7 @@
   (D2D:setColour 0xff 0xff 0xff 0x80)
   (state:draw)
   (D2D:setColour 255 255 255 0x80)
-  (T.printLines -300 -220 (.. "tris/frame=" D2D.prev.rawtri ", KC=" D2D.prev.kc))
+  ;(T.printLines -300 -220 (.. "tris/frame=" D2D.prev.rawtri ", KC=" D2D.prev.kc))
   (D2D:frameEnd)
   (set counter (+ counter 1)))
 

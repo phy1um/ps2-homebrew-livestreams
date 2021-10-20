@@ -152,7 +152,7 @@
       :draw (fn [me]
         (D2D:setColour me.col.r me.col.g me.col.b 0x80)
         ; (T.printLines me.x (- me.y 30) (.. me.dx ", " me.dy) )
-        (T.printLines me.x (- me.y 30) (.. me.impulse-x "-x " me.action " :: " me.vx))
+        ; (T.printLines me.x (- me.y 30) (.. me.impulse-x "-x " me.action " :: " me.vx))
         (D2D:rect me.x me.y me.w me.h))
     }))
 

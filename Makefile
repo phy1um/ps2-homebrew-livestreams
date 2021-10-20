@@ -34,7 +34,7 @@ src/test.elf:
 .PHONY: scripts
 scripts:
 	if ! [ -d dist/script ]; then mkdir -p dist/script; fi
-	cp script/* dist/script
+	cp -r script/* dist/script
 
 # TODO(Tom Marks): update ISO building to include everything in dist/
 $(ISO_TGT): $(EE_BIN)
