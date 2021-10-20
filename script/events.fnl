@@ -12,6 +12,9 @@
         :left 2
         :right 3
         :a0 4
+        :a1 5
+        :a2 6
+        :a3 7
         }
   :mod {:press 0
         :release 1

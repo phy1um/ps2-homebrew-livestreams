@@ -25,6 +25,9 @@
 (tset *binds* PAD.LEFT E.type.left)
 (tset *binds* PAD.RIGHT E.type.right)
 (tset *binds* PAD.X E.type.a0)
+(tset *binds* PAD.CIRCLE E.type.a3)
+(tset *binds* PAD.SQUARE E.type.a1)
+(tset *binds* PAD.TRIANGLE E.type.a2)
 
 (each [_ v (pairs E.type)]
   (tset *btn-state* v false))

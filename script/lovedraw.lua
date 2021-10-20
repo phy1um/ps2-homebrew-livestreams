@@ -27,7 +27,7 @@ end
 
 function draw:setColour(r,g,b,a)
   table.insert(self.events, function()
-    love.graphics.setColor(r,g,b,255)
+    love.graphics.setColor(r/255,g/255,b/255,1.0)
   end)
 end
 

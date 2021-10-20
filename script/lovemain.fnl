@@ -13,7 +13,10 @@
               :s false
               :a false
               :d false
+              :z false
               :x false
+              :c false
+              :v false
               })
 
 (fn love.keypressed [key]
@@ -37,7 +40,8 @@
             })
 
 (global PAD {
-             :UP "w" :LEFT "a" :DOWN "s" :RIGHT "d" :X "x"
+             :UP "up" :LEFT "left" :DOWN "down" :RIGHT "right" :X "x"
+             :SQUARE "z" :TRIANGLE "c" :CIRCLE "v"
              :held (fn [i]
                      (. key-map i))
              })

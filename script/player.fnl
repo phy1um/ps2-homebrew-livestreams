@@ -17,6 +17,44 @@
 (local *gravity* 0.98)
 (local *jump-pulse-speed* -8)
 
+(local *up* 0)
+(local *down* 1)
+(local *left* 2)
+(local *right* 3)
+
+(fn bullet [x y dx dy]
+  (fn []
+  {
+    : x : y : dx : dy
+    :w 12 :h 12
+    :life 0.08
+    :type "enemy-hurt"
+    :update (fn [me dt state] 
+              (set me.x (+ me.x me.dx))
+              (set me.y (+ me.y me.dy))
+              (set me.life (- me.life dt))
+              (if (> me.life 0)
+                (do
+                  (state:add-col (C.collider-rect 
+                                   me.id
+                                   me.x 
+                                   me.y 
+                                   me.w 
+                                   me.h 
+                                   (fn [other]
+                                     (if (and (= other.type "enemy") (~= other.hurt nil))
+                                       (other:hurt me))
+                                     (if (~= other.type "player")
+                                       (set me.life 0))
+                                     nil)))
+                  me)
+                nil))
+    :draw (fn [me]
+            (D2D:setColour 255 0 255 0x80)
+            (D2D:rect me.x me.y me.w me.h))
+   }))
+
+
 
 (fn friction [v f]
   (if 
@@ -39,58 +77,19 @@
     ; target == 0, do friction instead
     (friction d a)))
 
-(fn on-ground [me dx dy state]
-  (let [f1 (state.m:tile-free (+ me.x dx) (+ me.y me.h dy *stand-height*))
-        f2 (state.m:tile-free (+ me.x me.w dx) (+ me.y me.h dy *stand-height*))]
-    (not (or f1 f2))))
+(fn vec-length [v]
+  (math.sqrt (+ (* v.x v.x) (* v.y v.y))))
 
-(fn move-to-ground [me state yy]
-  (var yy (math.floor yy))
-  (while (and (> yy 0) (not (on-ground me 0 yy state)))
-    (set yy (- yy 1)))
-  (set me.y (+ me.y yy))
-  (set me.vy 0))
-
-(fn sgn-diff [a b]
-  (or (and (> a 0) (< b 0))
-      (and (< a 0) (> b 0))))
+(fn vec-normalized [v]
+  (let [len (vec-length v)]
+    {:x (/ v.x len) :y (/ v.y len)}))
 
 (fn update-stand [me dt state _]
-  (let [dx (* me.impulse-x dt *ground-speed*)]
-    (if (or (= dx 0) (sgn-diff dx me.vx))
-      ; apply ground friction
-      (set me.vx (friction me.vx *ground-friction*))
-      ; otherwise accelerate
-      (set me.vx (accel-to *ground-accel* me.vx (* me.impulse-x *ground-speed*)))))
-  (if (not (on-ground me 0 0 state)) (set me.action *state-fall*))
-  (if (> me.impulse-y 0)
-    (do
-      (set me.action *state-jump*)
-      (set me.y (- me.y *stand-height* 1))
-      (set me.vy *jump-pulse-speed*)
-      (set me.impulse-y 0))
-  (set me.vy 0)))
-
-(fn update-misc [me]
-  (print "unknown player state")
-  (set me.action *state-ground*))
-
-(fn update-fall [me dt state _]
-  (let [dy 3]
-    (let [newvy (accel-to *gravity* me.vy dy)]
-      ;(print "falling from " me.vy " to " newvy)
-      (set me.vy newvy)))
-  (set me.vx (accel-to *air-accel* me.vx (* me.impulse-x *ground-speed*)))
-  (if (on-ground me 0 me.vy state)
-    (do
-      (set me.action *state-ground*)
-      (move-to-ground me state me.vy))))
-
-(fn update-jump [me dt state ev]
-  (each [_ e (ipairs ev)]
-    (if (E.is e E.type.a0 E.mod.hold) (set me.vy *jump-pulse-speed*)))
-  (if (>= me.vy 0) (set me.action *state-fall*))
-  (update-fall me dt state ev))
+  (let [wish {:x me.impulse-x :y me.impulse-y}
+        wish-u (vec-normalized wish)
+        d {:x (* *ground-speed* wish-u.x) :y (* *ground-speed* wish-u.y)}]
+    (set me.vx (or d.x 0))
+    (set me.vy (or d.y 0))))
 
 (fn new [x y r g b d] 
     (fn [] 
@@ -102,25 +101,36 @@
        :solid true
        :impulse-x 0 :impulse-y 0
        :action *state-ground*
+       :last-dir *down*
 
       :update (fn [me dt state events]
                 (set me.impulse-x 0)
-                (set me.impulse-y (- me.impulse-y dt))
+                (set me.impulse-y 0)
                 ; process inputs into impulse/wish direction
                 (each [_ ev (ipairs events)]
-                  (if (E.is ev E.type.left E.mod.hold) (set me.impulse-x -1)
-                      (E.is ev E.type.right E.mod.hold) (set me.impulse-x 1)
-                      (E.is ev E.type.a0 E.mod.press) (set me.impulse-y 0.2)))
+                  (if (E.is ev E.type.left E.mod.hold) (set me.impulse-x (+ me.impulse-x -1))
+                      (E.is ev E.type.right E.mod.hold) (set me.impulse-x (+ me.impulse-x 1))
+                      (E.is ev E.type.up E.mod.hold) (set me.impulse-y (+ me.impulse-y -1))
+                      (E.is ev E.type.down E.mod.hold) (set me.impulse-y (+ me.impulse-y 1))
+                      (E.is ev E.type.a0 E.mod.press)
+                        (do
+                          (if (= me.last-dir *right*)
+                                (state:spawn (bullet (+ me.x me.w) me.y 10 0))
+                              (= me.last-dir *up*)
+                                (state:spawn (bullet me.x me.y 0 -10))
+                              (= me.last-dir *left*)
+                                (state:spawn (bullet me.x me.y -10 0))
+                              (= me.last-dir *down*)
+                                (state:spawn (bullet me.x (+ me.y me.h) 0 10))))))
+
                 ; run according to our state machine
                 (if (= me.action *state-ground*)
-                      (update-stand me dt state events)
-                    (= me.action *state-fall*)
-                      (update-fall me dt state events)
-                    (= me.action *state-jump*)
-                      (update-jump me dt state events)
-                    (update-misc me dt state events))
+                      (update-stand me dt state events))
                 ; update position (if it is free!)
-                ; (print "speed " me.vx me.vy)
+                (if (> me.vx 0) (set me.last-dir *right*)
+                  (< me.vx 0) (set me.last-dir *left*))
+                (if (> me.vy 0) (set me.last-dir *down*)
+                  (< me.vy 0) (set me.last-dir *up*))
                 (if (state.m:tile-rect-free (+ me.x me.vx) (+ me.y me.vy) me.w me.h)
                   (do
                     (set me.x (+ me.x me.vx))

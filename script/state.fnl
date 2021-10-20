@@ -6,6 +6,8 @@
 (fn spawn [state spawn]
   (let [t (spawn)]
     (set t.id (state:next-id))
+    (if (= nil t.x) (set t.x 0))
+    (if (= nil t.y) (set t.y 0))
     (table.insert state.entities t)
     t))
 
@@ -21,13 +23,21 @@
   this-state.next-state)
 
 (fn merge [s1 s2]
-  (each [k v (pairs s2)]
-    (tset s1 k v)))
+  (if (~= s2 nil) 
+    (each [k v (pairs s2)]
+      (tset s1 k v))))
 
 
 (fn draw [state]
-  (each [i ent (ipairs state.entities)]
-    (ent:draw state)))
+  (let [min-x (- state.view-x 24) min-y (- state.view-y 24)
+        max-x (+ state.view-x state.view-width 24) max-y (+ state.view-y state.view-height 24)]
+    (each [i ent (ipairs state.entities)]
+      (if (and
+            (> ent.x min-x)
+            (<= ent.x max-x)
+            (> ent.y min-y)
+            (<= ent.y max-y))
+          (ent:draw state)))))
 
 
 (fn update [dt state events]
@@ -59,6 +69,10 @@
         :update state.update 
         :draw state.draw
         :m state.m
+        :view-x state.view-x
+        :view-y state.view-y
+        :view-width state.view-width
+        :view-height state.view-height
        })))
 
 
@@ -78,6 +92,10 @@
     : pop
     : update
     : draw
+    :view-x -320
+    :view-y -240
+    :view-width 640
+    :view-height 448
     :next-state nil
     :m nil
   })
