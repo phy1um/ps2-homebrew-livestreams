@@ -1,13 +1,16 @@
 
 (local D2D (require "draw2d"))
 (local V (require "vector"))
+(local R (require "resource"))
 
 (local *seek* 0)
 (local *strafe* 1)
 
+(local frame (R.get-uv 16 4 4))
+
 (fn draw [me]
-  (D2D:setColour 0xff 0x00 0xff 0x80)
-  (D2D:rect me.x me.y me.w me.h))
+  (D2D:setColour 0x80 0x80 0x80 0x80)
+  (D2D:sprite R.chars me.x me.y me.w me.h frame.u1 frame.v1 frame.u2 frame.v2))
 
 (fn move-seek [me v speed]
   (let [dv (V.vec-scale (V.vec-normalize v) speed)]

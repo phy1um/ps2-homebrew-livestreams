@@ -11,6 +11,7 @@
 (local E (require "events"))
 (local PLAYER (require "player"))
 (local menu (require "mainmenu"))
+(local resources (require "resource"))
 
 (var gs nil)
 (var font nil)
@@ -104,8 +105,9 @@
 
 (print "overriding start function")
 (fn PS2PROG.start []
-  (set font (D2D.loadTexture "host:bigfont.tga" 256 64))
-  (set T.font font)
+  (resources:load)
+  (print "loaded resources")
+  (set T.font resources.font)
   (DMA.init DMA.GIF)
   (GS.setOutput 640 448 GS.INTERLACED GS.NTSC)
   (let [fb1 (VRAM.buffer 640 448 GS.PSM24 256)

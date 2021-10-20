@@ -3,6 +3,7 @@
 (local T (require "text"))
 (local E (require "events"))
 (local D2D (require "draw2d"))
+(local R (require "resource"))
 
 (local *state-ground* 0)
 (local *state-fall* 1)
@@ -21,6 +22,8 @@
 (local *down* 1)
 (local *left* 2)
 (local *right* 3)
+
+(local frame (R.get-uv 16 4 0))
 
 (fn bullet [x y dx dy]
   (fn []
@@ -50,7 +53,7 @@
                   me)
                 nil))
     :draw (fn [me]
-            (D2D:setColour 255 0 255 0x80)
+            (D2D:setColour 100 100 100 0x80)
             (D2D:rect me.x me.y me.w me.h))
    }))
 
@@ -153,7 +156,8 @@
         (D2D:setColour me.col.r me.col.g me.col.b 0x80)
         ; (T.printLines me.x (- me.y 30) (.. me.dx ", " me.dy) )
         ; (T.printLines me.x (- me.y 30) (.. me.impulse-x "-x " me.action " :: " me.vx))
-        (D2D:rect me.x me.y me.w me.h))
+
+        (D2D:sprite R.chars me.x me.y me.w me.h frame.u1 frame.v1 frame.u2 frame.v2))
     }))
 
 {

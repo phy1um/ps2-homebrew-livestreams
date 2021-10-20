@@ -30,7 +30,7 @@ int button_held(int b) { return btn_held[b]; }
 unsigned char joy_axis_value(int a) { return joysticks[a]; }
 
 int pad_init() {
-  btn_held = memalign(128, 12 * sizeof(int));
+  btn_held = memalign(256, 12 * sizeof(int));
   pad_buffer = memalign(256, 256);
   if ((u32)pad_buffer & 0xf) {
     info("pad buffer was not 16byte aligned: %x", (int)pad_buffer);

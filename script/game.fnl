@@ -55,7 +55,7 @@
     (s:spawn (es.new 10 10 19.4))
     (s:spawn (bat.new -100 100 24 2))
     ; create our player and remember him!
-    (let [p (s:spawn (player.new -200 -200 255 0 0 nil))]
+    (let [p (s:spawn (player.new -200 -200 0x93 0x80 0x93 nil))]
       (set s.m {
                 : w 
                 : h
