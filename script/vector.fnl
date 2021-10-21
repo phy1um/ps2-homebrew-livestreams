@@ -7,8 +7,8 @@
 
 (fn vec-normalize* [v]
   (let [l (vec-length v)]
-    (set v.x (/ v.x l))
-    (set v.y (/ v.y l))
+    (set v.x (if (> l 0) (/ v.x l) 0))
+    (set v.y (if (> l 0) (/ v.y l) 0))
     v))
 
 (fn vec-normalize [v]

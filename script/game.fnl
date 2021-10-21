@@ -6,6 +6,7 @@
 (local D2D (require "draw2d"))
 (local es (require "enemy/walker"))
 (local bat (require "enemy/bat"))
+(local room (require "room"))
 
 (local *GRID* 16)
 
@@ -15,23 +16,16 @@
   {
     :update (fn [me] me)
     :draw (fn [me state]
-            (each [i v (pairs state.m.tiles)]
+            (each [i v (pairs state.m.active-room.tiles)]
               (let [gx (% i state.m.w)
                     gy (- (math.floor (/ i state.m.w)) 1)
                     wx (- (* gx *GRID*) 320)
-                    wy (- (* gy *GRID*) (- 224 16)) ]
+                    wy (- (* gy *GRID*) 224) ]
                 (if (> v 0)
                   (do
                     (D2D:setColour 100 100 100 0x80)
                     (D2D:sprite R.tiles wx wy *GRID* *GRID* tile0.u1 tile0.v1 tile0.u2 tile0.v2))))))
    })
-
-(fn make-tile-map [w h]
-  (let [tiles []]
-    (for [i 0 w] 
-      (for [j 0 h]
-        (tset tiles (+ i (* j w)) 0)))
-      tiles))
 
 
 (fn zone [x y w h draw action]
@@ -62,36 +56,12 @@
       (set s.m {
                 : w 
                 : h
+                :active-room (room.new-room -320 -240 w h)
                 :player p
-                :tiles (make-tile-map w h)
-                :tile-free (fn [m x y]
-                             (let [wx (+ x 320) wy (+ y 224)
-                                   gx (math.floor (/ wx *GRID*))
-                                   gy (math.floor (/ wy *GRID*))]
-                             ;(print "test tm point " wx wy)
-                              (if 
-                                ; if wx and wy OOB then false
-                                (or 
-                                  (or (< gx 0) (< gy 0))
-                                  (or (>= gx w) (>= gy h)))
-                                false
-                                ; else test tile map
-                                (= 0 (m:tile-get gx gy)))))
-                :tile-rect-free (fn [m x y w h]
-                                  (and
-                                    (m:tile-free x y)
-                                    (m:tile-free (+ x w) y)
-                                    (m:tile-free x (+ y h))
-                                    (m:tile-free (+ x w) (+ y h))))
-                :tile-set (fn [m x y v]
-                            (let [index (+ x (* w y))]
-                              (tset m.tiles index v))
-                            v)
-                :tile-get (fn [m x y]
-                            (let [index (+ x (* w y))]
-                              (let [res (. m.tiles index)]
-                                ;(print "tile get " x y res)
-                                res)))
+                :tile-free (fn [m x y] (m.active-room:tile-free x y))
+                :tile-rect-free (fn [m x y w h] (m.active-room:tile-rect-free x y w h))
+                :tile-set (fn [m x y v] (m.active-room:tile-set x y v))
+                :tile-get (fn [m x y] (m.active-room:tile-get x y))
                 }))
 
     (s.m:tile-set 0 0 4)
@@ -99,7 +69,6 @@
       (s.m:tile-set i 20 2))
     (for [i 0 12]
       (s.m:tile-set i 17 3))
-    (print "TILES = " s.m.tiles)
     s))
 
 {

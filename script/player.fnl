@@ -4,6 +4,7 @@
 (local E (require "events"))
 (local D2D (require "draw2d"))
 (local R (require "resource"))
+(local vec (require "vector"))
 
 (local *state-ground* 0)
 (local *state-fall* 1)
@@ -81,16 +82,12 @@
 (fn vec-length [v]
   (math.sqrt (+ (* v.x v.x) (* v.y v.y))))
 
-(fn vec-normalized [v]
-  (let [len (vec-length v)]
-    {:x (/ v.x len) :y (/ v.y len)}))
-
 (fn update-stand [me dt state _]
   (let [wish {:x me.impulse-x :y me.impulse-y}
-        wish-u (vec-normalized wish)
+        wish-u (vec.vec-normalize wish)
         d {:x (* *ground-speed* wish-u.x) :y (* *ground-speed* wish-u.y)}]
-    (set me.vx (or d.x 0))
-    (set me.vy (or d.y 0))))
+    (set me.vx d.x)
+    (set me.vy d.y)))
 
 (fn new [x y r g b d] 
     (fn [] 
@@ -144,7 +141,6 @@
                                              me.w 
                                              me.h 
                                              (fn [other]
-                                               (print other.type)
                                                (if (= other.type "bad") (set me.health (- me.health 1)))
                                                nil)))
                 ; we are still alive
