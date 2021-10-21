@@ -84,10 +84,10 @@ function draw:sprite(tex, x, y, w, h, u1, v1, u2, v2)
   end
   GIF.packedST(self.buf, u1, v1)
   GIF.packedRGBAQ(self.buf, self.col.r, self.col.g, self.col.b, self.col.a)
-  GIF.packedXYZ2(self.buf, toCoord(x), toCoord(y), 0)
+  GIF.packedXYZ2(self.buf, toCoord(x-320), toCoord(y-224), 0)
   GIF.packedST(self.buf, u2, v2)
   GIF.packedRGBAQ(self.buf, self.col.r, self.col.g, self.col.b, self.col.a)
-  GIF.packedXYZ2(self.buf, toCoord(x+w), toCoord(y+h), 0)
+  GIF.packedXYZ2(self.buf, toCoord(x+w-320), toCoord(y+h-224), 0)
   self.loopCount = self.loopCount + 1
 end
 
@@ -105,9 +105,9 @@ function draw:triangle(x1, y1, x2, y2, x3, y3)
     self.state = DRAW_GEOM
   end
   GIF.packedRGBAQ(self.buf, self.col.r, self.col.g, self.col.b, self.col.a)
-  GIF.packedXYZ2(self.buf, toCoord(x1), toCoord(y1), 0)
-  GIF.packedXYZ2(self.buf, toCoord(x2), toCoord(y2), 0)
-  GIF.packedXYZ2(self.buf, toCoord(x3), toCoord(y3), 0)
+  GIF.packedXYZ2(self.buf, toCoord(x1-320), toCoord(y1-224), 0)
+  GIF.packedXYZ2(self.buf, toCoord(x2-320), toCoord(y2-224), 0)
+  GIF.packedXYZ2(self.buf, toCoord(x3-320), toCoord(y3-224), 0)
   self.loopCount = self.loopCount + 1
   self.rawtri = self.rawtri + 1
 end

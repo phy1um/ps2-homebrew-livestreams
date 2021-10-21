@@ -2,7 +2,7 @@
 (local C (require "col"))
 (local T (require "text"))
 (local E (require "events"))
-(local D2D (require "draw2d"))
+(local D2D (require "camera"))
 (local R (require "resource"))
 (local vec (require "vector"))
 

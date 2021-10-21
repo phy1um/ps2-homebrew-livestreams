@@ -1,5 +1,4 @@
 
-(local D2D (require "draw2d"))
 
 (local state {})
 
@@ -92,8 +91,8 @@
     : pop
     : update
     : draw
-    :view-x -320
-    :view-y -240
+    :view-x 0 
+    :view-y 0 
     :view-width 640
     :view-height 448
     :next-state nil

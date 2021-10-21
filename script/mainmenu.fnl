@@ -75,10 +75,10 @@
 
     :draw (fn [me]
             (D2D:setColour 255 255 255 0x80)
-            (T.printLines -200 -100 (table.unpack me.options))
-            (T.printLines -200 180 (.. "D-Pad to select, " T.x " to confirm"))
+            (T.printLines 120 124 (table.unpack me.options))
+            (T.printLines 120 420 (.. "D-Pad to select, " T.x " to confirm"))
             (D2D:setColour 255 255 0 0x80)
-            (D2D:rect -220 (+ -100 2 (* 16 me.cursor)) 8 8))
+            (D2D:rect 105 (+ 126 2 (* 16 me.cursor)) 8 8))
    })
 
 (fn menu-bg []
@@ -94,7 +94,7 @@
     :update (fn [me] me)
     :draw (fn []
             (D2D:setColour 255 255 255 0x80)
-            (T.printLines -300 -200 
+            (T.printLines 20 44 
                                "ERROR: somehow exited from the menu"
                                " this message should not be visible"
                                " please restart the program"

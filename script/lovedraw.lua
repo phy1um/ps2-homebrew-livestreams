@@ -33,19 +33,19 @@ end
 
 function draw:rect(x, y, w, h)
   table.insert(self.events, function()
-    love.graphics.rectangle("fill", x+320, y+240, w, h)
+    love.graphics.rectangle("fill", x, y, w, h)
   end)
 end
 
 function draw:sprite(tex, x, y, w, h, u1, v1, u2, v2)
   table.insert(self.events, function()
-    love.graphics.rectangle("fill", x+320, y+240, w, h)
+    love.graphics.rectangle("fill", x, y, w, h)
   end)
 end
 
 function draw:triangle(x1, y1, x2, y2, x3, y3)
   table.insert(self.events, function()
-    love.graphics.print("tri", x1+320, y1+240)
+    love.graphics.print("tri", x1, y1)
   end)
 end
 
@@ -70,7 +70,7 @@ function draw.printLines(x, y, ...)
   for i=1,narg,1 do
     local e = select(i, ...)
     table.insert(draw.events, function()
-      love.graphics.print(e, x+320, (y+ 240 + (i * 16)))
+      love.graphics.print(e, x, (y + (i * 16)))
     end)
   end
 end

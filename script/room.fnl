@@ -1,4 +1,10 @@
 
+(var *id-state* 177)
+(fn universal-id []
+  (let [i *id-state*]
+    (set *id-state* (+ *id-state* 1))
+    i))
+
 (fn make-tile-map [w h]
   (let [tiles []]
     (for [i 0 w] 
@@ -11,6 +17,7 @@
 (fn new-room [ox oy w h]
   {
     : ox : oy : w : h
+    :id (universal-id)
     :tiles (make-tile-map w h)
     :entity-spawns []
     :add-entity-spawn (fn [self f] (table.insert self.entity-spawns f))
@@ -23,7 +30,7 @@
                     (or 
                       (or (< gx 0) (< gy 0))
                       (or (>= gx w) (>= gy h)))
-                    false
+                    true
                     ; else test tile map
                     (= 0 (m:tile-get gx gy)))))
     :tile-rect-free (fn [m x y w h]
@@ -41,7 +48,10 @@
                   (let [res (. m.tiles index)]
                     ;(print "tile get " x y res)
                     res)))
-
+    :left nil
+    :right nil
+    :up nil
+    :down nil
    })
 
 {

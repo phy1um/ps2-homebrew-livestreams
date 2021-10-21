@@ -1,5 +1,5 @@
 
-(local D2D (require "draw2d"))
+(local D2D (require "camera"))
 (local V (require "vector"))
 (local R (require "resource"))
 
