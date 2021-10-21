@@ -15,6 +15,8 @@
         :a1 5
         :a2 6
         :a3 7
+        :menu 8
+        :reload 9
         }
   :mod {:press 0
         :release 1

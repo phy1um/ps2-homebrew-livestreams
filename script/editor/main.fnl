@@ -4,7 +4,20 @@
 (local room (require "room"))
 
 (fn draw [me state])
-(fn update [me dt state events] me)
+(fn update [me dt state events] 
+  (each [_ e (ipairs events)]
+    (if
+      (E.is e E.type.menu E.mod.press)
+      (do
+        (print "go to game state")
+        (let [menu (. (reload "editor/menu") "new")
+              old-update state.update]
+          (set state.update (fn [_ state]
+                              (let [ns (state:push (menu))]
+                                (set state.update old-update)
+                                ns)))))))
+
+  me)
 
 (fn controller []
   { : update : draw })

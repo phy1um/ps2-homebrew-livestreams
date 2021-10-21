@@ -107,7 +107,6 @@
         menu (state.new-state)]
 
     (menu:spawn menu-bg)
-    (menu:spawn menu-controller)
     (let [mc (menu:spawn menu-controller)]
       (if (~= nil love)
         (do
