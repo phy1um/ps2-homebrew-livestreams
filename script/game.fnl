@@ -10,7 +10,6 @@
 
 (local *GRID* 16)
 
-(local tile0 (R.get-uv 16 4 3))
 
 (fn set-room [s room-id]
   (let [nr (. s.m.room-map room-id)]
@@ -19,22 +18,6 @@
     (print "new XO" s.view-x)
     (set s.m.active-room nr)
     (D2D:setCamera nr.ox nr.oy)))
-
-
-(fn tile-draw []
-  {
-    :update (fn [me] me)
-    :draw (fn [me state]
-            (each [i v (pairs state.m.active-room.tiles)]
-              (let [gx (% i state.m.w)
-                    gy (- (math.floor (/ i state.m.w)) 1)
-                    wx (* gx *GRID*) 
-                    wy (+ (* gy *GRID*) 16) ]
-                (if (> v 0)
-                  (do
-                    (D2D:setColour 100 100 100 0x80)
-                    (D2D:sprite R.tiles wx wy *GRID* *GRID* tile0.u1 tile0.v1 tile0.u2 tile0.v2))))))
-   })
 
 (fn player-focus []
   {
@@ -72,7 +55,7 @@
                    (fn [other]
                      (if (= other.type "player")
                        {:do-pop true}))))
-    (s:spawn tile-draw)
+    (s:spawn room.tile-draw)
     (s:spawn player-focus)
     (s:spawn (es.new 10 10 19.4))
     (s:spawn (bat.new 600 100 24 2))

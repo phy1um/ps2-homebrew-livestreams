@@ -18,9 +18,9 @@
                 (let [game (. (reload "game") "new")
                       old-update state.update]
                   (set state.update (fn [_ state]
-                    (let [ns (state:push (game 40 30))]
-                      (set state.update old-update)
-                      ns)))))
+                                      (let [ns (state:push (game 40 30))]
+                                        (set state.update old-update)
+                                        ns)))))
               
               (fn [state] 
                 (print "show tutorial")
@@ -76,7 +76,7 @@
     :draw (fn [me]
             (D2D:setColour 255 255 255 0x80)
             (T.printLines 120 124 (table.unpack me.options))
-            (T.printLines 120 420 (.. "D-Pad to select, " T.x " to confirm"))
+            (T.printLines 120 220 (.. "D-Pad to select, " T.x " to confirm"))
             (D2D:setColour 255 255 0 0x80)
             (D2D:rect 105 (+ 126 2 (* 16 me.cursor)) 8 8))
    })
@@ -105,8 +105,22 @@
 (fn new []
   (let [fallthrough (state.new-state) 
         menu (state.new-state)]
+
     (menu:spawn menu-bg)
     (menu:spawn menu-controller)
+    (let [mc (menu:spawn menu-controller)]
+      (if (~= nil love)
+        (do
+          (table.insert mc.options "Editor")
+          (table.insert mc.actions (fn [state]
+                                      (print "go to editor state")
+                                      (let [editor (. (reload "editor/main") "new")
+                                            old-update state.update]
+                                        (set state.update (fn [_ state]
+                                                            (let [ns (state:push (editor))]
+                                                              (set state.update old-update)
+                                                              ns)))))))))
+
     (fallthrough:spawn fallthrough-message)
     (fallthrough:push menu)))
 

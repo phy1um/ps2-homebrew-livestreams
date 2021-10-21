@@ -1,4 +1,10 @@
 
+(local D2D (require "camera"))
+(local R (require "resource"))
+
+(local *GRID* 16)
+(local tile0 (R.get-uv 16 4 3))
+
 (var *id-state* 177)
 (fn universal-id []
   (let [i *id-state*]
@@ -54,6 +60,24 @@
     :down nil
    })
 
+(fn tile-draw []
+  {
+    :update (fn [me] me)
+    :draw (fn [me state]
+            (each [i v (pairs state.m.active-room.tiles)]
+              (let [gx (% i state.m.w)
+                    gy (- (math.floor (/ i state.m.w)) 1)
+                    wx (* gx *GRID*) 
+                    wy (+ (* gy *GRID*) 16) ]
+                (if (> v 0)
+                  (do
+                    (D2D:setColour 100 100 100 0x80)
+                    (D2D:sprite R.tiles wx wy *GRID* *GRID* tile0.u1 tile0.v1 tile0.u2 tile0.v2))))))
+   })
+
+
+
 {
  : new-room
+ : tile-draw
  }
