@@ -30,6 +30,10 @@
 (tset *binds* PAD.SQUARE E.type.a1)
 (tset *binds* PAD.TRIANGLE E.type.a2)
 (tset *binds* PAD.SELECT E.type.menu)
+(tset *binds* PAD.L1 E.type.l1)
+(tset *binds* PAD.L2 E.type.l2)
+(tset *binds* PAD.R1 E.type.r1)
+(tset *binds* PAD.R2 E.type.r2)
 
 (each [_ v (pairs E.type)]
   (tset *btn-state* v false))

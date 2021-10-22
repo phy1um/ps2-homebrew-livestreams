@@ -5,11 +5,10 @@
 
 (var *debounce-time* 0.07)
 
-
 (fn ed-menu [ed cursor controller]
+  (fn []
   {
     :options [
-              "New Floor"
               "Go left"
               "Go right"
               "Go up"
@@ -17,22 +16,37 @@
               "Mode tile"
               "Mode entity"
               "Mode player"
-              "Mode zone"
+              "Mode area"
               "Save"
+              "Test"
               "Back"
             ]
     :actions [
-              ; new floor
-              (fn [state] (controller:new))
-              (fn [state] (controller:room-left))
-              (fn [state] (controller:room-right))
-              (fn [state] (controller:room-up))
-              (fn [state] (controller:room-down))
-              (fn [state] (cursor:mode-tile))
-              (fn [state] (cursor:mode-entity))
-              (fn [state] (cursor:mode-player))
-              (fn [state] (cursor:mode-zone))
+              ; move room direction
+              (fn [state] (controller:add-room "left"))
+              (fn [state] (controller:add-room "right"))
+              (fn [state] (controller:add-room "up"))
+              (fn [state] (controller:add-room "down"))
+              ; change cursor mode
+              (fn [state] (cursor:set-mode "tile"))
+              (fn [state] (cursor:set-mode "entity"))
+              (fn [state] (cursor:set-mode "player"))
+              (fn [state] (cursor:set-mode "area"))
+              ; save room (?)
               (fn [state] (controller:save))
+              ; test
+              (fn [state] 
+                (print "go to game state")
+                (let [game (. (reload "game") "new")
+                      old-update state.update]
+                  (set state.update (fn [_ state]
+                                      (print "moving to game, loading rooms:")
+                                      (each [id _ (pairs ed.m.room-map)]
+                                        (print "got one " id))
+                                      (let [ns (state:push (game 40 30 ed.m.room-map ed.m.active-room.id))]
+                                        (set state.update old-update)
+                                        ns)))))
+              ; go back to prev state
               (fn [state] (set state.do-pop true))
           ]
     :cursor 1
@@ -47,7 +61,7 @@
                                           ; on cursor up
                                           (E.is ev E.type.up E.mod.press)
                                           (fn [] 
-                                            (print "move cursor " me.cursor (- me.cursor 1))
+                                            ;(print "move cursor " me.cursor (- me.cursor 1))
                                             (set me.cursor (math.max 1 (- me.cursor 1))))
                                           ; on cursor down
                                           (E.is ev E.type.down E.mod.press)
@@ -57,9 +71,11 @@
                                                              (+ me.cursor 1))))
                                           ; on action
                                           (E.is ev E.type.a0 E.mod.press)
-                                            (. me.actions me.cursor)))]
+                                            (. me.actions me.cursor)
+                                          (E.is ev E.type.menu E.mod.press)
+                                            (set state.do-pop true)))]
                       (each [i a (ipairs actions)]
-                        (print "acting?")
+                        ;(print "acting?")
                         (if (~= a nil) 
                           (do
                             (set me.debounce *debounce-time*)
@@ -69,10 +85,10 @@
     :draw (fn [me]
             (D2D:setColour 255 255 255 0x80)
             (T.printLines 120 124 (table.unpack me.options))
-            (T.printLines 120 220 (.. "D-Pad to select, " T.x " to confirm"))
+            (T.printLines 120 400 (.. "D-Pad to select, " T.x " to confirm"))
             (D2D:setColour 255 255 0 0x80)
             (D2D:rect 105 (+ 126 2 (* 16 me.cursor)) 8 8))
-   })
+   }))
 
 (fn menu-bg []
   {
@@ -82,10 +98,10 @@
            ;(D2D:rect -320 -240 640 480))
    })
 
-(fn new []
+(fn new [ed cursor controller]
   (let [menu (state.new-state)]
     (menu:spawn menu-bg)
-    (menu:spawn ed-menu)
+    (menu:spawn (ed-menu ed cursor controller))
     menu))
 
 {

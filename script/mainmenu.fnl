@@ -18,7 +18,7 @@
                 (let [game (. (reload "game") "new")
                       old-update state.update]
                   (set state.update (fn [_ state]
-                                      (let [ns (state:push (game 40 30))]
+                                      (let [ns (state:push (game 40 30 {}))]
                                         (set state.update old-update)
                                         ns)))))
               
@@ -108,7 +108,7 @@
 
     (menu:spawn menu-bg)
     (let [mc (menu:spawn menu-controller)]
-      (if (~= nil love)
+      ;(if (~= nil love)
         (do
           (table.insert mc.options "Editor")
           (table.insert mc.actions (fn [state]
@@ -118,7 +118,7 @@
                                         (set state.update (fn [_ state]
                                                             (let [ns (state:push (editor))]
                                                               (set state.update old-update)
-                                                              ns)))))))))
+                                                              ns))))))))
 
     (fallthrough:spawn fallthrough-message)
     (fallthrough:push menu)))

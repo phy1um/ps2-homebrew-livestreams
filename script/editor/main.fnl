@@ -2,6 +2,7 @@
 (local D2D (require "camera"))
 (local E (require "events"))
 (local room (require "room"))
+(local T (require "text"))
 
 (fn draw [me state])
 (fn update [me dt state events] 
@@ -13,15 +14,81 @@
         (let [menu (. (reload "editor/menu") "new")
               old-update state.update]
           (set state.update (fn [_ state]
-                              (let [ns (state:push (menu))]
+                              (let [ns (state:push (menu state state.m.cursor me))]
                                 (set state.update old-update)
                                 ns)))))))
 
   me)
 
-(fn controller []
-  { : update : draw })
+(fn add-room [m dir]
+  (if (~= (. m.active-room dir) nil)
+    (let [rm (. m.room-map (. m.active-room dir))]
+      (if (~= rm nil)
+        (set m.active-room (. m.room-map (. m.active-room dir)))
+        (print "room" dir "was nil!")))
+    (let [dx (if
+               (= dir "left") -640
+               (= dir "right") 640
+               0)
+          dy (if
+               (= dir "up") -448
+               (= dir "down") 448
+               0)
+          nx (+ m.active-room.ox dx)
+          ny (+ m.active-room.oy dy)
+          opposite (if
+                     (= dir "left") "right"
+                     (= dir "right") "left"
+                     (= dir "up") "down"
+                     (= dir "down") "up")
+          r (room.new-room nx ny 40 30)]
+      (tset m.active-room dir r.id)
+      (tset m.room-map r.id r)
+      (tset r opposite m.active-room.id)
+      (set m.active-room r)
+      (print "set room tgt " r.ox r.oy))))
 
+
+
+
+(fn controller []
+  { : update : draw 
+   :add-room (fn [self dir] (add-room self.m dir)) })
+
+(fn espawn [x y e]
+  (fn []
+    { :update (fn [me] me)
+      :draw (fn [me]
+              (D2D:setColour 255 0 0 0x30)
+              (D2D:rect me.x me.y me.w me.h))
+      : x : y :w 16 :h 16
+      :spawn e
+      :modifier 0
+      }))
+
+(fn area-fill [room fx fy tx ty v]
+  (let [dx (if (> tx fx) 1 -1)
+        dy (if (> ty fy) 1 -1)]
+    (for [i fx tx dx]
+      (for [j fy ty dy]
+        (room:tile-set i j v)))))
+
+
+(local cursor-actions {
+                       :tile (fn [me state] (state.m.active-room:tile-set me.x me.y me.active))
+                       :player (fn [me state] (state:spawn (espawn (* 16 me.x) (* 16 me.y) 1)))
+                       :entity (fn [me state] (state:spawn (espawn (* 16 me.x) (* 16 me.y) me.active)))
+                       :area (fn [me state] 
+                               (if (~= nil me.area-first)
+                                 (print me.area-first.x me.area-first.y)
+                                 (print "nil area - picking?"))
+                               (if
+                                (~= me.area-first nil)
+                                (do
+                                  (area-fill state.m.active-room me.area-first.x me.area-first.y me.x me.y me.active)
+                                  (set me.area-first nil))
+                                (set me.area-first {:x me.x :y me.y})))
+                       })
 
 (fn cursor-update [me dt state events]
   (each [_ e (ipairs events)]
@@ -34,37 +101,55 @@
         (set me.y (- me.y 1))
       (E.is e E.type.down E.mod.press)
         (set me.y (+ me.y 1))
-      (E.is e E.type.a0 E.mod.press)
-        (state.m.active-room:tile-set me.x me.y me.active)
       (E.is e E.type.a1 E.mod.press)
-        (state.m.active-room:tile-set me.x me.y 0)))
+        (state.m.active-room:tile-set me.x me.y me.active)
+      (E.is e E.type.a0 E.mod.press)
+        (let [a (. cursor-actions me.mode)]
+          (a me state))
+      (E.is e E.type.l1 E.mod.press)
+        (set me.active (math.max 0 (- me.active 1)))
+      (E.is e E.type.r1 E.mod.press)
+        (set me.active (math.min 100 (+ me.active 1)))))
+
   me)
 
 (fn cursor-draw [me]
   (D2D:setColour 255 0 255 0x20)
-  (D2D:rect (* me.x 16) (* me.y 16) 16 16))
+  (D2D:rect (* me.x 16) (* me.y 16) 16 16)
+  (if (and (= me.mode "area") (~= nil me.area-first))
+    (D2D:rect (* me.area-first.x 16) (* me.area-first.y 16) 16 16))
+  (D2D:setColour 255 255 255 0x80)
+  (T.printLines (* me.x 16) (- (* me.y 16) 28) 
+                (.. me.mode " :: " me.active)))
 
 
 (fn cursor []
   { :update cursor-update
    :draw cursor-draw 
+   :mode "tile"
+   :area-first nil
+   :set-mode (fn [self x] 
+               (set self.mode x)
+               (set self.area-first nil))
    :x 5 :y 5 :active 6})
 
 
 (fn new []
   (let [ed (state.new-state)]
     (ed:spawn room.tile-draw)
-    (ed:spawn controller)
-    (ed:spawn cursor)
-    (set ed.m {
-      :w 30 :h 40
-      :active-room nil
-      :room-map []
-               })
-    (let [r (room.new-room 0 0 30 40)]
-      (set ed.m.active-room r)
-      (tset ed.m.room-map r.id r))
-    ed))
+    (let [cursor (ed:spawn cursor)
+          ctrl (ed:spawn controller)]
+      (set ed.m {
+        :w 40 :h 30
+        :active-room nil
+        :room-map {}
+        : cursor
+                 })
+      (set ctrl.m ed.m)
+      (let [r (room.new-room 0 0 40 30)]
+        (set ed.m.active-room r)
+        (tset ed.m.room-map r.id r))
+      ed)))
 
 {
  : new

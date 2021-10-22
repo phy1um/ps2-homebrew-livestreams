@@ -39,7 +39,14 @@ end
 
 function draw:sprite(tex, x, y, w, h, u1, v1, u2, v2)
   table.insert(self.events, function()
-    love.graphics.rectangle("fill", x, y, w, h)
+    local tox = u1 * tex.width
+    local toy = v1 * tex.height
+    local ttx = u2 * tex.width
+    local tty = v2 * tex.height
+    local tw = ttx - tox
+    local th = tty - toy
+    local q = love.graphics.newQuad(tox, toy, tw, th, tex.width, tex.height)
+    love.graphics.draw(tex.data, q, x, y, 0, w/tw, h/th)
   end)
 end
 
@@ -56,6 +63,16 @@ function draw:updateLastTagLoops()
 end
 
 function draw.loadTexture(fname, w, h)
+  local nn = "dist/" .. string.sub(fname, 6, -1)
+  print("hooking load " .. fname .. " -> " .. nn)
+  local tt = {
+    basePtr = 0,
+    width = w,
+    height = h,
+    data = love.graphics.newImage(nn),
+    format = GS.PSM32
+  }
+  return tt
 end
 
 function draw:doLoveDraw()

@@ -17,6 +17,10 @@
         :a3 7
         :menu 8
         :reload 9
+        :l1 10
+        :l2 11
+        :r1 12
+        :r2 13
         }
   :mod {:press 0
         :release 1

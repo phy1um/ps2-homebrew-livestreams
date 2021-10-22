@@ -18,6 +18,10 @@
               :c false
               :v false
               :m false
+              :q false
+              :e false
+              :a false
+              :d false
               })
 
 (fn love.keypressed [key]
@@ -43,11 +47,12 @@
 (global PAD {
              :UP "up" :LEFT "left" :DOWN "down" :RIGHT "right" :X "x"
              :SQUARE "z" :TRIANGLE "c" :CIRCLE "v" :SELECT "m"
+             :L1 "a" :L2 "q" :R1 "d" :R2 "e"
              :held (fn [i]
                      (. key-map i))
              })
 
-(fennel.dofile "main.fnl")
+(fennel.dofile "script/main.fnl")
 
 
 (fn love.load []
