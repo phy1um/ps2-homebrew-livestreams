@@ -2,6 +2,7 @@
 (local D2D (require "draw2d"))
 (local E (require "events"))
 (local state (require "state"))
+(local F (require "flags"))
 
 (var *debounce-time* 0.07)
 
@@ -108,7 +109,7 @@
 
     (menu:spawn menu-bg)
     (let [mc (menu:spawn menu-controller)]
-      ;(if (~= nil love)
+      (if (= true F.dev)
         (do
           (table.insert mc.options "Editor")
           (table.insert mc.actions (fn [state]
@@ -118,7 +119,7 @@
                                         (set state.update (fn [_ state]
                                                             (let [ns (state:push (editor))]
                                                               (set state.update old-update)
-                                                              ns))))))))
+                                                              ns)))))))))
 
     (fallthrough:spawn fallthrough-message)
     (fallthrough:push menu)))

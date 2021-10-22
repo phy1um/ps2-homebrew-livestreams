@@ -17,7 +17,8 @@
       (do
         (set s.view-x nr.ox)
         (set s.view-y nr.oy)
-        (print "new XO" s.view-x)
+        (print "enter room @" nr.ox nr.oy)
+        (print " - links = " nr.left nr.right nr.up nr.down)
         (set s.m.active-room nr)
         (D2D:setCamera nr.ox nr.oy)))))
 

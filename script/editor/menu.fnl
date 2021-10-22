@@ -5,6 +5,11 @@
 
 (var *debounce-time* 0.07)
 
+(fn action [f]
+  (fn [state] 
+    (f)
+    (set state.do-pop true)))
+
 (fn ed-menu [ed cursor controller]
   (fn []
   {
@@ -23,17 +28,17 @@
             ]
     :actions [
               ; move room direction
-              (fn [state] (controller:add-room "left"))
-              (fn [state] (controller:add-room "right"))
-              (fn [state] (controller:add-room "up"))
-              (fn [state] (controller:add-room "down"))
+              (action (fn [] (controller:add-room "left")))
+              (action (fn [] (controller:add-room "right")))
+              (action (fn [] (controller:add-room "up")))
+              (action (fn [] (controller:add-room "down")))
               ; change cursor mode
-              (fn [state] (cursor:set-mode "tile"))
-              (fn [state] (cursor:set-mode "entity"))
-              (fn [state] (cursor:set-mode "player"))
-              (fn [state] (cursor:set-mode "area"))
+              (action (fn [] (cursor:set-mode "tile")))
+              (action (fn [] (cursor:set-mode "entity")))
+              (action (fn [] (cursor:set-mode "player")))
+              (action (fn [] (cursor:set-mode "area")))
               ; save room (?)
-              (fn [state] (controller:save))
+              (fn [] (controller:save))
               ; test
               (fn [state] 
                 (print "go to game state")
@@ -47,7 +52,7 @@
                                         (set state.update old-update)
                                         ns)))))
               ; go back to prev state
-              (fn [state] (set state.do-pop true))
+              (action (fn []))
           ]
     :cursor 1
     :debounce 0

@@ -73,6 +73,15 @@
       (for [j fy ty dy]
         (room:tile-set i j v)))))
 
+(fn area-ol [room fx fy tx ty v]
+  (let [dx (if (> tx fx) 1 -1)
+        dy (if (> ty fy) 1 -1)]
+    (for [i fx tx dx]
+      (for [j fy ty dy]
+        (if (or (= i 0) (= j 0) (= i tx) (= j ty))
+          (room:tile-set i j v))))))
+
+
 
 (local cursor-actions {
                        :tile (fn [me state] (state.m.active-room:tile-set me.x me.y me.active))
@@ -90,6 +99,23 @@
                                 (set me.area-first {:x me.x :y me.y})))
                        })
 
+(local cursor-alt-actions {
+                       :tile (fn [me state] (state.m.active-room:tile-set me.x me.y 0))
+                       :player (fn [me state] (state:spawn (espawn (* 16 me.x) (* 16 me.y) 1)))
+                       :entity (fn [me state] (state:spawn (espawn (* 16 me.x) (* 16 me.y) me.active)))
+                       :area (fn [me state] 
+                               (if (~= nil me.area-first)
+                                 (print me.area-first.x me.area-first.y)
+                                 (print "nil area - picking?"))
+                               (if
+                                (~= me.area-first nil)
+                                (do
+                                  (area-ol state.m.active-room me.area-first.x me.area-first.y me.x me.y me.active)
+                                  (set me.area-first nil))
+                                (set me.area-first {:x me.x :y me.y})))
+                       })
+
+
 (fn cursor-update [me dt state events]
   (each [_ e (ipairs events)]
     (if 
@@ -105,6 +131,9 @@
         (state.m.active-room:tile-set me.x me.y me.active)
       (E.is e E.type.a0 E.mod.press)
         (let [a (. cursor-actions me.mode)]
+          (a me state))
+      (E.is e E.type.a1 E.mod.press)
+        (let [a (. cursor-alt-actions me.mode)]
           (a me state))
       (E.is e E.type.l1 E.mod.press)
         (set me.active (math.max 0 (- me.active 1)))
@@ -134,7 +163,7 @@
    :x 5 :y 5 :active 6})
 
 
-(fn new []
+(fn new [name]
   (let [ed (state.new-state)]
     (ed:spawn room.tile-draw)
     (let [cursor (ed:spawn cursor)
@@ -143,6 +172,7 @@
         :w 40 :h 30
         :active-room nil
         :room-map {}
+        :name (if (= name nil) "test-zone" name)
         : cursor
                  })
       (set ctrl.m ed.m)

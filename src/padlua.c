@@ -138,6 +138,10 @@ int pad_lua_init(lua_State *l) {
   bind_int(DPAD_UP, "UP");
   bind_int(DPAD_DOWN, "DOWN");
   bind_int(BUTTON_SELECT, "SELECT");
+  bind_int(BUTTON_L1, "L1");
+  bind_int(BUTTON_L2, "L2");
+  bind_int(BUTTON_R1, "R1");
+  bind_int(BUTTON_R2, "R2");
   lua_setglobal(l, "PAD");
   return 0;
 }
