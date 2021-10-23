@@ -2,6 +2,7 @@
 (local D2D (require "draw2d"))
 (local E (require "events"))
 (local state (require "state"))
+(local entity (require "entity"))
 
 (var *debounce-time* 0.07)
 
@@ -9,6 +10,15 @@
   (fn [state] 
     (f)
     (set state.do-pop true)))
+
+(fn gen-enter [r]
+  (fn [self state]
+    (each [_ sp (ipairs r.entity-spawns)]
+      (let [f (entity.get-spawn-fn sp.class sp.x sp.y)]
+        (if (= f nil) (print "failed to spawn " sp.class))
+        (let [e (state:spawn f)]
+          (if (= sp.class "player")
+            (set state.m.player e)))))))
 
 (fn ed-menu [ed cursor controller]
   (fn []
@@ -20,7 +30,6 @@
               "Go down"
               "Mode tile"
               "Mode entity"
-              "Mode player"
               "Mode area"
               "Save"
               "Test"
@@ -35,19 +44,18 @@
               ; change cursor mode
               (action (fn [] (cursor:set-mode "tile")))
               (action (fn [] (cursor:set-mode "entity")))
-              (action (fn [] (cursor:set-mode "player")))
               (action (fn [] (cursor:set-mode "area")))
               ; save room (?)
               (fn [] (controller:save))
               ; test
               (fn [state] 
                 (print "go to game state")
+                (each [_ r (pairs ed.m.room-map)]
+                  (set r.enter (gen-enter r)))
                 (let [game (. (reload "game") "new")
                       old-update state.update]
                   (set state.update (fn [_ state]
                                       (print "moving to game, loading rooms:")
-                                      (each [id _ (pairs ed.m.room-map)]
-                                        (print "got one " id))
                                       (let [ns (state:push (game 40 30 ed.m.room-map ed.m.active-room.id))]
                                         (set state.update old-update)
                                         ns)))))

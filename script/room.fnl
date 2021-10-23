@@ -58,7 +58,11 @@
     :right nil
     :up nil
     :down nil
+    :enter (fn [])
+    :leave (fn [])
    })
+
+
 
 (fn tile-draw []
   {

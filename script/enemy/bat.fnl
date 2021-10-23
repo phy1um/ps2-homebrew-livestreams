@@ -73,4 +73,7 @@
 
 {
  : new
+ : draw
+ : update
+ :seek *seek*
  }

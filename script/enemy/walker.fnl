@@ -45,4 +45,6 @@
 
 {
  : new
+ : draw
+ : update
  }

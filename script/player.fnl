@@ -89,19 +89,7 @@
     (set me.vx d.x)
     (set me.vy d.y)))
 
-(fn new [x y r g b d] 
-    (fn [] 
-      { : x : y :w 16 :h 16
-       :col {: r : g : b} :dir d 
-       :v 90 :vx 0 :vy 0
-       :health 5
-       :type "player"
-       :solid true
-       :impulse-x 0 :impulse-y 0
-       :action *state-ground*
-       :last-dir *down*
-
-      :update (fn [me dt state events]
+(fn update [me dt state events]
                 (set me.impulse-x 0)
                 (set me.impulse-y 0)
                 ; process inputs into impulse/wish direction
@@ -146,15 +134,12 @@
                 ; we are still alive
                 me)
 
-      :draw (fn [me]
+      (fn draw [me]
         (D2D:setColour me.col.r me.col.g me.col.b 0x80)
-        ; (T.printLines me.x (- me.y 30) (.. me.dx ", " me.dy) )
-        ; (T.printLines me.x (- me.y 30) (.. me.impulse-x "-x " me.action " :: " me.vx))
-
         (let [frame (. R.player-frames.down 1)] 
           (D2D:sprite R.chars me.x me.y me.w me.h frame.u1 frame.v1 frame.u2 frame.v2)))
-    }))
 
 {
-  : new
+  : update
+  : draw
 }

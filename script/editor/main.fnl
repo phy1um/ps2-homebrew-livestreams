@@ -3,9 +3,13 @@
 (local E (require "events"))
 (local room (require "room"))
 (local T (require "text"))
+(local EE (require "entity"))
 
 (fn draw [me state] 
-  (T.printLines 5 5 (.. "Editing " state.m.name " @ " state.m.active-room.ox "," state.m.active-room.oy)))
+  (T.printLines 5 5 (.. "Editing " state.m.name " @ " state.m.active-room.ox "," state.m.active-room.oy))
+  (each [_ s (ipairs state.m.active-room.entity-spawns)]
+    (D2D:rect s.x s.y 16 16)
+    (T.printLines (- s.x D2D.cx) (- s.y D2D.cy) s.class)))
 
 (fn update [me dt state events] 
   (each [_ e (ipairs events)]
@@ -57,17 +61,6 @@
   { : update : draw 
    :add-room (fn [self dir] (add-room self.m dir)) })
 
-(fn espawn [x y e]
-  (fn []
-    { :update (fn [me] me)
-      :draw (fn [me]
-              (D2D:setColour 255 0 0 0x30)
-              (D2D:rect me.x me.y me.w me.h))
-      : x : y :w 16 :h 16
-      :spawn e
-      :modifier 0
-      }))
-
 (fn area-fill [room fx fy tx ty v]
   (let [dx (if (> tx fx) 1 -1)
         dy (if (> ty fy) 1 -1)]
@@ -87,8 +80,11 @@
 
 (local cursor-actions {
                        :tile (fn [me state] (print "add") (state.m.active-room:tile-set me.x me.y me.active))
-                       :player (fn [me state] (state:spawn (espawn (* 16 me.x) (* 16 me.y) 1)))
-                       :entity (fn [me state] (state:spawn (espawn (* 16 me.x) (* 16 me.y) me.active)))
+                       :entity (fn [me state] 
+                                 (let [r state.m.active-room
+                                       rx r.ox
+                                       ry r.oy]
+                                   (r:add-entity-spawn {:x (+ rx (* 16 me.x)) :y (+ ry (* 16 me.y)) :class (EE.get-class me.active)})))
                        :area (fn [me state] 
                                (if (~= nil me.area-first)
                                  (print me.area-first.x me.area-first.y)
@@ -103,8 +99,7 @@
 
 (local cursor-alt-actions {
                        :tile (fn [me state] (print "remove") (state.m.active-room:tile-set me.x me.y 0))
-                       :player (fn [me state] (state:spawn (espawn (* 16 me.x) (* 16 me.y) 1)))
-                       :entity (fn [me state] (state:spawn (espawn (* 16 me.x) (* 16 me.y) me.active)))
+                       :entity (fn [me state] )
                        :area (fn [me state] 
                                (if (~= nil me.area-first)
                                  (print me.area-first.x me.area-first.y)
@@ -159,7 +154,7 @@
    :set-mode (fn [self x] 
                (set self.mode x)
                (set self.area-first nil))
-   :x 5 :y 5 :active 6})
+   :x 5 :y 5 :active 1})
 
 
 (fn new [name]
