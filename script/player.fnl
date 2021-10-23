@@ -92,6 +92,7 @@
 (fn update [me dt state events]
                 (set me.impulse-x 0)
                 (set me.impulse-y 0)
+                (set me.hurtdebounce (- me.hurtdebounce dt))
                 ; process inputs into impulse/wish direction
                 (each [_ ev (ipairs events)]
                   (if (E.is ev E.type.left E.mod.hold) (set me.impulse-x (+ me.impulse-x -1))
@@ -122,24 +123,29 @@
                     (set me.x (+ me.x me.vx))
                     (set me.y (+ me.y me.vy))))
                 ; look for collisions
-                (state:add-col (C.collider-rect 
-                                             me.id
-                                             me.x 
-                                             me.y 
-                                             me.w 
-                                             me.h 
+                (state:add-col (C.collider-rect me.id me.x me.y me.w me.h
                                              (fn [other]
-                                               (if (= other.type "bad") (set me.health (- me.health 1)))
+                                               (if (= other.type "enemy") (me:hurt 1))
                                                nil)))
                 ; we are still alive
                 me)
 
-      (fn draw [me]
-        (D2D:setColour me.col.r me.col.g me.col.b 0x80)
-        (let [frame (. R.player-frames.down 1)] 
-          (D2D:sprite R.chars me.x me.y me.w me.h frame.u1 frame.v1 frame.u2 frame.v2)))
+(fn draw [me]
+  (D2D:setColour 0xff 0xff 0xff 0x80)
+  (T.printLines 20 0 (.. "HP: " me.health))
+  (D2D:setColour me.col.r me.col.g me.col.b 0x80)
+  (let [frame (. R.player-frames.down 1)] 
+    (D2D:sprite R.chars me.x me.y me.w me.h frame.u1 frame.v1 frame.u2 frame.v2)))
+
+(fn hurt [me d]
+  (if (<= me.hurtdebounce 0)
+    (do
+      (set me.health (- me.health 1))
+      (set me.hurtdebounce 0.3))))
+      
 
 {
   : update
   : draw
+  : hurt
 }

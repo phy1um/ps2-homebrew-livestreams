@@ -33,6 +33,9 @@
                         :last-dir 0
                         :update player.update
                         :draw player.draw
+                        :hurtdebounce 0.01
+                        :hurt player.hurt
+
                          }
                 :bat1 {
                       :w 28 :h 14
@@ -66,8 +69,11 @@
   (let [class (. classes c)
         f (if
             (= class nil) (fn []
+                            (print "SPAWN NIL!")
                             { :update (fn []) :draw (fn []) })
-            (fn [] (cpy-> class {: x : y})))]
+            (fn [] 
+              (print "SPAWN!")
+              (cpy-> class {: x : y})))]
     f))
 
 {

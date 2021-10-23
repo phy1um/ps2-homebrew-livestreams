@@ -49,7 +49,14 @@
             (set me.state (% (+ me.state 1) 2))
             (print "bat change state" me.state)
             (set me.state-timer 2.1)))
-        (if (> me.health 0) me nil))))
+        (if (> me.health 0) 
+          ; still alive
+          me 
+          ; mort
+          (do
+           (if (~= me.ondeath nil)
+             (me.ondeath))
+           nil)))))
 
 (fn new [x y speed health]
   (fn []

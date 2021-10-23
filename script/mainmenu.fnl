@@ -18,11 +18,10 @@
     :actions [
               (fn [state] 
                 (print "go to game state")
-                (let [game (. (reload "game") "new")
+                (let [game (. (reload "game2") "new")
                       old-update state.update]
                   (set state.update (fn [_ state]
-                                      (let [room-map (room.map-from-file "xx.fnl")
-                                            ns (state:push (game 40 30 room-map (room.find-player room-map)))]
+                                      (let [ns (state:push (game 40 30))]
                                         (set state.update old-update)
                                         ns)))))
               
