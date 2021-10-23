@@ -1,6 +1,8 @@
 
 (local D2D (require "camera"))
 (local R (require "resource"))
+(local entity (require "entity"))
+(local fennel (require "fennel"))
 
 (local *GRID* 16)
 (local tile0 (R.get-uv 16 4 3))
@@ -19,6 +21,23 @@
       tiles))
 
 (local *GRID* 16)
+
+(local copy-fields [
+                    "up" "down" "left" "right"
+                    "ox" "oy" "w" "h" "id"
+                    "tiles" "entity-spawns"])
+
+(fn stringify [self]
+  (let [o (collect [_ k (ipairs copy-fields)]
+                   (values k (. self k)))]
+    (fennel.view o)))
+
+(fn minify [self]
+  (collect [_ k (ipairs copy-fields)]
+             (values k (. self k))))
+
+
+
 
 (fn new-room [ox oy w h]
   {
@@ -60,6 +79,7 @@
     :down nil
     :enter (fn [])
     :leave (fn [])
+    : minify
    })
 
 
@@ -80,8 +100,47 @@
    })
 
 
+;; init room loaded from file
+
+(fn gen-enter [r]
+  (fn [self state]
+    (print "ENTER ROOM" r.id)
+    (each [_ sp (ipairs r.entity-spawns)]
+      (let [f (entity.get-spawn-fn sp.class sp.x sp.y)]
+        (if (= f nil) (print "failed to spawn " sp.class))
+        (let [e (state:spawn f)]
+          (if (= sp.class "player")
+            (set state.m.player e)))))))
+
+(fn from-loaded [o]
+  (let [n (new-room 0 0 0 0)]
+    (each [k v (pairs o)]
+      (print "setting loaded room field: " k v)
+      (tset n k v))
+    (set n.enter (gen-enter n))
+    n))
+
+(fn map-from-file [fname]
+  (let [loaded (fennel.dofile fname)]
+    (collect [k v (pairs loaded)]
+               (values k (from-loaded v)))))
+
+
+(fn find-player [rm]
+  (print "looking for player room start IN" rm)
+  (var tgt -1)
+  (each [k v (pairs rm)]
+    (print "trying room" k v)
+    (each [_ sp (ipairs v.entity-spawns)]
+      (print "found entity" sp.class sp.x sp.y)
+      (if (= sp.class "player")
+        (set tgt k))))
+  (print "found player @" tgt)
+  tgt)
 
 {
  : new-room
  : tile-draw
+ : map-from-file
+ : find-player
  }

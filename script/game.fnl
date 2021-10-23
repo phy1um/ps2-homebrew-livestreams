@@ -13,6 +13,7 @@
 
 (fn set-room [s room-id]
   ;(s.m.active-room:leave s)
+  (print "setting room to " room-id)
   (let [nr (. s.m.room-map room-id)]
     (if (~= nr nil )
       (do
@@ -21,8 +22,10 @@
         (print "enter room @" nr.ox nr.oy)
         (print " - links = " nr.left nr.right nr.up nr.down)
         (set s.m.active-room nr)
-        (D2D:setCamera nr.ox nr.oy)))
-    (nr:enter s)))
+        (D2D:setCamera nr.ox nr.oy)
+        (nr:enter s))
+      (do
+        (print "NIL ROOM TARGET! UNKNOWN ID " room-id)))))
 
 (fn focus-room [tgt state]
   (let [next-room (if (< tgt.x state.m.active-room.ox) "left"
@@ -39,7 +42,8 @@
 (fn player-focus []
   {
     :update (fn [me dt state] 
-              (focus-room state.m.player state)
+              (if (~= nil state.m.player)
+                (focus-room state.m.player state))
               me)
     :draw (fn [])
    })

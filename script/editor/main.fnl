@@ -4,6 +4,7 @@
 (local room (require "room"))
 (local T (require "text"))
 (local EE (require "entity"))
+(local fennel (require "fennel"))
 
 (fn draw [me state] 
   (T.printLines 5 5 (.. "Editing " state.m.name " @ " state.m.active-room.ox "," state.m.active-room.oy))
@@ -59,7 +60,14 @@
 
 (fn controller []
   { : update : draw 
-   :add-room (fn [self dir] (add-room self.m dir)) })
+   :add-room (fn [self dir] (add-room self.m dir))
+   :save (fn [self] 
+           (let [f (io.open "xx.fnl" "w")
+                 rooms (collect [k r (pairs self.m.room-map)]
+                                  (values k (r:minify)))]
+             (f:write (fennel.view rooms))
+             (f:close)))
+   })
 
 (fn area-fill [room fx fy tx ty v]
   (let [dx (if (> tx fx) 1 -1)
@@ -82,9 +90,13 @@
                        :tile (fn [me state] (print "add") (state.m.active-room:tile-set me.x me.y me.active))
                        :entity (fn [me state] 
                                  (let [r state.m.active-room
+                                       cname (EE.get-class me.active)
                                        rx r.ox
-                                       ry r.oy]
-                                   (r:add-entity-spawn {:x (+ rx (* 16 me.x)) :y (+ ry (* 16 me.y)) :class (EE.get-class me.active)})))
+                                       ry r.oy
+                                       x (+ rx (* 16 me.x))
+                                       y (+ ry (* 16 me.y))]
+                                   (r:add-entity-spawn {: x : y :class cname})))
+
                        :area (fn [me state] 
                                (if (~= nil me.area-first)
                                  (print me.area-first.x me.area-first.y)

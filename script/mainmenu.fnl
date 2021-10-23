@@ -3,6 +3,8 @@
 (local E (require "events"))
 (local state (require "state"))
 (local F (require "flags"))
+(local fennel (require "fennel"))
+(local room (require "room"))
 
 (var *debounce-time* 0.07)
 
@@ -19,7 +21,8 @@
                 (let [game (. (reload "game") "new")
                       old-update state.update]
                   (set state.update (fn [_ state]
-                                      (let [ns (state:push (game 40 30 {}))]
+                                      (let [room-map (room.map-from-file "xx.fnl")
+                                            ns (state:push (game 40 30 room-map (room.find-player room-map)))]
                                         (set state.update old-update)
                                         ns)))))
               
