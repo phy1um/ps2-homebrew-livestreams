@@ -4,7 +4,9 @@
 (local room (require "room"))
 (local T (require "text"))
 
-(fn draw [me state])
+(fn draw [me state] 
+  (T.printLines 5 5 (.. "Editing " state.m.name " @ " state.m.active-room.ox "," state.m.active-room.oy)))
+
 (fn update [me dt state events] 
   (each [_ e (ipairs events)]
     (if
@@ -78,13 +80,13 @@
         dy (if (> ty fy) 1 -1)]
     (for [i fx tx dx]
       (for [j fy ty dy]
-        (if (or (= i 0) (= j 0) (= i tx) (= j ty))
+        (if (or (= i fx) (= j fy) (= i tx) (= j ty))
           (room:tile-set i j v))))))
 
 
 
 (local cursor-actions {
-                       :tile (fn [me state] (state.m.active-room:tile-set me.x me.y me.active))
+                       :tile (fn [me state] (print "add") (state.m.active-room:tile-set me.x me.y me.active))
                        :player (fn [me state] (state:spawn (espawn (* 16 me.x) (* 16 me.y) 1)))
                        :entity (fn [me state] (state:spawn (espawn (* 16 me.x) (* 16 me.y) me.active)))
                        :area (fn [me state] 
@@ -100,7 +102,7 @@
                        })
 
 (local cursor-alt-actions {
-                       :tile (fn [me state] (state.m.active-room:tile-set me.x me.y 0))
+                       :tile (fn [me state] (print "remove") (state.m.active-room:tile-set me.x me.y 0))
                        :player (fn [me state] (state:spawn (espawn (* 16 me.x) (* 16 me.y) 1)))
                        :entity (fn [me state] (state:spawn (espawn (* 16 me.x) (* 16 me.y) me.active)))
                        :area (fn [me state] 
@@ -127,8 +129,6 @@
         (set me.y (- me.y 1))
       (E.is e E.type.down E.mod.press)
         (set me.y (+ me.y 1))
-      (E.is e E.type.a1 E.mod.press)
-        (state.m.active-room:tile-set me.x me.y me.active)
       (E.is e E.type.a0 E.mod.press)
         (let [a (. cursor-actions me.mode)]
           (a me state))
@@ -139,7 +139,6 @@
         (set me.active (math.max 0 (- me.active 1)))
       (E.is e E.type.r1 E.mod.press)
         (set me.active (math.min 100 (+ me.active 1)))))
-
   me)
 
 (fn cursor-draw [me]
