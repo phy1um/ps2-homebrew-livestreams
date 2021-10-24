@@ -55,11 +55,12 @@
                       }
                 :walker1 {
                       :w 16 :h 24
+                      :speed 32.3
                       :tx 0 :ty 0
-                      :waiting-timer 0.4
+                      :waiting-timer 0.05
                       :type "enemy"
                       :solid true
-                      :health 3
+                      :health 6
                       : hurt 
                       :draw walker.draw
                       :update walker.update
@@ -73,7 +74,6 @@
                             (print "SPAWN NIL!")
                             { :update (fn []) :draw (fn []) })
             (fn [] 
-              (print "SPAWN!")
               (cpy-> class {: x : y})))]
     f))
 

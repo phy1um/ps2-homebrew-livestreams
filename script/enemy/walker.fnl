@@ -24,7 +24,14 @@
               (set me.x (- me.x dv*.x))
               (set me.y (- me.y dv*.y))))
           )
-        (if (> me.health 0) me nil))))
+        (if (> me.health 0) 
+          ; alive
+          me 
+          ; mort
+          (do
+           (if (~= me.ondeath nil)
+             (me.ondeath))
+          nil)))))
 
 (fn new [x y speed]
   (fn []

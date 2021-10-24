@@ -102,9 +102,15 @@
                             (tset m.room-map r.id r))
                 })
       (set-room s r.id)
-      (s:spawn (W.wave-init W.wave-1 (fn []
-                                        (print "DONE")
-                                        )))
+      (var do-exit false)
+      (s:spawn (fn []
+                 { :draw (fn [] )
+                  :update (fn [me dt state]
+                            (if do-exit
+                              (do
+                                (set state.do-pop true)
+                                )))}))
+      (s:spawn (W.wave-init W.wave-1 (fn [] (set do-exit true))))
       s)))
       
 

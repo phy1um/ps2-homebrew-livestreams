@@ -29,7 +29,7 @@
 
 (fn update [me dt state]
   (set me.anim-timer
-       (if (> me.anim-timer 0.13) 0
+       (if (> me.anim-timer 0.2) 0
          (+ me.anim-timer dt)))
   (if (> me.waiting-timer 0)
       ; we are waiting for something so spin our wheels
