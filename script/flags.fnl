@@ -1,4 +1,4 @@
 
 {
-  :dev true
+  :dev false
  }
