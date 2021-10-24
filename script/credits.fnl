@@ -41,7 +41,7 @@
                           (let [t (if (= 0 me.part) me.part0
                                       (= 1 me.part) me.part1
                                       [""])]
-                            (T.printLines -300 -200 (table.unpack t))))
+                            (T.printLines 10 20 (table.unpack t))))
                     }
                   ))
        s))
