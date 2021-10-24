@@ -127,8 +127,11 @@
                                              (fn [other]
                                                (if (= other.type "enemy") (me:hurt 1))
                                                nil)))
-                ; we are still alive
-                me)
+                (if (> me.health 0)
+                  ; we are still alive
+                  me
+                  ; we are dead
+                  nil))
 
 (fn draw [me]
   (D2D:setColour 0xff 0xff 0xff 0x80)

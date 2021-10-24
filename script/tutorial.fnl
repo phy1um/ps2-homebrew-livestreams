@@ -16,6 +16,7 @@
                             (T.printLines 10 20
                                           (.. "Move with the D-Pad, shoot with " T.x)
                                           "Kill the enemies, if you lose your HP you die"
+                                          "If you die you have to restart the game!"
                                           ""
                                           ""
                                           "This game was made for the Lisp Autumn Game Jam 2021, and I had many"
