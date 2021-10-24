@@ -36,16 +36,32 @@
     (if (> t time) (do
                      (f me state)
                      then))))
+(fn after [time f then]
+  (var is-done false)
+  (fn [me state t]
+    (if is-done
+      ; test
+      (if (> t me.after-counter)
+        (do
+          (f me state)
+          then))
+      ; store current time etc
+      (do
+        (set me.after-counter (+ t time))
+        (set is-done true)))))
 
 (local wave-1 
   (at 0 (fn [me state]
-          (me:spawn state (bat 20 200))
-          (me:spawn state (bat 620 200)))
+          (me:spawn state (bat 20 200)))
   (at 6 (fn [me state]
           (me:spawn state (bat 20 10))
           (me:spawn state (bat 20 210)))
-  wait-for-end)))
-
+  (after 1 (fn [me state]
+             (print "after 1?")
+             (me:spawn state (bat 20 20))
+             (me:spawn state (bat 200 20))
+             (me:spawn state (bat 400 20)))
+  wait-for-end))))
 
 
 

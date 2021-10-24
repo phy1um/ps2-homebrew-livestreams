@@ -4,7 +4,8 @@
 
 (fn hurt [me d]
   (let [dmg (if (~= nil d.power) d.power 1)]
-    (set me.health (- me.health dmg))))
+    (set me.health (- me.health dmg))
+    (set me.washurt true)))
 
 ; copy A to B
 (fn cpy-> [a b]
@@ -39,9 +40,9 @@
                          }
                 :bat1 {
                       :w 28 :h 14
-                      :speed 20
+                      :speed 56
                       :tx 0 :ty 0
-                      :waiting-timer 0.4
+                      :waiting-timer 0.05
                       :type "enemy"
                       :solid true
                       :health 3

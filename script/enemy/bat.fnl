@@ -5,6 +5,7 @@
 
 (local *seek* 0)
 (local *strafe* 1)
+(local *flee* 2)
 
 (fn draw [me]
   (D2D:setColour 0x80 0x80 0x80 0x80)
@@ -16,14 +17,19 @@
     (set me.x (- me.x dv.x))
     (set me.y (- me.y dv.y))))
 
-(fn move-strafe [me v speed]
-  (if (> v.x v.y)
-    (set me.y (+ me.y speed))
-    (set me.x (+ me.x speed))))
+(fn move-strafe [me v speed tx ty]
+  (let [dist (V.vec-length v)
+        arcx (+ tx (- (* v.x (math.cos 0.01)) (* v.y (math.sin 0.01))))
+        arcy (+ ty (* v.x (math.sin 0.01)) (* v.y (math.cos 0.01)))
+        dx (- arcx me.x)
+        dy (- arcy me.y)
+        move (V.vec-scale (V.vec-normalize (V.vec2 dx dy)) speed)]
+    (set me.x (+ me.x move.x))
+    (set me.y (+ me.y move.y))))
 
 (fn update [me dt state]
   (set me.anim-timer
-       (if (> me.anim-timer 0.2) 0
+       (if (> me.anim-timer 0.13) 0
          (+ me.anim-timer dt)))
   (if (> me.waiting-timer 0)
       ; we are waiting for something so spin our wheels
@@ -33,22 +39,28 @@
       ; do the actual update part
       (do
         ; ...
+        (if me.washurt
+          (do
+            (set me.state *flee*)
+            (set me.state-timer (math.random 0.08 0.25))
+            (set me.washurt false)))
         (let [tgt state.m.player]
           (if (~= tgt nil)
             (let [dv (V.vec2 (- me.x tgt.x) (- me.y tgt.y))
                   speed (* dt me.speed) ]
               (if (= me.state *seek*)
-                    (move-seek me dv (* 2.4 speed))
+                    (move-seek me dv speed)
                   (= me.state *strafe*)
-                    (move-strafe me dv speed)))))
+                    (move-strafe me dv speed tgt.x tgt.y)
+                  (= me.state *flee*)
+                    (move-seek me dv (* speed -1.8))))))
         (if (> me.state-timer 0)
           ; if time left in state decrease time
           (set me.state-timer (- me.state-timer dt))
           ; otherwise advance to next state
           (do
             (set me.state (% (+ me.state 1) 2))
-            (print "bat change state" me.state)
-            (set me.state-timer 2.1)))
+            (set me.state-timer (math.random 1.1 4.1))))
         (if (> me.health 0) 
           ; still alive
           me 
@@ -58,28 +70,7 @@
              (me.ondeath))
            nil)))))
 
-(fn new [x y speed health]
-  (fn []
-    {
-      : x : y : speed
-      :w 28 :h 14
-      :tx 0 :ty 0
-      :waiting-timer 0.4
-      :type "enemy"
-      :solid true
-      : health
-      :state *seek*
-      :state-timer 2.9
-      :anim-timer 0
-      :hurt (fn [me d] 
-              (let [dmg (if (~= nil d.power) d.power 1)]
-                (set me.health (- me.health dmg))))
-      : draw
-      : update
-     }))
-
 {
- : new
  : draw
  : update
  :seek *seek*

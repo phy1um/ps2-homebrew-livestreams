@@ -9,6 +9,12 @@ function reload(p, ...)
   return require(p, ...)
 end
 
+-- ps2 outdated lua compat... :(
+local rnd = math.random
+function math.random(from, to)
+  return from + (to * rnd())
+end
+
 print("go go go")
 if love ~= nil then
   local fennel = require("script/fennel")
