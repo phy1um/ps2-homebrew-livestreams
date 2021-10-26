@@ -70,7 +70,7 @@
                    (fn [other]
                      (if (= other.type "player")
                        {:do-pop true}))))
-    (s:spawn room.tile-draw)
+    ;(s:spawn room.tile-draw)
     (s:spawn player-focus)
     (s:spawn (fn []
                {

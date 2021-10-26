@@ -5,6 +5,10 @@
 (local F (require "flags"))
 (local fennel (require "fennel"))
 (local room (require "room"))
+(local credits (require "credits"))
+(local tutorial (require "tutorial"))
+(local ed (require "editor/main"))
+(local game (require "game2"))
 
 (var *debounce-time* 0.07)
 
@@ -18,7 +22,7 @@
     :actions [
               (fn [state] 
                 (print "go to game state")
-                (let [game (. (reload "game2") "new")
+                (let [game game.new 
                       old-update state.update]
                   (set state.update (fn [_ state]
                                       (let [ns (state:push (game 40 30))]
@@ -27,7 +31,7 @@
               
               (fn [state] 
                 (print "show tutorial")
-                (let [tut (. (reload "tutorial") "new")
+                (let [tut tutorial.new
                       old-update state.update]
                   (set state.update (fn [_ state]
                                       (let [ns (state:push (tut))]
@@ -37,7 +41,7 @@
 
               (fn [state]                 
                 (print "show credits")
-                (let [credits (. (reload "credits") "new")
+                (let [credits credits.new
                       old-update state.update]
                   (set state.update (fn [_ state]
                                       (let [ns (state:push (credits))]
@@ -116,7 +120,7 @@
           (table.insert mc.options "Editor")
           (table.insert mc.actions (fn [state]
                                       (print "go to editor state")
-                                      (let [editor (. (reload "editor/main") "new")
+                                      (let [editor ed.new
                                             old-update state.update]
                                         (set state.update (fn [_ state]
                                                             (let [ns (state:push (editor))]

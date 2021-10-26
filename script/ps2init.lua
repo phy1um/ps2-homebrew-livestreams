@@ -1,6 +1,6 @@
 
 local libs = {}
-local SEARCH_PATH = "host:script/?.lua"
+local SEARCH_PATH = PS2_SCRIPT_PATH .. "?.lua"
 
 --[[
 local myreq = function(name)
@@ -35,7 +35,9 @@ print("setting up package searchers")
 --table.insert(package.serchers or package.loaders, function
 package.path = SEARCH_PATH
 local fennel = require ("fennel")
-fennel.path = "host:script/?.fnl"
+--fennel.path = "host:script/?.fnl"
+fennel.path = PS2_SCRIPT_PATH .. "?.fnl"
+print("seting fennel path = " .. fennel.path)
 table.insert(package.loaders or package.searchers, fennel.searcher)
 
 return function() end

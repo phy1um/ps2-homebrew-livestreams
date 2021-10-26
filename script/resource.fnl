@@ -59,11 +59,11 @@
   :tiles nil
   :load (fn [self]
           (let [chars (D2D.loadTexture "host:characters.tga" 256 64)
-                font (D2D.loadTexture "host:bigfont.tga" 256 64)
-                tiles (D2D.loadTexture "host:tiles.tga" 256 64)]
+                font (D2D.loadTexture "host:bigfont.tga" 256 64)]
+                
               (set self.chars chars)
               (set self.font font)
-              (set self.tiles tiles)))
+              (set self.tiles nil)))
   : get-uv
   : player-frames
   : bat-frames

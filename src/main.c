@@ -6,6 +6,11 @@
 #include <draw.h>
 #include <graph.h>
 #include <math.h>
+#include <time.h>
+
+#include <sifrpc.h>
+#include <kernel.h>
+#include <debug.h>
 
 #include "log.h"
 
@@ -13,7 +18,43 @@
 #include "pad.h"
 #include "script.h"
 
-#define INIT_SCRIPT "host:script/ps2init.lua"
+#ifdef FROM_MASS
+#define SCRIPT_ROOT "mass:LGJ21/script/"
+#else
+#ifdef FROM_DISK
+#define SCRIPT_ROOT "cdrom0:\\"
+#else
+#define SCRIPT_ROOT "host:script/"
+#endif
+#endif
+
+#define INIT_SCRIPT SCRIPT_ROOT "ps2init.lua"
+#define MAIN_SCRIPT SCRIPT_ROOT "main.lua"
+
+#ifndef NO_SCREEN_PRINT
+#ifdef info
+#undef info
+#endif
+#define info(m, ...) printf("[INFO] " m "\n", ##__VA_ARGS__); scr_printf(m "\n", ##__VA_ARGS__)
+#endif
+
+void wait(unsigned long ms)
+{
+    clock_t start = clock();
+    clock_t now;
+    float diff = 0;
+    do {
+        now = clock();
+        diff = (float) (now - start) / (float) CLOCKS_PER_SEC;
+    }
+    while(diff*1000 < ms);
+}
+
+static int ps2lua_scr_print(lua_State *l) {
+  const char *msg = lua_tostring(l, 1);
+  scr_printf("LUA: %s\n", msg);
+  return 0;
+}
 
 int lua_tga_init(lua_State *l);
 
@@ -107,23 +148,31 @@ static int runfile(lua_State *l, const char *fname) {
 }
 
 int main(int argc, char *argv[]) {
+  //SifInitRpc(0);
+#ifndef NO_SCREEN_PRINT
+  init_scr();
+  scr_printf("===== PS2 Lisp Game Startup =====\n Created by Tom Marks\n  visit coding.tommarks.xyz\n");
+#endif
+
+  gs_init();
   info("startup - argc = %d", argc);
   for (int i = 0; i < argc; i++) {
     info("arg %d) %s", i, argv[i]);
   }
-  char *startup = "host:script/main.lua";
+  char *startup = MAIN_SCRIPT;
   if (argc > 1) {
     info("setting entrypoint to %s", argv[1]);
     startup = argv[1];
   }
 
-  gs_init();
-
   struct lua_State *L;
   L = luaL_newstate();
   if (!L) {
     logerr("failed to start lua state");
-    return -1;
+    while (1) {
+      logerr("dead");
+    }
+    //return -1;
   }
   luaL_openlibs(L);
 
@@ -138,10 +187,27 @@ int main(int argc, char *argv[]) {
 
   info("finished lua state setup");
 
-  runfile(L, INIT_SCRIPT);
-  runfile(L, startup);
+  lua_pushstring(L, SCRIPT_ROOT);
+  lua_setglobal(L, "PS2_SCRIPT_PATH");
+
+  info("binding screen print fn");
+  lua_pushcfunction(L, ps2lua_scr_print);
+  lua_setglobal(L, "dbgPrint");
+
+  if(runfile(L, INIT_SCRIPT)) {
+    info("failed to load file " INIT_SCRIPT);
+    wait(100 * 1000);
+    return -1;
+  }
+  if(runfile(L, startup)) {
+    info("failed to load file %s", startup);
+    wait(100 * 1000);
+    return -1;
+  }
 
   ps2luaprog_onstart(L);
+  lua_pushnil(L);
+  lua_setglobal(L, "dbgPrint");
 
   while (ps2luaprog_is_running(L)) {
     pad_frame_start();

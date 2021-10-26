@@ -37,7 +37,10 @@ else
     print("REQ-" .. p)
     return rr
   end
+  dbgPrint("loading fennel")
   local fennel = require("fennel")
-  fennel.dofile("host:script/main.fnl")
+  local mainfile = PS2_SCRIPT_PATH .. "main.fnl"
+  dbgPrint("running " .. mainfile)
+  fennel.dofile(mainfile)
 end
 -- dofile("host:script/bundle.lua")
