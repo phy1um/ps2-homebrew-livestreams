@@ -1,2 +1,0 @@
-
-dofile("script/main.lua")

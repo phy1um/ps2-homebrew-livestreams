@@ -77,7 +77,6 @@ lint:
 .PHONY: lualint
 lualint:
 	luac5.1 -p script/*.lua
-	./fennel -c script/*.fnl > /dev/null
 
 .PHONY: format
 format:

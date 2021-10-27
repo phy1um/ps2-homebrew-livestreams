@@ -38,6 +38,14 @@
 #define info(m, ...) printf("[INFO] " m "\n", ##__VA_ARGS__); scr_printf(m "\n", ##__VA_ARGS__)
 #endif
 
+#ifndef WELCOME_LINE 
+#define WELCOME_LINE "### PS2 Game Engine Test ###"
+#endif
+
+#ifndef AUTHOR
+#define AUTHOR "Tom Marks - coding.tommarks.xyz"
+#endif
+
 void wait(unsigned long ms)
 {
     clock_t start = clock();
@@ -49,6 +57,14 @@ void wait(unsigned long ms)
     }
     while(diff*1000 < ms);
 }
+
+#define fatal(msg, ...) \
+do{ \
+  logerr(msg, ##__VA_ARGS__);\
+  info("program died due to fatal error!");\
+  wait(5*1000);\
+  while(1) {}; }while(0)
+
 
 static int ps2lua_scr_print(lua_State *l) {
   const char *msg = lua_tostring(l, 1);
@@ -148,13 +164,14 @@ static int runfile(lua_State *l, const char *fname) {
 }
 
 int main(int argc, char *argv[]) {
-  //SifInitRpc(0);
+
 #ifndef NO_SCREEN_PRINT
   init_scr();
-  scr_printf("===== PS2 Lisp Game Startup =====\n Created by Tom Marks\n  visit coding.tommarks.xyz\n");
+  scr_printf("==========\n" WELCOME_LINE "\nBy " AUTHOR "\n==========\n\n");
 #endif
 
   gs_init();
+
   info("startup - argc = %d", argc);
   for (int i = 0; i < argc; i++) {
     info("arg %d) %s", i, argv[i]);
@@ -168,11 +185,7 @@ int main(int argc, char *argv[]) {
   struct lua_State *L;
   L = luaL_newstate();
   if (!L) {
-    logerr("failed to start lua state");
-    while (1) {
-      logerr("dead");
-    }
-    //return -1;
+    fatal("failed to startup lua state");
   }
   luaL_openlibs(L);
 
@@ -196,13 +209,11 @@ int main(int argc, char *argv[]) {
 
   if(runfile(L, INIT_SCRIPT)) {
     info("failed to load file " INIT_SCRIPT);
-    wait(100 * 1000);
-    return -1;
+    fatal("failed to load startup file " INIT_SCRIPT);
   }
   if(runfile(L, startup)) {
     info("failed to load file %s", startup);
-    wait(100 * 1000);
-    return -1;
+    fatal("failed to load startup file %s", startup);
   }
 
   ps2luaprog_onstart(L);
@@ -213,7 +224,6 @@ int main(int argc, char *argv[]) {
     pad_frame_start();
     pad_poll();
     dma_wait_fast();
-    // info("ON FRAME");
     ps2luaprog_onframe(L);
     // may be required? -- dma_wait_fast();
     trace("WAIT DRAW");

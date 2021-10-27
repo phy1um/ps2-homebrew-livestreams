@@ -1,7 +1,3 @@
-if love ~= nil then
-  return require("lovedraw")
-end
-
 local GIF = require("gif")
 local P = require("ps2const")
 local VRAM = require("vram")
