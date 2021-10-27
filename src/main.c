@@ -6,11 +6,10 @@
 #include <draw.h>
 #include <graph.h>
 #include <math.h>
-#include <time.h>
 
-#include <sifrpc.h>
-#include <kernel.h>
 #include <debug.h>
+#include <kernel.h>
+#include <sifrpc.h>
 
 #include "log.h"
 
@@ -35,10 +34,12 @@
 #ifdef info
 #undef info
 #endif
-#define info(m, ...) printf("[INFO] " m "\n", ##__VA_ARGS__); scr_printf(m "\n", ##__VA_ARGS__)
+#define info(m, ...)                                                           \
+  printf("[INFO] " m "\n", ##__VA_ARGS__);                                     \
+  scr_printf(m "\n", ##__VA_ARGS__)
 #endif
 
-#ifndef WELCOME_LINE 
+#ifndef WELCOME_LINE
 #define WELCOME_LINE "### PS2 Game Engine Test ###"
 #endif
 
@@ -46,25 +47,13 @@
 #define AUTHOR "Tom Marks - coding.tommarks.xyz"
 #endif
 
-void wait(unsigned long ms)
-{
-    clock_t start = clock();
-    clock_t now;
-    float diff = 0;
-    do {
-        now = clock();
-        diff = (float) (now - start) / (float) CLOCKS_PER_SEC;
-    }
-    while(diff*1000 < ms);
-}
-
-#define fatal(msg, ...) \
-do{ \
-  logerr(msg, ##__VA_ARGS__);\
-  info("program died due to fatal error!");\
-  wait(5*1000);\
-  while(1) {}; }while(0)
-
+#define fatal(msg, ...)                                                        \
+  do {                                                                         \
+    logerr(msg, ##__VA_ARGS__);                                                \
+    info("program died due to fatal error!");                                  \
+    while (1) {                                                                \
+    }                                                                          \
+  } while (0)
 
 static int ps2lua_scr_print(lua_State *l) {
   const char *msg = lua_tostring(l, 1);
@@ -207,11 +196,11 @@ int main(int argc, char *argv[]) {
   lua_pushcfunction(L, ps2lua_scr_print);
   lua_setglobal(L, "dbgPrint");
 
-  if(runfile(L, INIT_SCRIPT)) {
+  if (runfile(L, INIT_SCRIPT)) {
     info("failed to load file " INIT_SCRIPT);
     fatal("failed to load startup file " INIT_SCRIPT);
   }
-  if(runfile(L, startup)) {
+  if (runfile(L, startup)) {
     info("failed to load file %s", startup);
     fatal("failed to load startup file %s", startup);
   }
