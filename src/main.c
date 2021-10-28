@@ -6,6 +6,7 @@
 #include <draw.h>
 #include <graph.h>
 #include <math.h>
+#include <string.h>
 
 #include <debug.h>
 #include <kernel.h>
@@ -17,18 +18,8 @@
 #include "pad.h"
 #include "script.h"
 
-#ifdef FROM_MASS
-#define SCRIPT_ROOT "mass:LGJ21/script/"
-#else
-#ifdef FROM_DISK
-#define SCRIPT_ROOT "cdrom0:\\"
-#else
-#define SCRIPT_ROOT "host:script/"
-#endif
-#endif
-
-#define INIT_SCRIPT SCRIPT_ROOT "ps2init.lua"
-#define MAIN_SCRIPT SCRIPT_ROOT "main.lua"
+char init_script[150];
+char main_script[150];
 
 #ifndef NO_SCREEN_PRINT
 #ifdef info
@@ -54,6 +45,19 @@
     while (1) {                                                                \
     }                                                                          \
   } while (0)
+
+/**
+ * get the last index of a character in a string
+ */
+int last_index_of(const char *str, int str_len, char c) {
+  int ind = -1;
+  for (int i = 0; i < str_len; i++) {
+    if (str[i] == c) {
+      ind = i;
+    }
+  }
+  return ind;
+}
 
 static int ps2lua_scr_print(lua_State *l) {
   const char *msg = lua_tostring(l, 1);
@@ -165,7 +169,26 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < argc; i++) {
     info("arg %d) %s", i, argv[i]);
   }
-  char *startup = MAIN_SCRIPT;
+  char *base_path = "host:";
+  if (argc != 0) {
+    int len = strlen(argv[0]);
+    int last_sep = last_index_of(argv[0], len, '/');
+    if (last_sep == -1) {
+      last_sep = last_index_of(argv[0], len, '\\');
+    }
+    if (last_sep == -1) {
+      last_sep = last_index_of(argv[0], len, ':');
+    }
+    if (last_sep == -1) {
+      logerr("invalid ELF path in argv[0]: %s", argv[0]);
+    }
+    base_path = argv[0] + last_sep;
+  }
+
+  sprintf(init_script, "%sscript/ps2init.lua", base_path);
+  sprintf(main_script, "%sscript/main.lua", base_path);
+
+  char *startup = main_script;
   if (argc > 1) {
     info("setting entrypoint to %s", argv[1]);
     startup = argv[1];
@@ -189,16 +212,16 @@ int main(int argc, char *argv[]) {
 
   info("finished lua state setup");
 
-  lua_pushstring(L, SCRIPT_ROOT);
+  lua_pushstring(L, base_path);
   lua_setglobal(L, "PS2_SCRIPT_PATH");
 
   info("binding screen print fn");
   lua_pushcfunction(L, ps2lua_scr_print);
   lua_setglobal(L, "dbgPrint");
 
-  if (runfile(L, INIT_SCRIPT)) {
-    info("failed to load file " INIT_SCRIPT);
-    fatal("failed to load startup file " INIT_SCRIPT);
+  if (runfile(L, init_script)) {
+    info("failed to load file %s", init_script);
+    fatal("failed to load startup file %s", init_script);
   }
   if (runfile(L, startup)) {
     info("failed to load file %s", startup);
