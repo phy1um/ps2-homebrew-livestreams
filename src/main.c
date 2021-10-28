@@ -182,8 +182,11 @@ int main(int argc, char *argv[]) {
     if (last_sep == -1) {
       logerr("invalid ELF path in argv[0]: %s", argv[0]);
     }
-    strncpy(base_path, argv[0], last_sep);
-    base_path[last_sep + 1] = 0;
+    if (last_sep + 2 >= 30) {
+      fatal("base path too long!");
+    }
+    strncpy(base_path, argv[0], last_sep + 1);
+    base_path[last_sep + 2] = 0;
   }
 
   sprintf(init_script, "%sscript/ps2init.lua", base_path);
