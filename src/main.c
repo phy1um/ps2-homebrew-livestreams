@@ -183,7 +183,7 @@ int main(int argc, char *argv[]) {
       logerr("invalid ELF path in argv[0]: %s", argv[0]);
     }
     strncpy(base_path, argv[0], last_sep);
-    base_path[last_sep+1] = 0;
+    base_path[last_sep + 1] = 0;
   }
 
   sprintf(init_script, "%sscript/ps2init.lua", base_path);
