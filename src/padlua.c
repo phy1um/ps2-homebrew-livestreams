@@ -12,7 +12,6 @@
 #define pad_test(b, v)                                                         \
   do {                                                                         \
     if ((c & b)) {                                                             \
-      info("set button %d", v);                                                \
       btn_held[v] = 1;                                                         \
     }                                                                          \
   } while (0)
@@ -31,7 +30,7 @@ int button_held(int b) { return btn_held[b]; }
 unsigned char joy_axis_value(int a) { return joysticks[a]; }
 
 int pad_init() {
-  btn_held = memalign(128, 12 * sizeof(int));
+  btn_held = memalign(256, 12 * sizeof(int));
   pad_buffer = memalign(256, 256);
   if ((u32)pad_buffer & 0xf) {
     info("pad buffer was not 16byte aligned: %x", (int)pad_buffer);
@@ -93,6 +92,7 @@ void pad_poll() {
     pad_test(PAD_L2, BUTTON_L2);
     pad_test(PAD_R1, BUTTON_R1);
     pad_test(PAD_R2, BUTTON_R2);
+    pad_test(PAD_SELECT, BUTTON_SELECT);
     /*
     joysticks[AXIS_LEFT_X] = pad_read_space->ljoy_h;
     joysticks[AXIS_LEFT_Y] = pad_read_space->ljoy_v;
@@ -112,7 +112,7 @@ static int pad_lua_button_held(lua_State *l) {
   int button_id = lua_tointeger(l, 1);
   // TODO(Tom Marks): bounds check
   int v = btn_held[button_id];
-  info("TEST BTN %d = %d", button_id, v);
+  // info("TEST BTN %d = %d", button_id, v);
   lua_pushboolean(l, v);
   return 1;
 }
@@ -137,6 +137,11 @@ int pad_lua_init(lua_State *l) {
   bind_int(DPAD_RIGHT, "RIGHT");
   bind_int(DPAD_UP, "UP");
   bind_int(DPAD_DOWN, "DOWN");
+  bind_int(BUTTON_SELECT, "SELECT");
+  bind_int(BUTTON_L1, "L1");
+  bind_int(BUTTON_L2, "L2");
+  bind_int(BUTTON_R1, "R1");
+  bind_int(BUTTON_R2, "R2");
   lua_setglobal(l, "PAD");
   return 0;
 }

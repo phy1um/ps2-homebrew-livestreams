@@ -85,7 +85,7 @@ function loadTexture(fname, w, h)
 end
 
 function PS2PROG.start()
-  testTex = loadTexture("host:test.tga", 64, 64)
+  testTex = D2D.loadTexture("host:test.tga", 64, 64)
   fnt = loadTexture("host:bigfont.tga", 256, 64)
   DMA.init(DMA.GIF)
   gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)

@@ -26,9 +26,9 @@ function vram.size(w, h, psm, align)
 --  end
   local size = w*h
   if psm == GS.PSM16 or psm == GS.PSM16S or psm == GS.PSMZ16 or psm == GS.PSMZ16S then
-    math.floor(width*height*0.5)
-  elseif psm == GS.PSM8 then size = math.floor(width*height*2^-2)
-  elseif psm == GS.PSM4 then size = math.floor(width*height*2^-3) 
+    math.floor(w*h*0.5)
+  elseif psm == GS.PSM8 then size = math.floor(w*h*2^-2)
+  elseif psm == GS.PSM4 then size = math.floor(w*h*2^-3) 
   end
 
   return vpa(size, align)

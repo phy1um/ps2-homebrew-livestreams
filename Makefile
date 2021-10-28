@@ -4,10 +4,13 @@ BIN=dist/test.elf
 PS2HOST?=192.168.20.99
 
 DOCKER_IMG=ps2build
-DOCKERFLAGS=--user "$(1000):$(1000)"
+DOCKERFLAGS=--user "$(shell id -u):$(shell id -g)"
 DOCKER?=docker
 
 LUA_BRANCH=ee-v5.4.4
+
+VERSION?=$(shell git rev-parse --short HEAD)
+ISO_FLAGS?=-l --allow-lowercase -A "game by Tom Marks" -V "LGJ21 $(VERSION)"
 
 include .lintvars
 
@@ -34,16 +37,19 @@ src/test.elf:
 .PHONY: scripts
 scripts:
 	if ! [ -d dist/script ]; then mkdir -p dist/script; fi
-	cp script/* dist/script
+	cp -r script/* dist/script
 
 # TODO(Tom Marks): update ISO building to include everything in dist/
 $(ISO_TGT): $(EE_BIN)
-	mkisofs -l -o $(ISO_TGT) $(BIN) dist/SYSTEM.CNF
+	mkisofs $(ISO_FLAGS) -o $(ISO_TGT) ./dist/*
 
 .PHONY: docker-elf
 docker-elf:
 	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
 
+.PHONY: docker-iso
+docker-iso:
+	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
 
 .PHONY: clean
 clean: 
@@ -58,7 +64,7 @@ run: scripts
 # TODO(Tom Marks): this could be improved, hard-coded ELF name is bad
 .PHONY: runps2
 runps2: scripts
-	ps2client -h $(PS2HOST) -t 10 execee host:test.elf
+	cd dist && ps2client -h $(PS2HOST) -t 10 execee host:test.elf
 
 .PHONY: resetps2
 resetps2:

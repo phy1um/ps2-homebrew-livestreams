@@ -12,13 +12,13 @@ function writeToBuffer(b, ints)
 end
 
 function PS2PROG.start()
-  dma.init(dma.gif)
-  gs.setoutput(640, 448, gs.interlaced, gs.ntsc)
-  local fb1 = vram.buffer(640, 448, gs.psm24, 256)
-  local fb2 = vram.buffer(640, 448, gs.psm24, 256)
-  local zb = vram.buffer(640, 448, gs.psmz24, 256)
-  gs.setbuffers(fb1, fb2, zb)
-  d2d:clearcolour(0x2b, 0x2b, 0x2b)
+  DMA.init(DMA.GIF)
+  GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
+  local fb1 = VRAM.buffer(640, 448, GS.PSM24, 256)
+  local fb2 = VRAM.buffer(640, 448, GS.PSM24, 256)
+  local zb = VRAM.buffer(640, 448, GS.PSMZ24, 256)
+  GS.setBuffers(fb1, fb2, zb)
+  D2D:clearColour(0x2b, 0x2b, 0x2b)
 
 
 end
