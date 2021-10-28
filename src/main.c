@@ -18,9 +18,11 @@
 #include "pad.h"
 #include "script.h"
 
-char base_path[30] = "host:";
-char init_script[150];
-char main_script[150];
+#define BASE_PATH_MAX_LEN 60
+#define FILE_NAME_MAX_LEN 150
+char base_path[BASE_PATH_MAX_LEN] = "host:";
+char init_script[FILE_NAME_MAX_LEN];
+char main_script[FILE_NAME_MAX_LEN];
 
 #ifndef NO_SCREEN_PRINT
 #ifdef info
@@ -97,8 +99,8 @@ int ps2luaprog_init(lua_State *l) {
 int ps2luaprog_onstart(lua_State *l) {
   lua_getglobal(l, "PS2PROG");
   lua_pushstring(l, "start");
-  lua_gettable(l, -2);
-  int type = lua_type(l, -1);
+  // lua_gettable(l, -2);
+  // int type = lua_type(l, -1);
   // info("start fn has type :: %s (%d)", lua_typename(l, type), type);
   int rc = lua_pcall(l, 0, 0, 0);
   if (rc) {
@@ -112,8 +114,8 @@ int ps2luaprog_onstart(lua_State *l) {
 int ps2luaprog_onframe(lua_State *l) {
   lua_getglobal(l, "PS2PROG");
   lua_pushstring(l, "frame");
-  lua_gettable(l, -2);
-  int type = lua_type(l, -1);
+  // lua_gettable(l, -2);
+  // int type = lua_type(l, -1);
   // info("frame fn has type :: %s (%d)", lua_typename(l, type), type);
   //
   int rc = lua_pcall(l, 0, 0, 0);
@@ -182,15 +184,15 @@ int main(int argc, char *argv[]) {
     if (last_sep == -1) {
       logerr("invalid ELF path in argv[0]: %s", argv[0]);
     }
-    if (last_sep + 2 >= 30) {
+    if (last_sep + 2 >= BASE_PATH_MAX_LEN) {
       fatal("base path too long!");
     }
     strncpy(base_path, argv[0], last_sep + 1);
     base_path[last_sep + 2] = 0;
   }
 
-  sprintf(init_script, "%sscript/ps2init.lua", base_path);
-  sprintf(main_script, "%sscript/main.lua", base_path);
+  snprintf(init_script, FILE_NAME_MAX_LEN, "%sscript/ps2init.lua", base_path);
+  snprintf(main_script, FILE_NAME_MAX_LEN, "%sscript/main.lua", base_path);
 
   char *startup = main_script;
   if (argc > 1) {
