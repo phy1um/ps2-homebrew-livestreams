@@ -18,6 +18,7 @@
 #include "pad.h"
 #include "script.h"
 
+char base_path[30] = "host:";
 char init_script[150];
 char main_script[150];
 
@@ -169,7 +170,6 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < argc; i++) {
     info("arg %d) %s", i, argv[i]);
   }
-  char *base_path = "host:";
   if (argc != 0) {
     int len = strlen(argv[0]);
     int last_sep = last_index_of(argv[0], len, '/');
@@ -182,7 +182,8 @@ int main(int argc, char *argv[]) {
     if (last_sep == -1) {
       logerr("invalid ELF path in argv[0]: %s", argv[0]);
     }
-    base_path = argv[0] + last_sep;
+    strncpy(base_path, argv[0], last_sep);
+    base_path[last_sep+1] = 0;
   }
 
   sprintf(init_script, "%sscript/ps2init.lua", base_path);
