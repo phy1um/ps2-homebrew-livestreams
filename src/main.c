@@ -6,6 +6,11 @@
 #include <draw.h>
 #include <graph.h>
 #include <math.h>
+#include <string.h>
+
+#include <debug.h>
+#include <kernel.h>
+#include <sifrpc.h>
 
 #include "log.h"
 
@@ -13,7 +18,46 @@
 #include "pad.h"
 #include "script.h"
 
-#define INIT_SCRIPT "host:script/ps2init.lua"
+#define BASE_PATH_MAX_LEN 60
+#define FILE_NAME_MAX_LEN 150
+char base_path[BASE_PATH_MAX_LEN] = "host:";
+char init_script[FILE_NAME_MAX_LEN];
+char main_script[FILE_NAME_MAX_LEN];
+
+#ifndef WELCOME_LINE
+#define WELCOME_LINE "### PS2 Game Engine Test ###"
+#endif
+
+#ifndef AUTHOR
+#define AUTHOR "Tom Marks - coding.tommarks.xyz"
+#endif
+
+#define fatal(msg, ...)                                                        \
+  do {                                                                         \
+    logerr(msg, ##__VA_ARGS__);                                                \
+    info("program died due to fatal error!");                                  \
+    while (1) {                                                                \
+    }                                                                          \
+  } while (0)
+
+/**
+ * get the last index of a character in a string
+ */
+int last_index_of(const char *str, int str_len, char c) {
+  int ind = -1;
+  for (int i = 0; i < str_len; i++) {
+    if (str[i] == c) {
+      ind = i;
+    }
+  }
+  return ind;
+}
+
+static int ps2lua_scr_print(lua_State *l) {
+  const char *msg = lua_tostring(l, 1);
+  scr_printf("LUA: %s\n", msg);
+  return 0;
+}
 
 int lua_tga_init(lua_State *l);
 
@@ -47,8 +91,11 @@ int ps2luaprog_onstart(lua_State *l) {
   lua_getglobal(l, "PS2PROG");
   lua_pushstring(l, "start");
   lua_gettable(l, -2);
+  /*
   int type = lua_type(l, -1);
-  // info("start fn has type :: %s (%d)", lua_typename(l, type), type);
+  info("start fn has type :: %s (%d)", lua_typename(l, type), type);
+  */
+
   int rc = lua_pcall(l, 0, 0, 0);
   if (rc) {
     const char *err = lua_tostring(l, -1);
@@ -62,9 +109,11 @@ int ps2luaprog_onframe(lua_State *l) {
   lua_getglobal(l, "PS2PROG");
   lua_pushstring(l, "frame");
   lua_gettable(l, -2);
+  /*
   int type = lua_type(l, -1);
-  // info("frame fn has type :: %s (%d)", lua_typename(l, type), type);
-  //
+  info("frame fn has type :: %s (%d)", lua_typename(l, type), type);
+  */
+
   int rc = lua_pcall(l, 0, 0, 0);
 
   if (rc) {
@@ -75,30 +124,41 @@ int ps2luaprog_onframe(lua_State *l) {
   return 0;
 }
 
+// Only screen print stuff during startup
+#ifndef NO_SCREEN_PRINT
+#ifdef info
+#undef info
+#endif
+#define info(m, ...)                                                           \
+  printf("[INFO] " m "\n", ##__VA_ARGS__);                                     \
+  scr_printf(m "\n", ##__VA_ARGS__)
+#endif
+
 int ps2luaprog_is_running(lua_State *l) { return 1; }
 
 static int runfile(lua_State *l, const char *fname) {
   info("running lua file %s", fname);
   int rc = luaL_loadfile(l, fname);
   if (rc == LUA_ERRSYNTAX) {
-    logerr("failed to load %s: syntax error", fname);
+    info("failed to load %s: syntax error", fname);
     const char *err = lua_tostring(l, -1);
     logerr("err: %s", err);
     return -1;
   } else if (rc == LUA_ERRMEM) {
-    logerr("faild to allocate memory for %s", fname);
+    info("faild to allocate memory for %s", fname);
     return -1;
   } else if (rc == LUA_ERRFILE) {
-    logerr("could not open/read file %s", fname);
+    info("could not open/read file %s", fname);
     return -1;
   } else if (rc) {
-    logerr("unknown error loading %s", fname);
+    info("unknown error loading %s", fname);
     return -1;
   }
 
   rc = lua_pcall(l, 0, 0, 0);
   if (rc) {
     const char *err = lua_tostring(l, -1);
+    info("lua error: %s", err);
     logerr("lua execution error -- %s", err);
     return -1;
   }
@@ -107,23 +167,50 @@ static int runfile(lua_State *l, const char *fname) {
 }
 
 int main(int argc, char *argv[]) {
+
+#ifndef NO_SCREEN_PRINT
+  init_scr();
+  scr_printf("==========\n" WELCOME_LINE "\nBy " AUTHOR "\n==========\n\n");
+#endif
+
+  gs_init();
+
   info("startup - argc = %d", argc);
   for (int i = 0; i < argc; i++) {
     info("arg %d) %s", i, argv[i]);
   }
-  char *startup = "host:script/main.lua";
+  if (argc != 0) {
+    int len = strlen(argv[0]);
+    int last_sep = last_index_of(argv[0], len, '/');
+    if (last_sep == -1) {
+      last_sep = last_index_of(argv[0], len, '\\');
+    }
+    if (last_sep == -1) {
+      last_sep = last_index_of(argv[0], len, ':');
+    }
+    if (last_sep == -1) {
+      logerr("invalid ELF path in argv[0]: %s", argv[0]);
+    }
+    if (last_sep + 2 >= BASE_PATH_MAX_LEN) {
+      fatal("base path too long!");
+    }
+    strncpy(base_path, argv[0], last_sep + 1);
+    base_path[last_sep + 2] = 0;
+  }
+
+  snprintf(init_script, FILE_NAME_MAX_LEN, "%sscript/ps2init.lua", base_path);
+  snprintf(main_script, FILE_NAME_MAX_LEN, "%sscript/main.lua", base_path);
+
+  char *startup = main_script;
   if (argc > 1) {
     info("setting entrypoint to %s", argv[1]);
     startup = argv[1];
   }
 
-  gs_init();
-
   struct lua_State *L;
   L = luaL_newstate();
   if (!L) {
-    logerr("failed to start lua state");
-    return -1;
+    fatal("failed to startup lua state");
   }
   luaL_openlibs(L);
 
@@ -138,24 +225,40 @@ int main(int argc, char *argv[]) {
 
   info("finished lua state setup");
 
-  runfile(L, INIT_SCRIPT);
-  runfile(L, startup);
+  lua_pushstring(L, base_path);
+  lua_setglobal(L, "PS2_SCRIPT_PATH");
+
+  info("binding screen print fn");
+  lua_pushcfunction(L, ps2lua_scr_print);
+  lua_setglobal(L, "dbgPrint");
+
+  if (runfile(L, init_script)) {
+    info("failed to run file %s", init_script);
+    fatal("failed to run startup file %s", init_script);
+  }
+  if (runfile(L, startup)) {
+    info("failed to run file %s", startup);
+    fatal("failed to run startup file %s", startup);
+  }
 
   ps2luaprog_onstart(L);
+  lua_pushnil(L);
+  lua_setglobal(L, "dbgPrint");
+
   while (ps2luaprog_is_running(L)) {
     pad_frame_start();
     pad_poll();
     dma_wait_fast();
-    info("ON FRAME");
     ps2luaprog_onframe(L);
     // may be required? -- dma_wait_fast();
-    info("WAIT DRAW");
+    trace("WAIT DRAW");
     draw_wait_finish();
-    info("WAIT VSYNC");
+    trace("WAIT VSYNC");
     graph_wait_vsync();
-    info("FLIP");
+    trace("FLIP");
     gs_flip();
-    info("FLIPOUT");
+    trace("FLIPOUT");
   }
+
   info("main loop ended");
 }

@@ -1,7 +1,9 @@
-# PS2 3D Test - by Tom Marks
+# PS2 Engine
 
-This is a package containing a 3D experiment for the Playstation 2.
+This is a miscelaneous PS2 executable engine by Tom Marks.
 
 It contains an ELF file, which can be loaded into the PCSX2 or real hardware
 using a Homebrew launcher such as uLaunchELF, wLaunchELF or ps2link.
+
+Visit coding.tommarks.xyz
 
