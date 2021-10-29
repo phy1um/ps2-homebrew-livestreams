@@ -109,11 +109,11 @@ int ps2luaprog_onframe(lua_State *l) {
   lua_getglobal(l, "PS2PROG");
   lua_pushstring(l, "frame");
   lua_gettable(l, -2);
-  /* 
+  /*
   int type = lua_type(l, -1);
   info("frame fn has type :: %s (%d)", lua_typename(l, type), type);
   */
-  
+
   int rc = lua_pcall(l, 0, 0, 0);
 
   if (rc) {
@@ -133,7 +133,6 @@ int ps2luaprog_onframe(lua_State *l) {
   printf("[INFO] " m "\n", ##__VA_ARGS__);                                     \
   scr_printf(m "\n", ##__VA_ARGS__)
 #endif
-
 
 int ps2luaprog_is_running(lua_State *l) { return 1; }
 
