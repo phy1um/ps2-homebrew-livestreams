@@ -24,15 +24,6 @@ char base_path[BASE_PATH_MAX_LEN] = "host:";
 char init_script[FILE_NAME_MAX_LEN];
 char main_script[FILE_NAME_MAX_LEN];
 
-#ifndef NO_SCREEN_PRINT
-#ifdef info
-#undef info
-#endif
-#define info(m, ...)                                                           \
-  printf("[INFO] " m "\n", ##__VA_ARGS__);                                     \
-  scr_printf(m "\n", ##__VA_ARGS__)
-#endif
-
 #ifndef WELCOME_LINE
 #define WELCOME_LINE "### PS2 Game Engine Test ###"
 #endif
@@ -99,9 +90,12 @@ int ps2luaprog_init(lua_State *l) {
 int ps2luaprog_onstart(lua_State *l) {
   lua_getglobal(l, "PS2PROG");
   lua_pushstring(l, "start");
-  // lua_gettable(l, -2);
-  // int type = lua_type(l, -1);
-  // info("start fn has type :: %s (%d)", lua_typename(l, type), type);
+  lua_gettable(l, -2);
+  /*
+  int type = lua_type(l, -1);
+  info("start fn has type :: %s (%d)", lua_typename(l, type), type);
+  */
+
   int rc = lua_pcall(l, 0, 0, 0);
   if (rc) {
     const char *err = lua_tostring(l, -1);
@@ -114,10 +108,12 @@ int ps2luaprog_onstart(lua_State *l) {
 int ps2luaprog_onframe(lua_State *l) {
   lua_getglobal(l, "PS2PROG");
   lua_pushstring(l, "frame");
-  // lua_gettable(l, -2);
-  // int type = lua_type(l, -1);
-  // info("frame fn has type :: %s (%d)", lua_typename(l, type), type);
-  //
+  lua_gettable(l, -2);
+  /* 
+  int type = lua_type(l, -1);
+  info("frame fn has type :: %s (%d)", lua_typename(l, type), type);
+  */
+  
   int rc = lua_pcall(l, 0, 0, 0);
 
   if (rc) {
@@ -128,30 +124,42 @@ int ps2luaprog_onframe(lua_State *l) {
   return 0;
 }
 
+// Only screen print stuff during startup
+#ifndef NO_SCREEN_PRINT
+#ifdef info
+#undef info
+#endif
+#define info(m, ...)                                                           \
+  printf("[INFO] " m "\n", ##__VA_ARGS__);                                     \
+  scr_printf(m "\n", ##__VA_ARGS__)
+#endif
+
+
 int ps2luaprog_is_running(lua_State *l) { return 1; }
 
 static int runfile(lua_State *l, const char *fname) {
   info("running lua file %s", fname);
   int rc = luaL_loadfile(l, fname);
   if (rc == LUA_ERRSYNTAX) {
-    logerr("failed to load %s: syntax error", fname);
+    info("failed to load %s: syntax error", fname);
     const char *err = lua_tostring(l, -1);
     logerr("err: %s", err);
     return -1;
   } else if (rc == LUA_ERRMEM) {
-    logerr("faild to allocate memory for %s", fname);
+    info("faild to allocate memory for %s", fname);
     return -1;
   } else if (rc == LUA_ERRFILE) {
-    logerr("could not open/read file %s", fname);
+    info("could not open/read file %s", fname);
     return -1;
   } else if (rc) {
-    logerr("unknown error loading %s", fname);
+    info("unknown error loading %s", fname);
     return -1;
   }
 
   rc = lua_pcall(l, 0, 0, 0);
   if (rc) {
     const char *err = lua_tostring(l, -1);
+    info("lua error: %s", err);
     logerr("lua execution error -- %s", err);
     return -1;
   }
@@ -226,12 +234,12 @@ int main(int argc, char *argv[]) {
   lua_setglobal(L, "dbgPrint");
 
   if (runfile(L, init_script)) {
-    info("failed to load file %s", init_script);
-    fatal("failed to load startup file %s", init_script);
+    info("failed to run file %s", init_script);
+    fatal("failed to run startup file %s", init_script);
   }
   if (runfile(L, startup)) {
-    info("failed to load file %s", startup);
-    fatal("failed to load startup file %s", startup);
+    info("failed to run file %s", startup);
+    fatal("failed to run startup file %s", startup);
   }
 
   ps2luaprog_onstart(L);
