@@ -91,7 +91,7 @@ static int buffer_settex(lua_State *l) {
 
   int v1 = tbp | (tbw << 14) | (psm << 20) | (tw << 26) | ((th & 0x3) << 30);
   // TODO(Tom Marks): 0x5??? i must mean 0x4
-  int v2 = ((th & 0x5) >> 2) | (tcc << 1) | (tfx << 2);
+  int v2 = ((th & 0x4) >> 2) | (tcc << 1) | (tfx << 2);
   int v3 = 0x6 + reg;
   int v4 = 0;
   *(base) = v1;
