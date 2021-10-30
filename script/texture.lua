@@ -20,7 +20,7 @@ function PS2PROG.start()
 end
 
 
-local uvc = {0.5, 1, 2.0}
+local uvc = {1, 2.0}
 local uvi = 0
 local nextPressed = false
 
