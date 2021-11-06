@@ -43,6 +43,9 @@ end
 
 local r = 0xff
 local g = 0xff
+local ffps = 0
+local fpsr = 10
+local cc = 0
 
 function PS2PROG.frame()
   D2D:frameStart(gs)
@@ -58,6 +61,14 @@ function PS2PROG.frame()
   else 
     g = 0
     r = 0xff
+  end
+  if FPS ~= nil then
+    ffps = ffps + FPS
+    cc = cc + 1
+    if cc > fpsr then
+      print("FPS: " .. (ffps/fpsr))
+      cc = 0
+    end
   end
   --db:free()
 end

@@ -7,6 +7,7 @@
 #include <graph.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 #include <debug.h>
 #include <kernel.h>
@@ -17,6 +18,15 @@
 #include "gs.h"
 #include "pad.h"
 #include "script.h"
+
+static clock_t __time_now;
+
+#define BENCH_START(vname) clock_t vname = clock()
+#define BENCH_INFO(vname, m) do { \
+  __time_now = clock(); \
+  info(m, ((float)__time_now - vname) / (float)CLOCKS_PER_SEC); \
+}while(0)
+  
 
 #define BASE_PATH_MAX_LEN 60
 #define FILE_NAME_MAX_LEN 150
@@ -88,6 +98,7 @@ int ps2luaprog_init(lua_State *l) {
 }
 
 int ps2luaprog_onstart(lua_State *l) {
+  BENCH_START(timer);
   lua_getglobal(l, "PS2PROG");
   lua_pushstring(l, "start");
   lua_gettable(l, -2);
@@ -101,6 +112,7 @@ int ps2luaprog_onstart(lua_State *l) {
     const char *err = lua_tostring(l, -1);
     logerr("lua execution error (start event) -- %s", err);
   }
+  BENCH_INFO(timer, " PS2PROG onstart in %f");
 
   return 0;
 }
@@ -137,6 +149,7 @@ int ps2luaprog_onframe(lua_State *l) {
 int ps2luaprog_is_running(lua_State *l) { return 1; }
 
 static int runfile(lua_State *l, const char *fname) {
+  BENCH_START(runfile_time);
   info("running lua file %s", fname);
   int rc = luaL_loadfile(l, fname);
   if (rc == LUA_ERRSYNTAX) {
@@ -154,7 +167,9 @@ static int runfile(lua_State *l, const char *fname) {
     info("unknown error loading %s", fname);
     return -1;
   }
+  BENCH_INFO(runfile_time, " - load time %f");
 
+  BENCH_START(call_time);
   rc = lua_pcall(l, 0, 0, 0);
   if (rc) {
     const char *err = lua_tostring(l, -1);
@@ -162,6 +177,9 @@ static int runfile(lua_State *l, const char *fname) {
     logerr("lua execution error -- %s", err);
     return -1;
   }
+  BENCH_INFO(call_time, " - pcall time %f");
+
+  BENCH_INFO(runfile_time, " - total run time %f");
 
   return 0;
 }
@@ -207,6 +225,8 @@ int main(int argc, char *argv[]) {
     startup = argv[1];
   }
 
+  BENCH_START(lua_init_time);
+
   struct lua_State *L;
   L = luaL_newstate();
   if (!L) {
@@ -223,6 +243,7 @@ int main(int argc, char *argv[]) {
   // TODO(Tom Marks): better abstraction for drawlua_*
   drawlua_init(L);
 
+  BENCH_INFO(lua_init_time, "lua startup time = %f");
   info("finished lua state setup");
 
   lua_pushstring(L, base_path);
@@ -245,6 +266,9 @@ int main(int argc, char *argv[]) {
   lua_pushnil(L);
   lua_setglobal(L, "dbgPrint");
 
+
+  int frame_count = 0;
+  clock_t next_fps_report = clock() + CLOCKS_PER_SEC;
   while (ps2luaprog_is_running(L)) {
     pad_frame_start();
     pad_poll();
@@ -258,6 +282,14 @@ int main(int argc, char *argv[]) {
     trace("FLIP");
     gs_flip();
     trace("FLIPOUT");
+    frame_count += 1;
+    clock_t now = clock();
+    if (now > next_fps_report) {
+      lua_pushinteger(L, frame_count);
+      lua_setglobal(L, "FPS");
+      frame_count = 0;
+      next_fps_report = now + CLOCKS_PER_SEC;
+    }
   }
 
   info("main loop ended");
