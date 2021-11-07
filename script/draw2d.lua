@@ -19,17 +19,36 @@ local draw = {
   buf = {},
   kc = 0,
   rawtri = 0,
+  dmaTagQws = 0,
+  dmaTagQwPtr = 0,
   prev = {
     kc = 0,
     rawtri = 0,
   }
 }
 
+function draw:newCnt()
+  print("DMA CNT = " .. DMA.CNT)
+  self.dmaTagQwPtr = self.buf.head
+  self.buf:pushint(DMA.CNT)
+  self.buf:pushint(0)
+  self.buf:pushint(0)
+  self.buf:pushint(0)
+end
+
+function draw:dmaEnd()
+  self.buf:pushint(DMA.END)
+  self.buf:pushint(0)
+  self.buf:pushint(0)
+  self.buf:pushint(0)
+end
+
 function draw:newBuffer()
   self.state = DRAW_NONE
   self.loopCount = 0
   self.tagLoopPtr = -1
   self.buf = RM.getDrawBuffer(DB_SIZE)
+  self:newCnt()
 end
 
 function draw:getBuffer()
@@ -110,7 +129,14 @@ end
 
 function draw:kick()
   draw:updateLastTagLoops()
-  DMA.send(self.buf, DMA.GIF)
+  local lw = self.buf:read(self.dmaTagQwPtr)
+  local qwc = math.floor(self.buf.head / 16)
+  if self.buf.head % 16 ~= 0 then
+    qwc = qwc + 1
+  end
+  self.buf:write(self.dmaTagQwPtr, lw + qwc - 2)
+  draw:dmaEnd()
+  DMA.sendChain(self.buf, DMA.GIF)
   self:newBuffer()
   self.kc = self.kc + 1
 end
@@ -168,7 +194,7 @@ function draw.loadTexture(fname, w, h)
     print("LOAD TEX: copy from TT " .. tb*blocksize*16 .. " to IB " .. ib.head .. " -- " .. blocksize*16)
     tt.data:copy(ib, ib.head, tb*blocksize*16, blocksize*16)
     ib.head = ib.head + blocksize*16
-    DMA.send(ib, DMA.GIF)
+    DMA.sendNormal(ib, DMA.GIF)
     ib = RM.getDrawBuffer(5000)
     packets = packets - 1
     tb = tb + 1
@@ -183,7 +209,7 @@ function draw.loadTexture(fname, w, h)
   end
 
   GIF.texflush(ib)
-  DMA.send(ib, DMA.GIF)
+  DMA.sendNormal(ib, DMA.GIF)
   print("LOAD TEX: DMA send")
 
   return tt
