@@ -91,7 +91,7 @@ int dma_lua_init(lua_State *l) {
   lua_pushinteger(l, DMA_CHANNEL_VIF1);
   lua_setfield(l, -2, "VIF1");
 
-  lua_pushinteger(l, 1 << 24); 
+  lua_pushinteger(l, 1 << 24);
   lua_setfield(l, -2, "CNT");
   lua_pushinteger(l, 7 << 24);
   lua_setfield(l, -2, "END");
@@ -101,7 +101,6 @@ int dma_lua_init(lua_State *l) {
   lua_setfield(l, -2, "REFE");
   lua_pushinteger(l, 2 << 24);
   lua_setfield(l, -2, "NEXT");
-
 
   lua_setglobal(l, "DMA");
   return 0;

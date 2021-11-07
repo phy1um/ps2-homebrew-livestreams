@@ -22,11 +22,11 @@
 static clock_t __time_now;
 
 #define BENCH_START(vname) clock_t vname = clock()
-#define BENCH_INFO(vname, m) do { \
-  __time_now = clock(); \
-  info(m, ((float)__time_now - vname) / (float)CLOCKS_PER_SEC); \
-}while(0)
-  
+#define BENCH_INFO(vname, m)                                                   \
+  do {                                                                         \
+    __time_now = clock();                                                      \
+    info(m, ((float)__time_now - vname) / (float)CLOCKS_PER_SEC);              \
+  } while (0)
 
 #define BASE_PATH_MAX_LEN 60
 #define FILE_NAME_MAX_LEN 150
@@ -268,7 +268,6 @@ int main(int argc, char *argv[]) {
 
   lua_pushinteger(L, 0);
   lua_setglobal(L, "FPS");
-
 
   int frame_count = 0;
   clock_t next_fps_report = clock() + CLOCKS_PER_SEC;
