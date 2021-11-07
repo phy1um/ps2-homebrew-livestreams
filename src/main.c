@@ -266,6 +266,9 @@ int main(int argc, char *argv[]) {
   lua_pushnil(L);
   lua_setglobal(L, "dbgPrint");
 
+  lua_pushinteger(L, 0);
+  lua_setglobal(L, "FPS");
+
 
   int frame_count = 0;
   clock_t next_fps_report = clock() + CLOCKS_PER_SEC;
@@ -275,13 +278,13 @@ int main(int argc, char *argv[]) {
     dma_wait_fast();
     ps2luaprog_onframe(L);
     // may be required? -- dma_wait_fast();
-    trace("WAIT DRAW");
+    info("WAIT DRAW");
     draw_wait_finish();
-    trace("WAIT VSYNC");
+    info("WAIT VSYNC");
     graph_wait_vsync();
-    trace("FLIP");
+    info("FLIP");
     gs_flip();
-    trace("FLIPOUT");
+    info("FLIPOUT");
     frame_count += 1;
     clock_t now = clock();
     if (now > next_fps_report) {

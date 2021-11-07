@@ -4,6 +4,8 @@
 #include <dma_tags.h>
 #include <tamtypes.h>
 
+#include <kernel.h>
+
 #include "log.h"
 
 static int dma_init(lua_State *l) {
@@ -24,7 +26,7 @@ int print_buffer(qword_t *b, int len) {
   return 0;
 }
 
-static int dma_send_buffer(lua_State *l) {
+static int dma_send_normal_buffer(lua_State *l) {
   // buffer is arg 1
   lua_pushstring(l, "ptr");
   lua_gettable(l, 1);
@@ -44,6 +46,27 @@ static int dma_send_buffer(lua_State *l) {
   return 0;
 }
 
+static int dma_send_chain_buffer(lua_State *l) {
+  // buffer is arg 1
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 1);
+  void *ptr = lua_touserdata(l, -1);
+  lua_pushstring(l, "head");
+  lua_gettable(l, 1);
+  int head = lua_tointeger(l, -1);
+
+  // channel is arg 2
+  int channel = lua_tointeger(l, 2);
+
+  // print buffer for debugging
+  print_buffer(ptr, head / 16);
+
+  // info("DMA send :: sending %d qwords on channel %d", head/16, channel);
+  dma_channel_send_chain(channel, ptr, head / 16, 0, 0);
+  FlushCache(0);
+  return 0;
+}
+
 static int dma_wait(lua_State *l) {
   dma_wait_fast();
 
@@ -54,8 +77,10 @@ int dma_lua_init(lua_State *l) {
   lua_createtable(l, 0, 5);
   lua_pushcfunction(l, dma_wait);
   lua_setfield(l, -2, "waitFast");
-  lua_pushcfunction(l, dma_send_buffer);
-  lua_setfield(l, -2, "send");
+  lua_pushcfunction(l, dma_send_normal_buffer);
+  lua_setfield(l, -2, "sendNormal");
+  lua_pushcfunction(l, dma_send_chain_buffer);
+  lua_setfield(l, -2, "sendChain");
   lua_pushcfunction(l, dma_init);
   lua_setfield(l, -2, "init");
 
@@ -65,6 +90,18 @@ int dma_lua_init(lua_State *l) {
   lua_setfield(l, -2, "VIF0");
   lua_pushinteger(l, DMA_CHANNEL_VIF1);
   lua_setfield(l, -2, "VIF1");
+
+  lua_pushinteger(l, 1 << 24); 
+  lua_setfield(l, -2, "CNT");
+  lua_pushinteger(l, 7 << 24);
+  lua_setfield(l, -2, "END");
+  lua_pushinteger(l, 3 << 24);
+  lua_setfield(l, -2, "REF");
+  lua_pushinteger(l, 0);
+  lua_setfield(l, -2, "REFE");
+  lua_pushinteger(l, 2 << 24);
+  lua_setfield(l, -2, "NEXT");
+
 
   lua_setglobal(l, "DMA");
   return 0;
