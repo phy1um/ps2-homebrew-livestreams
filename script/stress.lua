@@ -30,7 +30,7 @@ function PS2PROG.start()
   GS.setBuffers(fb1, fb2, zb)
   D2D:clearColour(0x2b, 0x2b, 0x2b)
 
-  local dd = 100
+  local dd = 2
   local dx = math.floor(640/dd)
   local dy = math.floor(448/dd)
   for x=-320,320,dx do

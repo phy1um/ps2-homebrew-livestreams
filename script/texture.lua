@@ -4,19 +4,7 @@ local P = require("ps2const")
 local D2D = require("draw2d")
 local VRAM = require("vram")
 
-function makeTex(w, h, fill)
-  local t = {}
-  for x=0,w,1 do
-    for y=0,h,1 do
-      t[y*w + x] = fill
-    end
-  end
-  return t
-end
-
-
 local gs = nil
---local tex = makeTex(64, 64, 0x800000ff)
 local testTex = {}
 local fnt = nil
 
@@ -41,7 +29,7 @@ function PS2PROG.frame()
   D2D:sprite(testTex, xx, 200, 200, 200, 0, 0, 1, 1)
   D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)
   D2D:frameEnd(gs)
-  print("tris/frame = " .. D2D.prev.rawtri .. ", KC=" .. D2D.prev.kc)
+  print("tris/frame = " .. D2D.prev.rawtri .. ", KC=" .. D2D.prev.kc .. ", FPS=" .. FPS)
 
   if PAD.held(PAD.LEFT) then xx = xx - 50*dt end
   if PAD.held(PAD.RIGHT) then xx = xx + 50*dt end
