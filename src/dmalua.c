@@ -59,7 +59,7 @@ static int dma_send_chain_buffer(lua_State *l) {
   int channel = lua_tointeger(l, 2);
 
   // print buffer for debugging
-  print_buffer(ptr, head / 16);
+  // print_buffer(ptr, head / 16);
 
   // info("DMA send :: sending %d qwords on channel %d", head/16, channel);
   dma_channel_send_chain(channel, ptr, head / 16, 0, 0);
@@ -91,15 +91,15 @@ int dma_lua_init(lua_State *l) {
   lua_pushinteger(l, DMA_CHANNEL_VIF1);
   lua_setfield(l, -2, "VIF1");
 
-  lua_pushinteger(l, 1 << 24);
+  lua_pushinteger(l, 1 << 28);
   lua_setfield(l, -2, "CNT");
-  lua_pushinteger(l, 7 << 24);
+  lua_pushinteger(l, 7 << 28);
   lua_setfield(l, -2, "END");
-  lua_pushinteger(l, 3 << 24);
+  lua_pushinteger(l, 3 << 28);
   lua_setfield(l, -2, "REF");
   lua_pushinteger(l, 0);
   lua_setfield(l, -2, "REFE");
-  lua_pushinteger(l, 2 << 24);
+  lua_pushinteger(l, 2 << 28);
   lua_setfield(l, -2, "NEXT");
 
   lua_setglobal(l, "DMA");
