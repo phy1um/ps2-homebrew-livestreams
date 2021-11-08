@@ -10,10 +10,11 @@ local fnt = nil
 
 
 function PS2PROG.start()
-  testTex = D2D.loadTexture("host:test.tga", 64, 64)
-  fnt = D2D.loadTexture("host:bigfont.tga", 256, 64)
   DMA.init(DMA.GIF)
-  gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
+  testTex = D2D:loadTexture("host:test.tga", 64, 64)
+  fnt = D2D:loadTexture("host:bigfont.tga", 256, 64)
+  print("loaded test=" .. testTex.basePtr .. ", font=" .. fnt.basePtr)
+  gs = GS.setOutput(640, 448, GS.NONINTERLACED, GS.NTSC)
   local fb1 = VRAM.buffer(640, 448, GS.PSM24, 256)
   local fb2 = VRAM.buffer(640, 448, GS.PSM24, 256)
   local zb = VRAM.buffer(640, 448, GS.PSMZ24, 256)
@@ -25,6 +26,8 @@ xx = 200
 local dt = 1/60
 function PS2PROG.frame()
   D2D:frameStart(gs)
+  D2D:uploadTexture(testTex)
+  D2D:uploadTexture(fnt)
   D2D:setColour(0x80,0x80,0x80,0x80)
   D2D:sprite(testTex, xx, 200, 200, 200, 0, 0, 1, 1)
   D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)

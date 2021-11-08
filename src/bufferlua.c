@@ -317,6 +317,8 @@ static int drawlua_new_drawbuffer(lua_State *l) {
   char *buf = static_draw_buffer;
   lua_pushlightuserdata(l, buf);
   lua_setfield(l, -2, "ptr");
+  lua_pushinteger(l, (int) buf);
+  lua_setfield(l, -2, "addr");
   lua_pushcfunction(l, drawlua_start_frame);
   lua_setfield(l, -2, "frameStart");
   lua_pushcfunction(l, drawlua_end_frame);

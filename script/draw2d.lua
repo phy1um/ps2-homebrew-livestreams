@@ -21,13 +21,23 @@ local draw = {
   rawtri = 0,
   dmaTagQws = 0,
   dmaTagQwPtr = 0,
+  packetHasTexture = false,
+  inDrawTag = false,
   prev = {
     kc = 0,
     rawtri = 0,
   }
 }
 
+function draw:rawDmaTag(qwc, id, addr)
+  self.buf:pushint(qwc + id)
+  self.buf:pushint(addr)
+  self.buf:pushint(0)
+  self.buf:pushint(0)
+end
+
 function draw:newCnt()
+  self.inDrawTag = true
   print("DMA CNT = " .. DMA.CNT)
   self.dmaTagQwPtr = self.buf.head
   self.buf:pushint(DMA.CNT)
@@ -39,6 +49,21 @@ end
 function draw:dmaEnd()
   self.buf:pushint(DMA.END)
   self.buf:pushint(0)
+  self.buf:pushint(0)
+  self.buf:pushint(0)
+end
+
+function draw:newRef(addr, qwc, refEnd)
+  refEnd = refEnd or false
+  if self.inDrawTag then
+    self:endCnt()
+  end
+  print("REF @ " .. addr)
+  -- ID and QWC
+  self.buf:pushint(DMA.REF + qwc)
+  -- ADDR
+  self.buf:pushint(addr)
+  -- 0 padding
   self.buf:pushint(0)
   self.buf:pushint(0)
 end
@@ -127,15 +152,23 @@ function draw:triangle(x1, y1, x2, y2, x3, y3)
   self.rawtri = self.rawtri + 1
 end
 
-function draw:kick()
-  draw:updateLastTagLoops()
+function draw:endCnt()
+  if not self.inDrawTag then
+    return
+  end
   local lw = self.buf:read(self.dmaTagQwPtr)
-  local qwc = math.floor(self.buf.head / 16)
+  local qwc = math.floor((self.buf.head - self.dmaTagQwPtr) / 16)
   if self.buf.head % 16 ~= 0 then
     qwc = qwc + 1
   end
   self.buf:write(self.dmaTagQwPtr, lw + qwc - 1)
-  print("DMATag qws = " .. qwc-1)
+  print("DMATag CNT qws = " .. qwc-1)
+  self.inDrawTag = false
+end
+
+function draw:kick()
+  draw:updateLastTagLoops()
+  self:endCnt()
   draw:dmaEnd()
   DMA.sendChain(self.buf, DMA.GIF)
   self:newBuffer()
@@ -154,14 +187,15 @@ function draw:updateLastTagLoops()
   end
 end
 
-function draw.loadTexture(fname, w, h)
+function draw:loadTexture(fname, w, h)
   print("LOAD TEX: " .. fname .. " @ PSM32")
   local tt = {
     basePtr = 0,
     width = w,
     height = h,
     data = nil,
-    format = GS.PSM32
+    format = GS.PSM32,
+    name = fname
   }
 
   tt.data = TGA.load(fname, w, h)
@@ -170,15 +204,25 @@ function draw.loadTexture(fname, w, h)
   local texVramSize = w*h*4
   tt.basePtr = VRAM.alloc(texVramSize, 256)
   print("LOAD TEX: got texture VRAM addr = " .. tt.basePtr)
+  return tt
+end
 
-  -- ib = RM.tmpBuffer(1000)
-  ib = RM.getDrawBuffer(5000)
+
+function draw:uploadTexture(tt)
+  if tt == nil then
+    print("unknown texture?")
+  end
+  print("upload tex " .. tt.name)
+  ib = self.buf
 
   GIF.tag(ib, GIF.PACKED, 4, false, {0xe})
   GIF.bitBltBuf(ib, math.floor(tt.basePtr/64), math.floor(tt.width/64), tt.format)
   GIF.trxPos(ib,0,0,0,0,0)
   GIF.trxReg(ib,tt.width,tt.height)
   GIF.trxDir(ib, 0)
+
+  -- end previous draw
+  self:endCnt()
 
   -- ASSUMPTION about format!
   local eeSize = tt.width*tt.height*4
@@ -191,28 +235,36 @@ function draw.loadTexture(fname, w, h)
 
   local tb = 0
   while packets > 0 do
+    -- raw DMATag header
+    self:rawDmaTag(1, DMA.CNT, 0)
     GIF.tag(ib, GIF.IMAGE, blocksize, false, {0}) 
-    print("LOAD TEX: copy from TT " .. tb*blocksize*16 .. " to IB " .. ib.head .. " -- " .. blocksize*16)
-    tt.data:copy(ib, ib.head, tb*blocksize*16, blocksize*16)
-    ib.head = ib.head + blocksize*16
-    DMA.sendNormal(ib, DMA.GIF)
-    ib = RM.getDrawBuffer(5000)
+    local blockOffset = tb*blocksize*16
+    self:newRef(tt.data.addr + blockOffset, blocksize*16)
+    -- print("LOAD TEX: copy from TT " .. tb*blocksize*16 .. " to IB " .. ib.head .. " -- " .. blocksize*16)
+    -- tt.data:copy(ib, ib.head, tb*blocksize*16, blocksize*16)
+    -- ib.head = ib.head + blocksize*16
+    -- DMA.sendNormal(ib, DMA.GIF)
+    -- ib = RM.getDrawBuffer(5000)
     packets = packets - 1
     tb = tb + 1
   end
 
   if remain > 0 then
     local base = tb*blocksize*16
-    GIF.tag(ib, GIF.IMAGE, remain, false, {1})
+    self:rawDmaTag(1, DMA.CNT, 0)
+    GIF.tag(ib, GIF.IMAGE, remain, false, {0})
     print("copy from TT " .. base .. " to IB " .. ib.head .. " -- " .. remain*16)
-    tt.data:copy(ib, ib.head, base, remain*16)
-    ib.head = ib.head + remain*16
+    self:newRef(tt.data.addr + base, remain*16)
+    -- tt.data:copy(ib, ib.head, base, remain*16)
+    -- ib.head = ib.head + remain*16
   end
 
+  self:newCnt()
   GIF.texflush(ib)
-  DMA.sendNormal(ib, DMA.GIF)
-  print("LOAD TEX: DMA send")
+  -- DMA.sendChain(ib, DMA.GIF)
+  -- print("LOAD TEX: DMA send")
 
+  print("upload texture ... " .. tt.basePtr)
   return tt
 end
 
