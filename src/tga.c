@@ -38,7 +38,7 @@ int load_tga_to_raw(const char *fname, void *buffer) {
 
   // bytes per pixel from bits per pixel
   int bpp = header.bps / 8;
-  info("reading image data - %d bytes", header.width * header.height * bpp);
+  info("reading image data - %d bytes @ %p", header.width * header.height * bpp, buffer);
   rc = fread(tmp_buffer, bpp, header.width * header.height * bpp, f);
   char *to = (char *)buffer;
   for (int i = 0; i < header.width; i++) {

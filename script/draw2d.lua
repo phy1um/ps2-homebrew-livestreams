@@ -239,7 +239,7 @@ function draw:uploadTexture(tt)
     self:rawDmaTag(1, DMA.CNT, 0)
     GIF.tag(ib, GIF.IMAGE, blocksize, false, {0}) 
     local blockOffset = tb*blocksize*16
-    self:newRef(tt.data.addr + blockOffset, blocksize*16)
+    self:newRef(tt.data.addr + blockOffset, blocksize)
     -- print("LOAD TEX: copy from TT " .. tb*blocksize*16 .. " to IB " .. ib.head .. " -- " .. blocksize*16)
     -- tt.data:copy(ib, ib.head, tb*blocksize*16, blocksize*16)
     -- ib.head = ib.head + blocksize*16
@@ -254,7 +254,7 @@ function draw:uploadTexture(tt)
     self:rawDmaTag(1, DMA.CNT, 0)
     GIF.tag(ib, GIF.IMAGE, remain, false, {0})
     print("copy from TT " .. base .. " to IB " .. ib.head .. " -- " .. remain*16)
-    self:newRef(tt.data.addr + base, remain*16)
+    self:newRef(tt.data.addr + base, remain)
     -- tt.data:copy(ib, ib.head, base, remain*16)
     -- ib.head = ib.head + remain*16
   end

@@ -24,13 +24,19 @@ end
 
 xx = 200
 local dt = 1/60
+local tt = 2
 function PS2PROG.frame()
   D2D:frameStart(gs)
-  D2D:uploadTexture(testTex)
-  D2D:uploadTexture(fnt)
-  D2D:setColour(0x80,0x80,0x80,0x80)
-  D2D:sprite(testTex, xx, 200, 200, 200, 0, 0, 1, 1)
-  D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)
+  if tt < 0 then
+    D2D:uploadTexture(testTex)
+    D2D:uploadTexture(fnt)
+    D2D:setColour(0x80,0x80,0x80,0x80)
+    D2D:sprite(testTex, xx, 200, 200, 200, 0, 0, 1, 1)
+    D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)
+  else
+    print("skip ", tt)
+    tt = tt - dt
+  end
   D2D:frameEnd(gs)
   print("tris/frame = " .. D2D.prev.rawtri .. ", KC=" .. D2D.prev.kc .. ", FPS=" .. FPS)
 
