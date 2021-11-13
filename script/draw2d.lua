@@ -134,7 +134,7 @@ function draw:kick()
   if self.buf.head % 16 ~= 0 then
     qwc = qwc + 1
   end
-  self.buf:write(self.dmaTagQwPtr, lw + qwc - 2)
+  self.buf:write(self.dmaTagQwPtr, lw + qwc - 1)
   draw:dmaEnd()
   DMA.sendChain(self.buf, DMA.GIF)
   self:newBuffer()
