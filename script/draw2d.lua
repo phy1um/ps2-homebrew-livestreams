@@ -144,7 +144,6 @@ function draw:triangle(x1, y1, x2, y2, x3, y3)
 end
 
 function draw:kick()
-  print("kick")
   self:updateLastTagLoops()
   self:endCnt()
   self:dmaEnd()
