@@ -277,13 +277,13 @@ int main(int argc, char *argv[]) {
     dma_wait_fast();
     ps2luaprog_onframe(L);
     // may be required? -- dma_wait_fast();
-    info("WAIT DRAW");
+    trace("WAIT DRAW");
     draw_wait_finish();
-    info("WAIT VSYNC");
+    trace("WAIT VSYNC");
     graph_wait_vsync();
-    info("FLIP");
+    trace("FLIP");
     gs_flip();
-    info("FLIPOUT");
+    trace("FLIPOUT");
     frame_count += 1;
     clock_t now = clock();
     if (now > next_fps_report) {
