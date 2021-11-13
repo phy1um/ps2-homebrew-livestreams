@@ -71,6 +71,8 @@ int load_tga_lua(lua_State *l) {
   lua_setfield(l, -2, "size");
   lua_pushlightuserdata(l, b);
   lua_setfield(l, -2, "ptr");
+  lua_pushinteger(l, (int) b);
+  lua_setfield(l, -2, "addr");
 
   luaL_getmetatable(l, "ps2.buffer");
   lua_setmetatable(l, -2);

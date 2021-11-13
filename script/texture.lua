@@ -27,8 +27,10 @@ xx = 200
 local dt = 1/60
 function PS2PROG.frame()
   D2D:frameStart(gs)
-  D2D:uploadTexture(testTex)
-  D2D:uploadTexture(fnt)
+  res = D2D:uploadTexture(testTex)
+  if res then testTex.resident = true end
+  res = D2D:uploadTexture(fnt)
+  if res then fnt.resident = true end
   D2D:setColour(0x80,0x80,0x80,0x80)
   D2D:sprite(testTex, xx, 200, 200, 200, 0, 0, 1, 1)
   D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)

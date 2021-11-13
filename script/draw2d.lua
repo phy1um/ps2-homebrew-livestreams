@@ -21,6 +21,7 @@ local draw = {
   rawtri = 0,
   dmaTagQws = 0,
   dmaTagQwPtr = 0,
+  isInCnt = false,
   prev = {
     kc = 0,
     rawtri = 0,
@@ -33,7 +34,27 @@ function draw:newCnt()
   self.buf:pushint(0)
   self.buf:pushint(0)
   self.buf:pushint(0)
+  self.isInCnt = true
 end
+
+function draw:endCnt()
+  if self.isInCnt then
+    local lw = self.buf:read(self.dmaTagQwPtr)
+    local qwc = math.floor(self.buf.head / 16)
+    if self.buf.head % 16 ~= 0 then
+      qwc = qwc + 1
+    end
+    self.buf:write(self.dmaTagQwPtr, lw + qwc - 1)
+  end
+end
+
+function draw:dmaTagRaw(tt, qwc, addr)
+  self.buf:pushint(qwc + tt)
+  self.buf:pushint(addr)
+  self.buf:pushint(0)
+  self.buf:pushint(0)
+end
+
 
 function draw:dmaEnd()
   self.buf:pushint(DMA.END)
@@ -127,14 +148,9 @@ function draw:triangle(x1, y1, x2, y2, x3, y3)
 end
 
 function draw:kick()
-  draw:updateLastTagLoops()
-  local lw = self.buf:read(self.dmaTagQwPtr)
-  local qwc = math.floor(self.buf.head / 16)
-  if self.buf.head % 16 ~= 0 then
-    qwc = qwc + 1
-  end
-  self.buf:write(self.dmaTagQwPtr, lw + qwc - 1)
-  draw:dmaEnd()
+  self:updateLastTagLoops()
+  self:endCnt()
+  self:dmaEnd()
   DMA.sendChain(self.buf, DMA.GIF)
   self:newBuffer()
   self.kc = self.kc + 1
@@ -177,11 +193,17 @@ function draw:uploadTexture(tt)
   -- only works for power of 2 textures @ psm32!!!!!
   ib = self.buf
 
+  -- TODO: bounds check buffer
+
   GIF.tag(ib, GIF.PACKED, 4, false, {0xe})
   GIF.bitBltBuf(ib, math.floor(tt.basePtr/64), math.floor(tt.width/64), tt.format)
   GIF.trxPos(ib,0,0,0,0,0)
   GIF.trxReg(ib,tt.width,tt.height)
   GIF.trxDir(ib, 0)
+
+  self:endCnt()
+
+  -- TODO: check buffer has room for (CNT, GIFTag, REF)*(packets+1)
 
   -- ASSUMPTION about format!
   local eeSize = tt.width*tt.height*4
@@ -193,30 +215,30 @@ function draw:uploadTexture(tt)
   print("LOAD TEX: transmitting in " .. packets .. " packets with " .. remain .. " left")
 
   local tb = 0
+  local imgAddr = tt.data.addr
   while packets > 0 do
+    self:dmaTagRaw(DMA.CNT, 1, 0) 
     GIF.tag(ib, GIF.IMAGE, blocksize, false, {0}) 
-    print("LOAD TEX: copy from TT " .. tb*blocksize*16 .. " to IB " .. ib.head .. " -- " .. blocksize*16)
-    tt.data:copy(ib, ib.head, tb*blocksize*16, blocksize*16)
-    ib.head = ib.head + blocksize*16
-    self:kick()
-    ib = self.buf
+    self:dmaTagRaw(DMA.REF, blocksize, imgAddr)
+    imgAddr = imgAddr + blocksize*16
     packets = packets - 1
     tb = tb + 1
   end
 
   if remain > 0 then
     local base = tb*blocksize*16
+    self:dmaTagRaw(DMA.CNT, 1, 0)
     GIF.tag(ib, GIF.IMAGE, remain, false, {1})
-    print("copy from TT " .. base .. " to IB " .. ib.head .. " -- " .. remain*16)
-    tt.data:copy(ib, ib.head, base, remain*16)
-    ib.head = ib.head + remain*16
+    self:dmaTagRaw(DMA.REF, remain, imgAddr)
   end
 
+  self:newCnt()
   GIF.texflush(ib)
+  -- TODO: this kick should be optional?
   self:kick()
   print("LOAD TEX: DMA send")
 
-  return tt
+  return true
 end
 
 function draw:frameStart(gs)
