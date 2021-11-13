@@ -30,10 +30,7 @@ local draw = {
 
 function draw:newCnt()
   self.dmaTagQwPtr = self.buf.head
-  self.buf:pushint(DMA.CNT)
-  self.buf:pushint(0)
-  self.buf:pushint(0)
-  self.buf:pushint(0)
+  self:dmaTagRaw(DMA.CNT, 0, 0)
   self.isInCnt = true
 end
 
@@ -57,10 +54,7 @@ end
 
 
 function draw:dmaEnd()
-  self.buf:pushint(DMA.END)
-  self.buf:pushint(0)
-  self.buf:pushint(0)
-  self.buf:pushint(0)
+  self:dmaTagRaw(DMA.END, 0, 0)
 end
 
 function draw:newBuffer()
@@ -191,19 +185,15 @@ function draw:uploadTexture(tt)
     error("cannot upload texture that has not been allocated")
   end
   -- only works for power of 2 textures @ psm32!!!!!
-  ib = self.buf
+  if self.buf.size - self.buf.head < 7 then self:kick() end
 
-  -- TODO: bounds check buffer
-
-  GIF.tag(ib, GIF.PACKED, 4, false, {0xe})
-  GIF.bitBltBuf(ib, math.floor(tt.basePtr/64), math.floor(tt.width/64), tt.format)
-  GIF.trxPos(ib,0,0,0,0,0)
-  GIF.trxReg(ib,tt.width,tt.height)
-  GIF.trxDir(ib, 0)
+  GIF.tag(self.buf, GIF.PACKED, 4, false, {0xe})
+  GIF.bitBltBuf(self.buf, math.floor(tt.basePtr/64), math.floor(tt.width/64), tt.format)
+  GIF.trxPos(self.buf,0,0,0,0,0)
+  GIF.trxReg(self.buf,tt.width,tt.height)
+  GIF.trxDir(self.buf, 0)
 
   self:endCnt()
-
-  -- TODO: check buffer has room for (CNT, GIFTag, REF)*(packets+1)
 
   -- ASSUMPTION about format!
   local eeSize = tt.width*tt.height*4
@@ -217,8 +207,9 @@ function draw:uploadTexture(tt)
   local tb = 0
   local imgAddr = tt.data.addr
   while packets > 0 do
+    if self.buf.size - self.buf.head < 4 then self:kick() end
     self:dmaTagRaw(DMA.CNT, 1, 0) 
-    GIF.tag(ib, GIF.IMAGE, blocksize, false, {0}) 
+    GIF.tag(self.buf, GIF.IMAGE, blocksize, false, {0}) 
     self:dmaTagRaw(DMA.REF, blocksize, imgAddr)
     imgAddr = imgAddr + blocksize*16
     packets = packets - 1
@@ -226,16 +217,17 @@ function draw:uploadTexture(tt)
   end
 
   if remain > 0 then
+    if self.buf.size - self.buf.head < 4 then self:kick() end
     local base = tb*blocksize*16
     self:dmaTagRaw(DMA.CNT, 1, 0)
-    GIF.tag(ib, GIF.IMAGE, remain, false, {1})
+    GIF.tag(self.buf, GIF.IMAGE, remain, false, {1})
     self:dmaTagRaw(DMA.REF, remain, imgAddr)
   end
 
   self:newCnt()
-  GIF.texflush(ib)
+  GIF.texflush(self.buf)
   -- TODO: this kick should be optional?
-  self:kick()
+  -- self:kick()
   print("LOAD TEX: DMA send")
 
   return true
