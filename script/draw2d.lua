@@ -28,7 +28,6 @@ local draw = {
 }
 
 function draw:newCnt()
-  print("DMA CNT = " .. DMA.CNT)
   self.dmaTagQwPtr = self.buf.head
   self.buf:pushint(DMA.CNT)
   self.buf:pushint(0)
@@ -154,24 +153,29 @@ function draw:updateLastTagLoops()
 end
 
 function draw.loadTexture(fname, w, h)
-  print("LOAD TEX: " .. fname .. " @ PSM32")
   local tt = {
-    basePtr = 0,
     width = w,
     height = h,
     data = nil,
-    format = GS.PSM32
+    format = GS.PSM32,
+    fname = fname,
   }
-
   tt.data = TGA.load(fname, w, h)
+  return tt 
+end
 
-  -- only works for power of 2 textures @ psm32!!!!!
-  local texVramSize = w*h*4
+function draw.vramAllocTexture(tt)
+  local texVramSize = tt.width*tt.height*4
   tt.basePtr = VRAM.alloc(texVramSize, 256)
   print("LOAD TEX: got texture VRAM addr = " .. tt.basePtr)
+end
 
-  -- ib = RM.tmpBuffer(1000)
-  ib = RM.getDrawBuffer(5000)
+function draw:uploadTexture(tt)
+  if tt.basePtr == nil then
+    error("cannot upload texture that has not been allocated")
+  end
+  -- only works for power of 2 textures @ psm32!!!!!
+  ib = self.buf
 
   GIF.tag(ib, GIF.PACKED, 4, false, {0xe})
   GIF.bitBltBuf(ib, math.floor(tt.basePtr/64), math.floor(tt.width/64), tt.format)
@@ -194,8 +198,8 @@ function draw.loadTexture(fname, w, h)
     print("LOAD TEX: copy from TT " .. tb*blocksize*16 .. " to IB " .. ib.head .. " -- " .. blocksize*16)
     tt.data:copy(ib, ib.head, tb*blocksize*16, blocksize*16)
     ib.head = ib.head + blocksize*16
-    DMA.sendNormal(ib, DMA.GIF)
-    ib = RM.getDrawBuffer(5000)
+    self:kick()
+    ib = self.buf
     packets = packets - 1
     tb = tb + 1
   end
@@ -209,7 +213,7 @@ function draw.loadTexture(fname, w, h)
   end
 
   GIF.texflush(ib)
-  DMA.sendNormal(ib, DMA.GIF)
+  self:kick()
   print("LOAD TEX: DMA send")
 
   return tt
