@@ -21,6 +21,7 @@ local draw = {
   rawtri = 0,
   dmaTagQws = 0,
   dmaTagQwPtr = 0,
+  dmaCntStart = 0,
   isInCnt = false,
   prev = {
     kc = 0,
@@ -37,7 +38,8 @@ end
 function draw:endCnt()
   if self.isInCnt then
     local lw = self.buf:read(self.dmaTagQwPtr)
-    local qwc = math.floor(self.buf.head / 16)
+    local bytes = self.buf.head - self.dmaTagQwPtr
+    local qwc = math.floor(bytes / 16)
     if self.buf.head % 16 ~= 0 then
       qwc = qwc + 1
     end
@@ -142,6 +144,7 @@ function draw:triangle(x1, y1, x2, y2, x3, y3)
 end
 
 function draw:kick()
+  print("kick")
   self:updateLastTagLoops()
   self:endCnt()
   self:dmaEnd()
@@ -177,7 +180,7 @@ end
 function draw.vramAllocTexture(tt)
   local texVramSize = tt.width*tt.height*4
   tt.basePtr = VRAM.alloc(texVramSize, 256)
-  print("LOAD TEX: got texture VRAM addr = " .. tt.basePtr)
+  print("TEXTURE: got texture VRAM addr = " .. tt.basePtr)
 end
 
 function draw:uploadTexture(tt)
@@ -202,7 +205,6 @@ function draw:uploadTexture(tt)
   local blocksize = math.floor(4496/16)
   local packets = math.floor(qwc / blocksize)
   local remain = qwc % blocksize
-  print("LOAD TEX: transmitting in " .. packets .. " packets with " .. remain .. " left")
 
   local tb = 0
   local imgAddr = tt.data.addr
@@ -228,7 +230,6 @@ function draw:uploadTexture(tt)
   GIF.texflush(self.buf)
   -- TODO: this kick should be optional?
   -- self:kick()
-  print("LOAD TEX: DMA send")
 
   return true
 end
