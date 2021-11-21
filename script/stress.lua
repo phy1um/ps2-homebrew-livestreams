@@ -1,7 +1,8 @@
 --local GIF = dofile("host:script/gif.lua")
 local GIF = require("gif")
 local P = require("ps2const")
-local D2D = require("draw2d")
+--local D2D = require("draw2d")
+D2D = FAST_DRAW2D
 local VRAM = require("vram")
 
 
@@ -29,6 +30,7 @@ function PS2PROG.start()
   local zb = VRAM.buffer(640, 448, GS.PSMZ24, 256)
   GS.setBuffers(fb1, fb2, zb)
   D2D:clearColour(0x2b, 0x2b, 0x2b)
+  D2D:screenDimensions(640, 448)
 
   local dd = 100
   local dx = math.floor(640/dd)
@@ -54,7 +56,7 @@ function PS2PROG.frame()
     s:draw()
   end
   D2D:frameEnd(gs)
-  print("tris/frame = " .. D2D.prev.rawtri .. ", KC=" .. D2D.prev.kc)
+  --print("tris/frame = " .. D2D.prev.rawtri .. ", KC=" .. D2D.prev.kc)
   if r > 0 then
     g = 0xff
     r = 0

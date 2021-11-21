@@ -76,6 +76,7 @@ static int ps2lua_scr_print(lua_State *l) {
 }
 
 int lua_tga_init(lua_State *l);
+int draw2d_lua_init(lua_State *l);
 
 static int ps2luaprog_start_nil(lua_State *l) {
   info("default start...");
@@ -245,6 +246,7 @@ int main(int argc, char *argv[]) {
   gs_lua_init(L);
   lua_tga_init(L);
   pad_lua_init(L);
+  draw2d_lua_init(L);
 
   // TODO(Tom Marks): better abstraction for drawlua_*
   drawlua_init(L);
