@@ -1,9 +1,10 @@
-#include "draw.h"
-
 #include <gs_gp.h>
 
-int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs, uint64_t regs)
-{
+#include "draw.h"
+#include "buffer.h"
+
+int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs,
+    uint64_t regs) {
   // update giftag tracking state
   s->gif.loop_count = 0;
   s->gif.head = (uint32_t *) s->drawbuffer_head;
@@ -24,21 +25,21 @@ int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs, uin
   return 1;
 }
 
-#define GIF_AD(b, reg, value) do{\
+#define GIF_AD(b, reg, value) do {\
     ((uint64_t*)b)[0] = (reg); \
     ((uint64_t*)b)[1] = (value);\
   }while(0)
 
 int giftag_ad_prim(struct d2d_state *s,
-  int type, int shaded, int textured, int aa)
-{
-  GIF_AD(s->drawbuffer_head, GS_REG_PRIM, type | (shaded*0x8) | (textured*0x10) | (aa*0x80));
+  int type, int shaded, int textured, int aa) {
+  GIF_AD(s->drawbuffer_head,
+      GS_REG_PRIM,
+      type | (shaded*0x8) | (textured*0x10) | (aa*0x80));
   s->drawbuffer_head += QW_SIZE;
   return 1;
 }
 
-int push_rgbaq(struct d2d_state *s, char cols[4])
-{
+int push_rgbaq(struct d2d_state *s, char cols[4]) {
   uint32_t *v = (uint32_t *)s->drawbuffer_head;
   v[0] = cols[0];
   v[1] = cols[1];
@@ -48,8 +49,7 @@ int push_rgbaq(struct d2d_state *s, char cols[4])
   return 1;
 }
 
-int push_xyz2(struct d2d_state *s, uint16_t x, uint16_t y, uint32_t z)
-{
+int push_xyz2(struct d2d_state *s, uint16_t x, uint16_t y, uint32_t z) {
   uint32_t *v = (uint32_t*)s->drawbuffer_head;
   v[0] = x;
   v[1] = y;
@@ -60,8 +60,7 @@ int push_xyz2(struct d2d_state *s, uint16_t x, uint16_t y, uint32_t z)
 }
 
 // ASSERT sizeof(float) == sizeof(uint32_t)
-int push_st(struct d2d_state *state, float s, float t)
-{
+int push_st(struct d2d_state *state, float s, float t) {
   float *v = (float *)state->drawbuffer_head;
   v[0] = s;
   v[1] = t;

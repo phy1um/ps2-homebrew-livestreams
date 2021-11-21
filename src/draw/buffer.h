@@ -4,7 +4,8 @@
 
 #include "draw.h"
 
-int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs, uint64_t regs);
+int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs,
+    uint64_t regs);
 int giftag_ad_prim(struct d2d_state *s, int, int, int, int);
 
 int push_rgbaq(struct d2d_state *s, char cols[4]);

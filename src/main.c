@@ -20,6 +20,12 @@
 #include "script.h"
 
 static clock_t __time_now;
+static int is_running = 1;
+
+void core_error(const char *msg) {
+  is_running = 0;
+  logerr("FATAL ERROR: %s", msg);
+}
 
 #define BENCH_START(vname) clock_t vname = clock()
 #define BENCH_INFO(vname, m)                                                   \
@@ -146,7 +152,7 @@ int ps2luaprog_onframe(lua_State *l) {
   scr_printf(m "\n", ##__VA_ARGS__)
 #endif
 
-int ps2luaprog_is_running(lua_State *l) { return 1; }
+// int ps2luaprog_is_running(lua_State *l) { return 1; }
 
 static int runfile(lua_State *l, const char *fname) {
   BENCH_START(runfile_time);
@@ -271,7 +277,7 @@ int main(int argc, char *argv[]) {
 
   int frame_count = 0;
   clock_t next_fps_report = clock() + CLOCKS_PER_SEC;
-  while (ps2luaprog_is_running(L)) {
+  while (is_running) {
     pad_frame_start();
     pad_poll();
     dma_wait_fast();
