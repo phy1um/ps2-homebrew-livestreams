@@ -208,6 +208,7 @@ function draw:updateLastTagLoops()
   end
 end
 
+-- TODO: move out of draw2d
 -- load a texture into EE memory
 function draw.loadTexture(fname, w, h)
   local tt = {
@@ -219,14 +220,6 @@ function draw.loadTexture(fname, w, h)
   }
   tt.data = TGA.load(fname, w, h)
   return tt 
-end
-
--- get VRAM address for texture
-function draw.vramAllocTexture(tt)
-  -- only works for power of 2 textures @ psm32!!!!!
-  local texVramSize = tt.width*tt.height*4
-  tt.basePtr = VRAM.alloc(texVramSize, 256)
-  print("TEXTURE: got texture VRAM addr = " .. tt.basePtr)
 end
 
 -- upload a texture that has been VRAM allocated into GS memory

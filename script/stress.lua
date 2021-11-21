@@ -24,11 +24,17 @@ local scene = {}
 function PS2PROG.start()
   DMA.init(DMA.GIF)
   GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
-  local fb1 = VRAM.buffer(640, 448, GS.PSM24, 256)
-  local fb2 = VRAM.buffer(640, 448, GS.PSM24, 256)
-  local zb = VRAM.buffer(640, 448, GS.PSMZ24, 256)
+  local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 256)
+  local fb2 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 256)
+  local zb = VRAM.mem:framebuffer(640, 448, GS.PSM24, 256)
   GS.setBuffers(fb1, fb2, zb)
   D2D:clearColour(0x2b, 0x2b, 0x2b)
+
+  local vr = VRAM:slice(VRAM.mem.head)
+
+--  local len = math.floor((VRAM.max - VRAM.mem.head) / 2)
+--  local abuf = VRAM:slice(VRAM.mem.head, len)
+--  local bbuf = VRAM:slice(VRAM.mem.head + len, len)
 
   local dd = 100
   local dx = math.floor(640/dd)

@@ -3,21 +3,52 @@ local vram = {}
 local basePtr = 0
 -- maximum is 4mb
 local max = math.floor(4 * 1024 * 1024)
+vram.max = max
 
-function vpa(v, a)
-  return v + a - (v%a)
-end
+local vramslice = {
+  start= 0,
+  head = 0,
+  tail = max,
+}
 
-function vram.alloc(b, align)
-  local out = basePtr
+function vramslice:alloc(b, align)
+  local out = self.head 
   out = out + align - (out%align)
   if out + b >= max then
-    print("vram overflow: " .. out .. " + " .. b .. " > 4MB")
-    error("VRAM overflow")
+    print("vram buffer overflow")
+    error("vram buffer overflow")
   end
-  basePtr = out + b
-  print("vram alloc: " .. out .. " base -> " .. basePtr)
+  self.head = out + b
+  -- print("vram alloc: " .. out .. " base -> " .. basePtr)
   return out
+end
+
+function vramslice:framebuffer(w, h, psm, align)
+  local sz = vram.size(w, h, psm, align)
+  return {
+    address = self:alloc(sz, align),
+    width = w,
+    height = h,
+    format = psm,
+  }
+end
+
+function vramslice:texture(tex)
+  --local size = vram.size(tex.width, tex.height, tex.psm, 256)
+  local size = tex.width*tex.height*4
+  tex.basePtr = self:alloc(size, 256)
+  return tex
+end
+
+function vram.slice(start, tail)
+  if tail == nil then tail = max end
+  return setmetatable({
+      start=start,
+      head=start,
+      tail=tail
+    }, 
+    { __index=vramslice }
+  )
 end
 
 function vram.size(w, h, psm, align)
@@ -31,21 +62,9 @@ function vram.size(w, h, psm, align)
   elseif psm == GS.PSM4 then size = math.floor(w*h*2^-3) 
   end
 
-  return vpa(size, align)
+  return size + align - (size%align)
 end
 
-function vram.buffer(w, h, psm, align)
-  local sz = vram.size(w, h, psm, align)
-  return {
-    address = vram.alloc(sz, align),
-    width = w,
-    height = h,
-    format = psm,
-  }
-end
-
-function vram.textureSize(w,h,psm)
-  error("not implemented")
-end
+vram.mem = vram.slice(0, max)
 
 return vram
