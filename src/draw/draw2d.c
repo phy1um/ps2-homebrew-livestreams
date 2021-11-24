@@ -106,10 +106,10 @@ int draw2d_kick() {
       buffer_size / 16,
       0,
       0);
+  // dma_wait_fast();
   // TODO(phy1um): get new memory?
   draw2d_new_buffer();
   draw2d_start_cnt();
-  state.drawbuffer_head = state.drawbuffer;
   state.this_frame.kick_count += 1;
   return 1;
 }
@@ -125,7 +125,7 @@ int draw2d_triangle(float x1, float y1,
     draw2d_kick();
   }
 
-  if (state.drawbuffer_size >= 20000) {
+  if (state.drawbuffer_size >= 10000) {
     draw2d_kick();
   }
 

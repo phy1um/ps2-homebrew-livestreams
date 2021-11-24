@@ -32,7 +32,7 @@ function PS2PROG.start()
   D2D:clearColour(0x2b, 0x2b, 0x2b)
   D2D:screenDimensions(640, 448)
 
-  local dd = 15
+  local dd = 100
   local dx = math.floor(640/dd)
   local dy = math.floor(448/dd)
   for x=0,620,dx do
