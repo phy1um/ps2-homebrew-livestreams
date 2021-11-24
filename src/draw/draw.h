@@ -30,7 +30,7 @@ struct d2d_gif {
 };
 
 struct d2d_dma {
-  int head;
+  char *head;
   int in_cnt;
 };
 
@@ -40,7 +40,7 @@ struct d2d_stats {
 };
 
 struct d2d_state {
-  char col[4];
+  unsigned char col[4];
   char clear[4];
   int screen_w;
   int screen_h;
@@ -48,6 +48,7 @@ struct d2d_state {
   int vram_texture_ptr;
   char *drawbuffer;
   char *drawbuffer_head;
+  size_t drawbuffer_size;
   int drawbuffer_len;
   void *zbuffer_ref;
 
@@ -63,7 +64,7 @@ int draw2d_triangle(float x1, float y1, float x2, float y2, float x3, float y3);
 
 int draw2d_screen_dimensions(int w, int h);
 int draw2d_clear_colour(char r, char g, char b);
-int draw2d_set_colour(char r, char g, char b, char a);
+int draw2d_set_colour(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 int draw2d_alloc();
 
 #endif

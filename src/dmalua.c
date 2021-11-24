@@ -16,16 +16,6 @@ static int dma_init(lua_State *l) {
   return 0;
 }
 
-int print_buffer(qword_t *b, int len) {
-  info("-- buffer\n");
-  for (int i = 0; i < len; i++) {
-    printf("%016llx %016llx\n", b->dw[0], b->dw[1]);
-    b++;
-  }
-  info("-- /buffer\n");
-  return 0;
-}
-
 static int dma_send_normal_buffer(lua_State *l) {
   // buffer is arg 1
   lua_pushstring(l, "ptr");
@@ -39,7 +29,7 @@ static int dma_send_normal_buffer(lua_State *l) {
   int channel = lua_tointeger(l, 2);
 
   // print buffer for debugging
-  // print_buffer(ptr, head / 16);
+  print_buffer(ptr, head / 16);
 
   // info("DMA send :: sending %d qwords on channel %d", head/16, channel);
   dma_channel_send_normal(channel, ptr, head / 16, 0, 0);
@@ -59,7 +49,7 @@ static int dma_send_chain_buffer(lua_State *l) {
   int channel = lua_tointeger(l, 2);
 
   // print buffer for debugging
-  // print_buffer(ptr, head / 16);
+  print_buffer(ptr, head / 16);
 
   // info("DMA send :: sending %d qwords on channel %d", head/16, channel);
   dma_channel_send_chain(channel, ptr, head / 16, 0, 0);

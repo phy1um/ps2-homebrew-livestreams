@@ -2,7 +2,7 @@
 local GIF = require("gif")
 local P = require("ps2const")
 --local D2D = require("draw2d")
-D2D = FAST_DRAW2D
+local D2D = FAST_DRAW2D
 local VRAM = require("vram")
 
 
@@ -32,11 +32,11 @@ function PS2PROG.start()
   D2D:clearColour(0x2b, 0x2b, 0x2b)
   D2D:screenDimensions(640, 448)
 
-  local dd = 100
+  local dd = 15
   local dx = math.floor(640/dd)
   local dy = math.floor(448/dd)
-  for x=-320,320,dx do
-    for y=-224,224,dy do
+  for x=0,620,dx do
+    for y=0,420,dy do
       tt = emt.new(x,y,dx,dy)
       table.insert(scene, tt)
     end
@@ -59,20 +59,12 @@ function PS2PROG.frame()
   --print("tris/frame = " .. D2D.prev.rawtri .. ", KC=" .. D2D.prev.kc)
   if r > 0 then
     g = 0xff
-    r = 0
+    r = 0xff
   else 
     g = 0
     r = 0xff
   end
-  if FPS ~= nil then
-    ffps = ffps + FPS
-    cc = cc + 1
-    if cc > fpsr then
-      print("FPS: " .. (ffps/fpsr))
-      cc = 0
-    end
-  end
-  --db:free()
+  print("FPS: " .. FPS)
 end
 
 

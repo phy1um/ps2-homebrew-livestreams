@@ -22,6 +22,18 @@
 static clock_t __time_now;
 static int is_running = 1;
 
+int print_buffer(qword_t *b, int len) {
+#ifdef LOG_TRACE
+  info("-- buffer\n");
+  for (int i = 0; i < len; i++) {
+    printf("%016llx %016llx\n", b->dw[0], b->dw[1]);
+    b++;
+  }
+  info("-- /buffer\n");
+#endif
+  return 0;
+}
+
 void core_error(const char *msg) {
   is_running = 0;
   logerr("FATAL ERROR: %s", msg);

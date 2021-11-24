@@ -309,6 +309,10 @@ function draw:clearColour(r, g, b)
   self.clearB = b
 end
 
+function draw:screenDimensions()
+
+end
+
 return draw
 
 

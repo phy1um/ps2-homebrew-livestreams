@@ -1,6 +1,6 @@
 local gif = dofile("host:script/gif.lua")
 local VRAM = require("vram")
-local D2D = require("draw2d")
+local D2D = FAST_DRAW2D
 
 local gs = nil
 
@@ -19,7 +19,7 @@ function PS2PROG.start()
   local zb = VRAM.buffer(640, 448, GS.PSMZ24, 256)
   GS.setBuffers(fb1, fb2, zb)
   D2D:clearColour(0x2b, 0x2b, 0x2b)
-
+  D2D:screenDimensions(640, 448)
 
 end
 

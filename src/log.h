@@ -2,6 +2,7 @@
 #define LOG_H
 
 #include <stdio.h>
+#include <tamtypes.h>
 
 #if 1
 #define logmsg(lvl, msg, ...)                                                  \
@@ -18,5 +19,7 @@
 
 #define info(msg, ...) logmsg("[INFO]", msg, ##__VA_ARGS__)
 #define logerr(msg, ...) logmsg("[ERRO]", msg, ##__VA_ARGS__)
+
+int print_buffer(qword_t *b, int len);
 
 #endif

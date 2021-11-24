@@ -21,33 +21,74 @@ int draw2d_alloc() {
 
 #define GIF_REGS_AD 0xe
 #define GIF_REGS_AD_LEN 1
-#define GIF_REGS_TRIS 0x1555
+#define GIF_REGS_TRIS 0x5551
 #define GIF_REGS_TRIS_LEN 4
 #define GIF_REGS_SPRITE 0x215215
 #define GIF_REGS_SPRITE_LEN 6
 
 // easy :D
 int draw2d_new_buffer() {
+  trace("D2D new buffer");
   state.drawbuffer_head = state.drawbuffer;
+  state.gif.head = 0;
+  state.dma.head = 0;
+  state.dma.in_cnt = 0;
+  state.draw_type = D2D_NONE;
+  state.drawbuffer_size = 0;
   return 1;
 }
 
 
 int draw2d_update_last_tag_loops() {
-  if (state.gif.loop_count <= GIF_MAX_LOOPS) {
-    uint32_t eop = *state.gif.head & 0x8000;
-    *state.gif.head = state.gif.loop_count | eop;
-  } else {
-    error("too many loops in GIFTag");
+  trace("D2D update last tag loop");
+  if (state.gif.head) {
+    if (state.gif.loop_count <= GIF_MAX_LOOPS) {
+      uint32_t eop = *state.gif.head & 0x8000;
+      *state.gif.head = state.gif.loop_count | eop;
+    } else {
+      error("too many loops in GIFTag");
+    }
   }
   return 1;
 }
 
+int draw2d_start_cnt() {
+  state.dma.in_cnt = 1;
+  state.dma.head = state.drawbuffer_head;
+  dma_tag((uint32_t*) state.drawbuffer_head, 0, 0x1<<28, 0);
+  state.drawbuffer_head += QW_SIZE;
+  state.drawbuffer_size += QW_SIZE;
+  return 1;
+}
+
 int draw2d_end_cnt() {
+  if (state.dma.in_cnt) {
+    size_t dma_len = state.drawbuffer_head - state.dma.head;
+    trace("set dma cnt qwc=%d", dma_len/16);
+    uint16_t *lh = (uint16_t*) state.dma.head;
+    if (dma_len % 16 == 0) {
+      *lh = (dma_len/16) - 1;
+    } else {
+      *lh = dma_len/16;
+    }
+    state.dma.in_cnt = 0;
+  }
   return 1;
 }
 
 int draw2d_dma_end() {
+  draw2d_end_cnt();
+  dma_tag((uint32_t*) state.drawbuffer_head, 0, 0x7<<28, 0);
+  state.drawbuffer_head += QW_SIZE;
+  state.drawbuffer_size += QW_SIZE;
+  return 1;
+}
+
+int draw2d_dma_ref(uint32_t addr) {
+  draw2d_end_cnt();
+  dma_tag((uint32_t*) state.drawbuffer_head, 0, 0x3<<28, addr);
+  state.drawbuffer_head += QW_SIZE;
+  state.drawbuffer_size += QW_SIZE;
   return 1;
 }
 
@@ -58,6 +99,7 @@ int draw2d_kick() {
   draw2d_dma_end();
   size_t buffer_size = state.drawbuffer_head - state.drawbuffer;
   trace("dma send");
+  print_buffer((qword_t*) state.drawbuffer, buffer_size/16);
   dma_channel_send_chain(
       DMA_CHANNEL_GIF,
       state.drawbuffer,
@@ -66,22 +108,24 @@ int draw2d_kick() {
       0);
   // TODO(phy1um): get new memory?
   draw2d_new_buffer();
+  draw2d_start_cnt();
   state.drawbuffer_head = state.drawbuffer;
   state.this_frame.kick_count += 1;
   return 1;
 }
 
 #define to_coord(f) \
-  (uint16_t) ( ((int)(f) << 4) | (int)( ((f) - ((int)(f))) * 0xf ) )
+  0x8000 + (0xfff0 & ( ((int) (f) << 4) | (int) ((f) - ((int)(f)))*0xf ))
+ //(uint16_t) ( ((int)(f) << 4) | (int)( ((f) - ((int)(f))) * 0xf ) )
 
 int draw2d_triangle(float x1, float y1,
     float x2, float y2, float x3, float y3) {
-  trace("tri @ %f,%f  %f,%f  %f,%f", x1, y1, x2, y2, x3, y3);
+  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.drawbuffer_size, x1, y1, x2, y2, x3, y3);
   if (state.gif.loop_count >= GIF_MAX_LOOPS - 1) {
     draw2d_kick();
   }
 
-  if (state.drawbuffer - state.drawbuffer_head >= 20000) {
+  if (state.drawbuffer_size >= 20000) {
     draw2d_kick();
   }
 
@@ -110,6 +154,7 @@ int draw2d_frame_start() {
   trace("frame start");
   memset(&state.this_frame, 0, sizeof(struct d2d_stats)); 
   draw2d_new_buffer(); 
+  draw2d_start_cnt();
 
   // Clear the screen using PS2SDK functions
   float halfw = (state.screen_w*1.0f) / 2.0f;
@@ -127,6 +172,8 @@ int draw2d_frame_start() {
   q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - halfh, 
       state.screen_w, state.screen_h, 
       state.clear[0], state.clear[1], state.clear[2]);
+  trace("clear screen: %d, %d, %f, %f, %p -> %p", state.screen_w, state.screen_h,
+      2048.0f - halfw, 2048.0f - halfh, state.drawbuffer_head, q);
   state.drawbuffer_head = (char *) q;
   return 1;
 }
@@ -140,7 +187,7 @@ int draw2d_frame_end() {
   return 1;
 }
 
-int draw2d_set_colour(char r, char g, char b, char a) {
+int draw2d_set_colour(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
   state.col[0] = r;
   state.col[1] = g;
   state.col[2] = b;
