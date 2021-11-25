@@ -28,8 +28,8 @@ static clock_t __time_now;
     info(m, ((float)__time_now - vname) / (float)CLOCKS_PER_SEC);              \
   } while (0)
 
-#define BASE_PATH_MAX_LEN 60
-#define FILE_NAME_MAX_LEN 150
+#define BASE_PATH_MAX_LEN 160
+#define FILE_NAME_MAX_LEN 220
 char base_path[BASE_PATH_MAX_LEN] = "host:";
 char init_script[FILE_NAME_MAX_LEN];
 char main_script[FILE_NAME_MAX_LEN];
