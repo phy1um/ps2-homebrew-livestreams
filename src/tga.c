@@ -29,6 +29,10 @@ char tmp_buffer[256 * 256 * 4];
 int load_tga_to_raw(const char *fname, void *buffer) {
   info("loading TGA %s", fname);
   FILE *f = fopen(fname, "rb");
+  if (!f) {
+    logerr("failed to read file %s", fname);
+    return 0;
+  }
   struct tga_header header = {0};
   size_t rc = fread(&header, 1, 18, f);
 
