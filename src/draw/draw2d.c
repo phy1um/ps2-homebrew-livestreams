@@ -243,12 +243,13 @@ int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
   // assume format == PSM32
   int ee_vram_size = width*height*4;
   if (ee_vram_size > bytes) {
-    logerr("texture upload overflows buffer - bad dimensions %d, %d", width, height); 
+    logerr("texture upload overflows buffer - bad dimensions %d, %d",
+        width, height);
     return 0;
   }
 
   int qwc = ee_vram_size / 16;
-  if ( ee_vram_size % 16 != 0) {
+  if (ee_vram_size % 16 != 0) {
     qwc += 1;
   }
   int block_size = BLOCK_SIZE_BYTES/16;
@@ -279,7 +280,7 @@ int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
     dmatag_raw(remain, 0x3<<28, img_addr);
   }
 
-  draw2d_start_cnt(); 
+  draw2d_start_cnt();
 
   giftag_new(&state, GIF_PACKED, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
   giftag_ad_texflush(&state);
@@ -307,7 +308,8 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
     draw2d_kick();
   }
 
-  if (state.draw_type != D2D_SPRITE || state.active_tex != state.tex_vram_addr) {
+  if (state.draw_type != D2D_SPRITE
+      || state.active_tex != state.tex_vram_addr) {
     if (state.draw_type != D2D_NONE) {
       draw2d_update_last_tag_loops();
     }
@@ -316,9 +318,9 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
     giftag_new(&state, 0, 4, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_texa(&state, 0x80, 0x80);
     giftag_ad_tex1(&state, 1, 0, 1, 0, 0);
-    giftag_ad_tex0(&state, 0, 
-        state.tex_vram_addr/64, 
-        state.tex_width/64, 
+    giftag_ad_tex0(&state, 0,
+        state.tex_vram_addr/64,
+        state.tex_width/64,
         state.tex_psm,
         floorlog2(state.tex_width),
         floorlog2(state.tex_height),
@@ -328,10 +330,10 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
     state.draw_type = D2D_SPRITE;
   }
 
-  push_st(&state, u1, v1); 
+  push_st(&state, u1, v1);
   push_rgbaq(&state, state.col);
   push_xyz2(&state, to_coord(x-320), to_coord(y-224), 0);
-  push_st(&state, u2, v2); 
+  push_st(&state, u2, v2);
   push_rgbaq(&state, state.col);
   push_xyz2(&state, to_coord(x+w-320), to_coord(y+h-224), 0);
   state.gif.loop_count += 1;

@@ -34,9 +34,9 @@ int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs,
     ((uint64_t*)b)[0] = (value);\
   }while(0)
 
-#define SHIFT(v, m, p) ((((uint64_t)v)&m)<<p)
+#define SHIFT(v, m, p) ((((uint64_t)v)&m) << p)
 
-// TODO: intline?
+// TODO(phy1um): intline?
 int gif_ad(struct d2d_state *s, uint64_t reg, uint64_t value) {
   GIF_AD(s->drawbuffer_head, reg, value);
   s->drawbuffer_head += QW_SIZE;

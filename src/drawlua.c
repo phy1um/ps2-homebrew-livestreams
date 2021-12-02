@@ -73,7 +73,8 @@ int draw2d_lua_upload_texture(lua_State *l) {
   lua_gettable(l, 1);
   int vram_addr = lua_tointeger(l, -1);
 
-  int rc = draw2d_upload_texture(ptr, width*height, width, height, psm, vram_addr);
+  int rc =
+      draw2d_upload_texture(ptr, width * height, width, height, psm, vram_addr);
   lua_pushboolean(l, rc);
   return 1;
 }
@@ -95,7 +96,7 @@ int draw2d_lua_sprite(lua_State *l) {
   lua_gettable(l, 1);
   int vram_addr = lua_tointeger(l, -1);
 
-  draw2d_bind_texture(vram_addr, width, height, psm); 
+  draw2d_bind_texture(vram_addr, width, height, psm);
 
   float x = lua_tonumber(l, 2);
   float y = lua_tonumber(l, 3);
@@ -107,7 +108,7 @@ int draw2d_lua_sprite(lua_State *l) {
   float v2 = lua_tonumber(l, 9);
 
   draw2d_sprite(x, y, w, h, u1, v1, u2, v2);
-  
+
   return 1;
 }
 
