@@ -4,7 +4,7 @@
 #include "log.h"
 
 int draw2d_lua_frame_start(lua_State *l) {
-  draw2d_frame_start(); 
+  draw2d_frame_start();
   return 0;
 }
 
@@ -14,12 +14,12 @@ int draw2d_lua_frame_end(lua_State *l) {
 }
 
 int draw2d_lua_triangle(lua_State *l) {
-  float x1 = lua_tonumber(l, 2); 
-  float y1 = lua_tonumber(l, 3); 
-  float x2 = lua_tonumber(l, 4); 
-  float y2 = lua_tonumber(l, 5); 
-  float x3 = lua_tonumber(l, 6); 
-  float y3 = lua_tonumber(l, 7); 
+  float x1 = lua_tonumber(l, 2);
+  float y1 = lua_tonumber(l, 3);
+  float x2 = lua_tonumber(l, 4);
+  float y2 = lua_tonumber(l, 5);
+  float x3 = lua_tonumber(l, 6);
+  float y3 = lua_tonumber(l, 7);
   draw2d_triangle(x1, y1, x2, y2, x3, y3);
   return 0;
 }
@@ -53,8 +53,8 @@ int draw2d_lua_undefined(lua_State *l) {
   return 0;
 }
 
-#define pushfn(f, n) \
-  lua_pushcfunction(l, f); \
+#define pushfn(f, n)                                                           \
+  lua_pushcfunction(l, f);                                                     \
   lua_setfield(l, -2, n)
 
 int draw2d_lua_init(lua_State *l) {
@@ -67,6 +67,6 @@ int draw2d_lua_init(lua_State *l) {
   pushfn(draw2d_lua_set_colour, "setColour");
   pushfn(draw2d_lua_clear_colour, "clearColour");
   pushfn(draw2d_lua_screen_dimensions, "screenDimensions");
-  lua_setglobal(l, "FAST_DRAW2D"); 
+  lua_setglobal(l, "FAST_DRAW2D");
   return 0;
 }
