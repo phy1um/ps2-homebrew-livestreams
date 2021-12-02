@@ -17,6 +17,9 @@ local DB_SIZE = 20000
 
 -- Local draw state
 local draw = {
+  -- screen dimensions
+  fbw = -1,
+  fbh = -1,
   -- current colour
   col = {r=255, g=255, b=255, a=0x80},
   -- current state
@@ -291,7 +294,7 @@ function draw:frameStart(gs)
   self.kc = 0
   self.rawtri = 0
   self:newBuffer() 
-  self.buf:frameStart(640, 448, self.clearR, self.clearG, self.clearB)
+  self.buf:frameStart(self.fbw, self.fbh, self.clearR, self.clearG, self.clearB)
 end
 
 -- setup frame end, kick drawbuffer
@@ -309,8 +312,9 @@ function draw:clearColour(r, g, b)
   self.clearB = b
 end
 
-function draw:screenDimensions()
-
+function draw:screenDimensions(w, h)
+  self.fbw = w
+  self.fbh = h
 end
 
 return draw
