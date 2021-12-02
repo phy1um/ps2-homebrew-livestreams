@@ -35,6 +35,18 @@ int load_tga_to_raw(const char *fname, void *buffer) {
   }
   struct tga_header header = {0};
   size_t rc = fread(&header, 1, 18, f);
+  if (rc != 18) {
+    if ( feof(f) ) {
+      logerr("malformed TGA %s, unexpected EOF in header", fname);
+      return 0;
+    } else if ( ferror(f) ) {
+      logerr("error reading %s", fname);
+      return 0;
+    } else {
+      logerr("unknown IO error with %s", fname);
+      return 0;
+    }
+  }
 
   info("reading ID data - %d bytes", header.idlen);
   char idData[255];
