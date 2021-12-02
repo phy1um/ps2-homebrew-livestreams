@@ -1,6 +1,8 @@
-local gif = dofile("host:script/gif.lua")
+PS2PROG.slow2d = false
+
+local gif = require("gif")
 local VRAM = require("vram")
-local D2D = FAST_DRAW2D
+local D2D = require("draw2d")
 
 local gs = nil
 

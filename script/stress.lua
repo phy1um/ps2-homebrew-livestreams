@@ -1,8 +1,7 @@
 --local GIF = dofile("host:script/gif.lua")
 local GIF = require("gif")
 local P = require("ps2const")
---local D2D = require("draw2d")
-local D2D = FAST_DRAW2D
+local D2D = require("draw2d")
 local VRAM = require("vram")
 
 
