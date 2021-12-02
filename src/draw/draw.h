@@ -52,6 +52,12 @@ struct d2d_state {
   int drawbuffer_len;
   void *zbuffer_ref;
 
+  int tex_vram_addr;
+  int tex_width;
+  int tex_height;
+  int tex_psm;
+  int active_tex;
+
   struct d2d_gif gif;
   struct d2d_dma dma;
   struct d2d_stats this_frame;
@@ -67,5 +73,14 @@ int draw2d_clear_colour(char r, char g, char b);
 int draw2d_set_colour(unsigned char r, unsigned char g, unsigned char b,
     unsigned char a);
 int draw2d_alloc();
+
+int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
+    int format, int vram_addr);
+
+int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
+    float u2, float v2);
+
+int draw2d_bind_texture(int tex_vram_addr, int width, int height, int psm);
+
 
 #endif

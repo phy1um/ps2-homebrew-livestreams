@@ -1,8 +1,7 @@
 
 local GIF = require("gif")
 local P = require("ps2const")
---local D2D = require("draw2d")
-local D2D = FAST_DRAW2D
+local D2D = require("draw2d")
 local VRAM = require("vram")
 
 local gs = nil
@@ -36,7 +35,8 @@ function PS2PROG.frame()
   D2D:sprite(testTex, xx, 200, 200, 200, 0, 0, 1, 1)
   D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)
   D2D:frameEnd(gs)
-  print("tris/frame = " .. D2D.prev.rawtri .. ", KC=" .. D2D.prev.kc .. ", FPS=" .. FPS)
+  --print("tris/frame = " .. D2D.prev.rawtri .. ", KC=" .. D2D.prev.kc .. ", FPS=" .. FPS)
+  print("FPS=" .. FPS)
 
   if PAD.held(PAD.LEFT) then xx = xx - 50*dt end
   if PAD.held(PAD.RIGHT) then xx = xx + 50*dt end

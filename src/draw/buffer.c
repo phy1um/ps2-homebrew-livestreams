@@ -34,13 +34,80 @@ int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs,
     ((uint64_t*)b)[0] = (value);\
   }while(0)
 
-int giftag_ad_prim(struct d2d_state *s,
-  int type, int shaded, int textured, int aa) {
-  GIF_AD(s->drawbuffer_head,
-      GS_REG_PRIM,
-      type | (shaded*0x8) | (textured*0x10) | (aa*0x80));
+#define SHIFT(v, m, p) ((((uint64_t)v)&m)<<p)
+
+// TODO: intline?
+int gif_ad(struct d2d_state *s, uint64_t reg, uint64_t value) {
+  GIF_AD(s->drawbuffer_head, reg, value);
   s->drawbuffer_head += QW_SIZE;
   s->drawbuffer_size += QW_SIZE;
+  return 1;
+}
+
+int giftag_ad_texflush(struct d2d_state *s) {
+  gif_ad(s, GS_REG_TEXFLUSH, 0);
+  return 1;
+}
+
+int giftag_ad_prim(struct d2d_state *s,
+  int type, int shaded, int textured, int aa) {
+  gif_ad(s, GS_REG_PRIM,
+      type | (shaded*0x8) | (textured*0x10) | (aa*0x80));
+  return 1;
+}
+
+int giftag_ad_bitbltbuf(struct d2d_state *s, int dba, int dbw, uint64_t psm) {
+  gif_ad(s, GS_REG_BITBLTBUF,
+      SHIFT(dba, 0x1fff, 32) | SHIFT(dbw, 0x1f, 48) | SHIFT(psm, 0x1f, 56));
+  return 1;
+}
+
+int giftag_ad_trxpos(struct d2d_state *s, int sx, uint64_t sy, uint64_t dx,
+    uint64_t dy, uint64_t dir) {
+  gif_ad(s, GS_REG_TRXPOS,
+      sx | (sy << 16) | (dx << 32) | (dy << 48) | (dir << 59));
+  return 1;
+}
+
+int giftag_ad_trxdir(struct d2d_state *s, int dir) {
+  gif_ad(s, GS_REG_TRXDIR,
+      dir&0x1);
+  return 1;
+}
+
+int giftag_ad_trxreg(struct d2d_state *s, int rrw, int rrh) {
+  gif_ad(s, GS_REG_TRXREG,
+      SHIFT(rrw, 0x7ff, 0) | SHIFT(rrh, 0x7ff, 32));
+  return 1;
+}
+
+int giftag_ad_texa(struct d2d_state *s, int ta0, int ta1) {
+  gif_ad(s, GS_REG_TEXA,
+      SHIFT(ta0, 0x7f, 0) | SHIFT(ta1, 0x7f, 32));
+  return 1;
+}
+
+int giftag_ad_tex0(struct d2d_state *s,
+    int reg, int tbp, int tbw, int psm, int tw, int th, int tcc, int tfx) {
+  gif_ad(s, GS_REG_TEX0 + reg,
+      SHIFT(tbp, 0x1fff, 0)
+      | SHIFT(tbw, 0x1f, 14)
+      | SHIFT(psm, 0x1f, 20)
+      | SHIFT(tw, 0x7, 26)
+      | SHIFT(th, 0x7, 30)
+      | SHIFT(tcc, 0x1, 34)
+      | SHIFT(tfx, 0x3, 35));
+  return 1;
+}
+
+int giftag_ad_tex1(struct d2d_state *s, int lcm, int mxl, int mtba,
+    int l, int k) {
+  gif_ad(s, GS_REG_TEX1,
+      SHIFT(lcm, 0x1, 0)
+      | SHIFT(mxl, 0x3, 2)
+      | SHIFT(mtba, 0x1, 9)
+      | SHIFT(l, 0x3, 19)
+      | SHIFT(k, 0x7ff, 32));
   return 1;
 }
 
