@@ -64,7 +64,8 @@ int draw2d_triangle(float x1, float y1, float x2, float y2, float x3, float y3);
 
 int draw2d_screen_dimensions(int w, int h);
 int draw2d_clear_colour(char r, char g, char b);
-int draw2d_set_colour(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+int draw2d_set_colour(unsigned char r, unsigned char g, unsigned char b,
+    unsigned char a);
 int draw2d_alloc();
 
 #endif

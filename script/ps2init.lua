@@ -23,7 +23,7 @@ function require(p)
   return trueRequire(p)
 end
 
-PS2PROG.slow2d = true
+--PS2PROG.slow2d = true
 
 return function() end
 

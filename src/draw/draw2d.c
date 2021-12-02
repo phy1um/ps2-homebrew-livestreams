@@ -116,11 +116,11 @@ int draw2d_kick() {
 
 #define to_coord(f) \
   0x8000 + (0xfff0 & ( ((int) (f) << 4) | (int) ((f) - ((int)(f)))*0xf ))
- //(uint16_t) ( ((int)(f) << 4) | (int)( ((f) - ((int)(f))) * 0xf ) )
 
 int draw2d_triangle(float x1, float y1,
     float x2, float y2, float x3, float y3) {
-  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.drawbuffer_size, x1, y1, x2, y2, x3, y3);
+  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.drawbuffer_size, x1, y1,
+      x2, y2, x3, y3);
   if (state.gif.loop_count >= GIF_MAX_LOOPS - 1) {
     draw2d_kick();
   }
@@ -152,8 +152,8 @@ int draw2d_triangle(float x1, float y1,
 static zbuffer_t zb = {0};
 int draw2d_frame_start() {
   trace("frame start");
-  memset(&state.this_frame, 0, sizeof(struct d2d_stats)); 
-  draw2d_new_buffer(); 
+  memset(&state.this_frame, 0, sizeof(struct d2d_stats));
+  draw2d_new_buffer();
   draw2d_start_cnt();
 
   // Clear the screen using PS2SDK functions
@@ -169,10 +169,11 @@ int draw2d_frame_start() {
                           DRAW_ENABLE, ZTEST_METHOD_ALLPASS),
               GS_REG_TEST);
   q++;
-  q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - halfh, 
-      state.screen_w, state.screen_h, 
+  q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - halfh,
+      state.screen_w, state.screen_h,
       state.clear[0], state.clear[1], state.clear[2]);
-  trace("clear screen: %d, %d, %f, %f, %p -> %p", state.screen_w, state.screen_h,
+  trace("clear screen: %d, %d, %f, %f, %p -> %p",
+      state.screen_w, state.screen_h,
       2048.0f - halfw, 2048.0f - halfh, state.drawbuffer_head, q);
   state.drawbuffer_head = (char *) q;
   return 1;
@@ -187,7 +188,8 @@ int draw2d_frame_end() {
   return 1;
 }
 
-int draw2d_set_colour(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+int draw2d_set_colour(unsigned char r, unsigned char g, unsigned char b,
+    unsigned char a) {
   state.col[0] = r;
   state.col[1] = g;
   state.col[2] = b;
