@@ -94,31 +94,31 @@ int draw2d_lua_upload_texture(lua_State *l) {
 
 int draw2d_lua_sprite(lua_State *l) {
   lua_pushstring(l, "width");
-  lua_gettable(l, 1);
+  lua_gettable(l, 2);
   int width = lua_tointeger(l, -1);
 
   lua_pushstring(l, "height");
-  lua_gettable(l, 1);
+  lua_gettable(l, 2);
   int height = lua_tointeger(l, -1);
 
   lua_pushstring(l, "format");
-  lua_gettable(l, 1);
+  lua_gettable(l, 2);
   int psm = lua_tointeger(l, -1);
 
   lua_pushstring(l, "basePtr");
-  lua_gettable(l, 1);
+  lua_gettable(l, 2);
   int vram_addr = lua_tointeger(l, -1);
 
   draw2d_bind_texture(vram_addr, width, height, psm);
 
-  float x = lua_tonumber(l, 2);
-  float y = lua_tonumber(l, 3);
-  float w = lua_tonumber(l, 4);
-  float h = lua_tonumber(l, 5);
-  float u1 = lua_tonumber(l, 6);
-  float v1 = lua_tonumber(l, 7);
-  float u2 = lua_tonumber(l, 8);
-  float v2 = lua_tonumber(l, 9);
+  float x = lua_tonumber(l, 3);
+  float y = lua_tonumber(l, 4);
+  float w = lua_tonumber(l, 5);
+  float h = lua_tonumber(l, 6);
+  float u1 = lua_tonumber(l, 7);
+  float v1 = lua_tonumber(l, 8);
+  float u2 = lua_tonumber(l, 9);
+  float v2 = lua_tonumber(l, 10);
 
   draw2d_sprite(x, y, w, h, u1, v1, u2, v2);
 
