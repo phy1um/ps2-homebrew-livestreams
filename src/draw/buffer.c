@@ -7,7 +7,7 @@
 
 int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs,
     uint64_t regs) {
-  trace("new giftag %d @ %u", flag, s->drawbuffer_size);
+  trace("GIFTag %d @ %p", flag, s->drawbuffer_head);
   // update giftag tracking state
   s->gif.loop_count = 0;
   s->gif.head = (uint32_t *) s->drawbuffer_head;
@@ -146,6 +146,7 @@ int push_st(struct d2d_state *state, float s, float t) {
 }
 
 int dma_tag(uint32_t *t, int qwc, int type, uint32_t addr) {
+  trace("DMATag @ %p", t);
   t[0] = (qwc&0xffff) | type;
   t[1] = addr;
   t[2] = 0;

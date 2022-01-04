@@ -50,31 +50,44 @@ int draw2d_lua_set_colour(lua_State *l) {
 
 int draw2d_lua_upload_texture(lua_State *l) {
   lua_pushstring(l, "width");
-  lua_gettable(l, 1);
+  lua_gettable(l, 2);
   int width = lua_tointeger(l, -1);
+  lua_pop(l, 1);
 
   lua_pushstring(l, "height");
-  lua_gettable(l, 1);
+  lua_gettable(l, 2);
   int height = lua_tointeger(l, -1);
+  lua_pop(l, 1);
 
   lua_pushstring(l, "format");
-  lua_gettable(l, 1);
+  lua_gettable(l, 2);
   int psm = lua_tointeger(l, -1);
-
-  lua_pushstring(l, "data");
-  lua_gettable(l, 1);
-  // texture data table on top of stack!
-  lua_pushstring(l, "addr");
-  lua_gettable(l, -1);
-  void *ptr = lua_touserdata(l, -1);
   lua_pop(l, 1);
 
   lua_pushstring(l, "basePtr");
-  lua_gettable(l, 1);
+  lua_gettable(l, 2);
   int vram_addr = lua_tointeger(l, -1);
+  lua_pop(l, 1);
 
+  lua_pushstring(l, "data");
+  lua_gettable(l, 2);
+  // texture data table on top of stack!
+  lua_pushstring(l, "addr");
+  lua_gettable(l, -2);
+  void *ptr = (void*) lua_tointeger(l, -1);
+  lua_pop(l, 2);
+
+  // ASSUME: no textures at VRAM addr 0
+  if ( vram_addr == 0 ) {
+    logerr("cannot upload texture at vram addr = 0"); 
+    lua_pushboolean(l, 0);
+    return 1;
+  }
+
+  info("calling upload texture with: w=%d, h=%d, psm=%d, vram=%d, ee_addr=%p",
+      width, height, psm, vram_addr, ptr);
   int rc =
-      draw2d_upload_texture(ptr, width * height, width, height, psm, vram_addr);
+      draw2d_upload_texture(ptr, width * height * 4, width, height, psm, vram_addr);
   lua_pushboolean(l, rc);
   return 1;
 }

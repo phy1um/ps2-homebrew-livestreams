@@ -24,7 +24,7 @@ static int is_running = 1;
 
 int print_buffer(qword_t *b, int len) {
 #ifdef LOG_TRACE
-  info("-- buffer\n");
+  info("-- buffer %p\n", b);
   for (int i = 0; i < len; i++) {
     printf("%016llx %016llx\n", b->dw[0], b->dw[1]);
     b++;

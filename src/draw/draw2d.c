@@ -192,6 +192,7 @@ int draw2d_frame_start() {
       state.screen_w, state.screen_h,
       2048.0f - halfw, 2048.0f - halfh, state.drawbuffer_head, q);
   state.drawbuffer_head = (char *) q;
+  state.drawbuffer_size = ((char *) q - state.drawbuffer);
   return 1;
 }
 
@@ -230,14 +231,13 @@ int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
     int format, int vram_addr) {
   trace("uploading tex %p -> %d", texture, vram_addr);
   // setup
-  giftag_new(&state, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
+  giftag_new(&state, 0, 4, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
   giftag_ad_bitbltbuf(&state, vram_addr/64, width/64, format);
   giftag_ad_trxpos(&state, 0, 0, 0, 0, 0);
   giftag_ad_trxreg(&state, width, height);
   giftag_ad_trxdir(&state, 0);
 
   // end current drawing
-  draw2d_update_last_tag_loops();
   draw2d_end_cnt();
 
   // assume format == PSM32
@@ -255,6 +255,9 @@ int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
   int block_size = BLOCK_SIZE_BYTES/16;
   int packet_count = qwc / block_size;
   int remain = qwc % block_size;
+
+  trace("upload texture: block_size=%d, packet_count=%d, remain=%d",
+      block_size, packet_count, remain);
 
   // split upload into reasonably sized blocks
   int img_addr = (int) texture;
