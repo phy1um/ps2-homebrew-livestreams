@@ -81,7 +81,7 @@ int giftag_ad_trxreg(struct d2d_state *s, int rrw, int rrh) {
   return 1;
 }
 
-// TODO: the value is always 0 for some reason
+// TODO(phy1um): the value is always 0 for some reason
 int giftag_ad_texa(struct d2d_state *s, int ta0, int ta1) {
   gif_ad(s, GS_REG_TEXA,
       SHIFT(ta0, 0xff, 0) | SHIFT(ta1, 0xff, 32));
@@ -95,7 +95,7 @@ int giftag_ad_tex0(struct d2d_state *s,
       | SHIFT(tbw, 0x1f, 14)
       | SHIFT(psm, 0x1f, 20)
       | SHIFT(tw, 0xf, 26)
-      | SHIFT(th, 0xf, 30)
+      | SHIFT(th, 0x7, 30)
       | SHIFT(tcc, 0x1, 34)
       | SHIFT(tfx, 0x3, 35));
   return 1;

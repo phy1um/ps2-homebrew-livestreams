@@ -79,15 +79,15 @@ int draw2d_lua_upload_texture(lua_State *l) {
 
   // ASSUME: no textures at VRAM addr 0
   if ( vram_addr == 0 ) {
-    logerr("cannot upload texture at vram addr = 0"); 
+    logerr("cannot upload texture at vram addr = 0");
     lua_pushboolean(l, 0);
     return 1;
   }
 
   info("calling upload texture with: w=%d, h=%d, psm=%d, vram=%d, ee_addr=%p",
       width, height, psm, vram_addr, ptr);
-  int rc =
-      draw2d_upload_texture(ptr, width * height * 4, width, height, psm, vram_addr);
+  int rc = draw2d_upload_texture(ptr, width * height * 4, width, height,
+          psm, vram_addr);
   lua_pushboolean(l, rc);
   return 1;
 }

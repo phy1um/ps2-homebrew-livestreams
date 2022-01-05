@@ -1,6 +1,5 @@
 #include <dma.h>
 #include <dma_tags.h>
-#include <draw.h>
 #include <gs_gp.h>
 #include <gs_psm.h>
 #include <tamtypes.h>
