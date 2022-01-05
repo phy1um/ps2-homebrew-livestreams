@@ -9,7 +9,6 @@ local gif = {
 
 function gif.tag(b, flg, nloop, eop, regs) 
   local lpp = b.head
-  --if #regs == 0 then return end
   -- print("GIFTAG: pushing " .. string.format("0x%x", nloop))
   if eop then
     b:pushint(nloop + 0x8000)
