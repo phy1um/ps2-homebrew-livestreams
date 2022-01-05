@@ -94,8 +94,8 @@ int giftag_ad_tex0(struct d2d_state *s,
       SHIFT(tbp, 0x3fff, 0)
       | SHIFT(tbw, 0x1f, 14)
       | SHIFT(psm, 0x1f, 20)
-      | SHIFT(tw, 0x7, 26)
-      | SHIFT(th, 0x7, 30)
+      | SHIFT(tw, 0xf, 26)
+      | SHIFT(th, 0xf, 30)
       | SHIFT(tcc, 0x1, 34)
       | SHIFT(tfx, 0x3, 35));
   return 1;
