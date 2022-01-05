@@ -327,7 +327,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
         state.tex_psm,
         floorlog2(state.tex_width),
         floorlog2(state.tex_height),
-        0, 1);
+        1, 0);
     giftag_ad_prim(&state, PRIM_SPRITE, 0, 1, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_SPRITE_LEN, GIF_REGS_SPRITE);
     state.draw_type = D2D_SPRITE;

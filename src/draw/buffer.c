@@ -34,7 +34,7 @@ int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs,
     ((uint64_t*)b)[0] = (value);\
   }while(0)
 
-#define SHIFT(v, m, p) ((((uint64_t)v)&m) << p)
+#define SHIFT(v, m, p) ((((uint64_t)v) & (m)) << p)
 
 // TODO(phy1um): intline?
 int gif_ad(struct d2d_state *s, uint64_t reg, uint64_t value) {
@@ -58,7 +58,7 @@ int giftag_ad_prim(struct d2d_state *s,
 
 int giftag_ad_bitbltbuf(struct d2d_state *s, int dba, int dbw, uint64_t psm) {
   gif_ad(s, GS_REG_BITBLTBUF,
-      SHIFT(dba, 0x1fff, 32) | SHIFT(dbw, 0x1f, 48) | SHIFT(psm, 0x1f, 56));
+      SHIFT(dba, 0x3fff, 32) | SHIFT(dbw, 0x1f, 48) | SHIFT(psm, 0x1f, 56));
   return 1;
 }
 
@@ -81,16 +81,17 @@ int giftag_ad_trxreg(struct d2d_state *s, int rrw, int rrh) {
   return 1;
 }
 
+// TODO: the value is always 0 for some reason
 int giftag_ad_texa(struct d2d_state *s, int ta0, int ta1) {
   gif_ad(s, GS_REG_TEXA,
-      SHIFT(ta0, 0x7f, 0) | SHIFT(ta1, 0x7f, 32));
+      SHIFT(ta0, 0xff, 0) | SHIFT(ta1, 0xff, 32));
   return 1;
 }
 
 int giftag_ad_tex0(struct d2d_state *s,
     int reg, int tbp, int tbw, int psm, int tw, int th, int tcc, int tfx) {
   gif_ad(s, GS_REG_TEX0 + reg,
-      SHIFT(tbp, 0x1fff, 0)
+      SHIFT(tbp, 0x3fff, 0)
       | SHIFT(tbw, 0x1f, 14)
       | SHIFT(psm, 0x1f, 20)
       | SHIFT(tw, 0x7, 26)
@@ -105,7 +106,7 @@ int giftag_ad_tex1(struct d2d_state *s, int lcm, int mxl, int mtba,
   gif_ad(s, GS_REG_TEX1,
       SHIFT(lcm, 0x1, 0)
       | SHIFT(mxl, 0x3, 2)
-      | SHIFT(mtba, 0x1, 9)
+      | SHIFT(mtba, 0x1, 8)
       | SHIFT(l, 0x3, 19)
       | SHIFT(k, 0x7ff, 32));
   return 1;

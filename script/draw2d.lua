@@ -266,7 +266,7 @@ function draw:uploadTexture(tt)
     -- for each fullsized packet, add a CNT with the GIFTag describing IMAGE
     --  data, followed by DMATag REF pointing to EE memory
     self:dmaTagRaw(DMA.CNT, 1, 0) 
-    GIF.tag(self.buf, GIF.IMAGE, blocksize, false, {0}) 
+    GIF.tag(self.buf, GIF.IMAGE, blocksize, false, {}) 
     self:dmaTagRaw(DMA.REF, blocksize, imgAddr)
     imgAddr = imgAddr + blocksize*16
     packets = packets - 1
@@ -278,7 +278,7 @@ function draw:uploadTexture(tt)
     if self.buf.size - self.buf.head < 4 then self:kick() end
     local base = tb*blocksize*16
     self:dmaTagRaw(DMA.CNT, 1, 0)
-    GIF.tag(self.buf, GIF.IMAGE, remain, false, {1})
+    GIF.tag(self.buf, GIF.IMAGE, remain, false, {})
     self:dmaTagRaw(DMA.REF, remain, imgAddr)
   end
 
