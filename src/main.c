@@ -46,8 +46,8 @@ void core_error(const char *msg) {
     info(m, ((float)__time_now - vname) / (float)CLOCKS_PER_SEC);              \
   } while (0)
 
-#define BASE_PATH_MAX_LEN 60
-#define FILE_NAME_MAX_LEN 150
+#define BASE_PATH_MAX_LEN 180
+#define FILE_NAME_MAX_LEN 300
 char base_path[BASE_PATH_MAX_LEN] = "host:";
 char init_script[FILE_NAME_MAX_LEN];
 char main_script[FILE_NAME_MAX_LEN];
