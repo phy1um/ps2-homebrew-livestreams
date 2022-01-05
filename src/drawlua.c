@@ -88,6 +88,10 @@ int draw2d_lua_upload_texture(lua_State *l) {
        width, height, psm, vram_addr, ptr);
   int rc = draw2d_upload_texture(ptr, width * height * 4, width, height, psm,
                                  vram_addr);
+  if (rc) {
+    lua_pushboolean(l, 1);
+    lua_setfield(l, 2, "resident");
+  }
   lua_pushboolean(l, rc);
   return 1;
 }
