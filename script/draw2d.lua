@@ -286,7 +286,6 @@ function draw:uploadTexture(tt)
   self:newCnt()
   GIF.texflush(self.buf)
 
-  tt.resident = true
   return true
 end
 

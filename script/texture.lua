@@ -7,6 +7,7 @@ local VRAM = require("vram")
 local gs = nil
 local testTex = {}
 local fnt = nil
+local texturesInVram = false
 
 
 function PS2PROG.start()
@@ -24,14 +25,19 @@ function PS2PROG.start()
   D2D.vramAllocTexture(fnt)
 end
 
+function uploadTextures()
+  if not texturesInVram then
+    D2D:uploadTexture(testTex)
+    D2D:uploadTexture(fnt)
+    texturesInVram = true
+  end
+end
+
 xx = 200
 local dt = 1/60
 function PS2PROG.frame()
   D2D:frameStart(gs)
-  if not testTex.resident then D2D:uploadTexture(testTex) end
-  if res then testTex.resident = true end
-  if not fnt.resident then D2D:uploadTexture(fnt) end
-  if res then fnt.resident = true end
+  uploadTextures()
   D2D:setColour(0x80,0x80,0x80,0x80)
   D2D:sprite(testTex, xx, 200, 200, 200, 0, 0, 1, 1)
   D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)
