@@ -45,14 +45,10 @@ function PS2PROG.frame()
   D2D:setColour(0x80,0x80,0x80,0x80)
   D2D:sprite(testTex, xx, 200, 200, 200, 0, 0, 1, 1)
   D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)
-  D2D:rect(100, 100, 20, 20)
   D2D:frameEnd(gs)
-  --print("tris/frame = " .. D2D.prev.rawtri .. ", KC=" .. D2D.prev.kc .. ", FPS=" .. FPS)
-  --print("FPS=" .. FPS)
 
   if PAD.held(PAD.LEFT) then xx = xx - 50*dt end
   if PAD.held(PAD.RIGHT) then xx = xx + 50*dt end
-  --db:free()
 end
 
 
