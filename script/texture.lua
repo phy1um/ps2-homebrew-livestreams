@@ -8,6 +8,7 @@ local gs = nil
 local testTex = {}
 local fnt = nil
 local texturesInVram = false
+local vr = nil
 
 
 function PS2PROG.start()
@@ -16,14 +17,16 @@ function PS2PROG.start()
   fnt = D2D.loadTexture("host:bigfont.tga", 256, 64)
   DMA.init(DMA.GIF)
   gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
-  local fb1 = VRAM.buffer(640, 448, GS.PSM24, 256)
-  local fb2 = VRAM.buffer(640, 448, GS.PSM24, 256)
-  local zb = VRAM.buffer(640, 448, GS.PSMZ24, 256)
+  local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 256)
+  local fb2 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 256)
+  local zb = VRAM.mem:framebuffer(640, 448, GS.PSMZ24, 256)
   GS.setBuffers(fb1, fb2, zb)
   D2D:screenDimensions(640, 448)
   D2D:clearColour(0x2b, 0x2b, 0x2b)
-  D2D.vramAllocTexture(testTex)
-  D2D.vramAllocTexture(fnt)
+
+  vr = VRAM.slice(VRAM.mem.head)
+  vr:texture(testTex)
+  vr:texture(fnt)
 end
 
 function uploadTextures()
