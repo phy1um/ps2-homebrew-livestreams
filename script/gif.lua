@@ -9,7 +9,6 @@ local gif = {
 
 function gif.tag(b, flg, nloop, eop, regs) 
   local lpp = b.head
-  if #regs == 0 then return end
   -- print("GIFTAG: pushing " .. string.format("0x%x", nloop))
   if eop then
     b:pushint(nloop + 0x8000)
@@ -139,7 +138,7 @@ function gif.packedST(b, s, t)
 end
 
 function gif.texflush(b)
-  gif.tag(b, gif.PACKED, 1, true, {0xe})
+  gif.tag(b, gif.PACKED, 1, false, {0xe})
   gif.setAd(b, P.REG.TEXFLUSH, 0, 0)
 end
 

@@ -82,6 +82,11 @@ lualint:
 format:
 	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/workdir unibeautify/clang-format -i -sort-includes **/*.c **/*.h
 
+.PHONY: release
+release: clean assets docker-elf 
+	mv $(BIN) dist/$(VERSION)-release.elf
+	zip -r ps2-engine-$(VERSION).zip dist
+
 deps:
 	git clone https://github.com/ps2dev/lua --depth 1 --branch $(LUA_BRANCH) --single-branch src/lua
 

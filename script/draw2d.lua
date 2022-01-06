@@ -17,6 +17,9 @@ local DB_SIZE = 20000
 
 -- Local draw state
 local draw = {
+  -- screen dimensions
+  fbw = -1,
+  fbh = -1,
   -- current colour
   col = {r=255, g=255, b=255, a=0x80},
   -- current state
@@ -256,7 +259,7 @@ function draw:uploadTexture(tt)
     -- for each fullsized packet, add a CNT with the GIFTag describing IMAGE
     --  data, followed by DMATag REF pointing to EE memory
     self:dmaTagRaw(DMA.CNT, 1, 0) 
-    GIF.tag(self.buf, GIF.IMAGE, blocksize, false, {0}) 
+    GIF.tag(self.buf, GIF.IMAGE, blocksize, false, {}) 
     self:dmaTagRaw(DMA.REF, blocksize, imgAddr)
     imgAddr = imgAddr + blocksize*16
     packets = packets - 1
@@ -268,7 +271,7 @@ function draw:uploadTexture(tt)
     if self.buf.size - self.buf.head < 4 then self:kick() end
     local base = tb*blocksize*16
     self:dmaTagRaw(DMA.CNT, 1, 0)
-    GIF.tag(self.buf, GIF.IMAGE, remain, false, {1})
+    GIF.tag(self.buf, GIF.IMAGE, remain, false, {})
     self:dmaTagRaw(DMA.REF, remain, imgAddr)
   end
 
@@ -284,7 +287,7 @@ function draw:frameStart(gs)
   self.kc = 0
   self.rawtri = 0
   self:newBuffer() 
-  self.buf:frameStart(640, 448, self.clearR, self.clearG, self.clearB)
+  self.buf:frameStart(self.fbw, self.fbh, self.clearR, self.clearG, self.clearB)
 end
 
 -- setup frame end, kick drawbuffer
@@ -300,6 +303,11 @@ function draw:clearColour(r, g, b)
   self.clearR = r
   self.clearG = g
   self.clearB = b
+end
+
+function draw:screenDimensions(w, h)
+  self.fbw = w
+  self.fbh = h
 end
 
 return draw
