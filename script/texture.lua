@@ -11,6 +11,7 @@ local texturesInVram = false
 
 
 function PS2PROG.start()
+  PS2PROG.logLevel(5)
   testTex = D2D.loadTexture("host:test.tga", 64, 64)
   fnt = D2D.loadTexture("host:bigfont.tga", 256, 64)
   DMA.init(DMA.GIF)
@@ -43,7 +44,7 @@ function PS2PROG.frame()
   D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)
   D2D:frameEnd(gs)
   --print("tris/frame = " .. D2D.prev.rawtri .. ", KC=" .. D2D.prev.kc .. ", FPS=" .. FPS)
-  print("FPS=" .. FPS)
+  --print("FPS=" .. FPS)
 
   if PAD.held(PAD.LEFT) then xx = xx - 50*dt end
   if PAD.held(PAD.RIGHT) then xx = xx + 50*dt end
