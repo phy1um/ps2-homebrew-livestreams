@@ -58,26 +58,30 @@ int giftag_ad_prim(struct d2d_state *s,
 
 int giftag_ad_bitbltbuf(struct d2d_state *s, int dba, int dbw, uint64_t psm) {
   gif_ad(s, GS_REG_BITBLTBUF,
-      SHIFT(dba, 0x3fff, 32) | SHIFT(dbw, 0x1f, 48) | SHIFT(psm, 0x1f, 56));
+      SHIFT(dba, 0x3fff, 32) | SHIFT(dbw, 0x3f, 48) | SHIFT(psm, 0x3f, 56));
   return 1;
 }
 
 int giftag_ad_trxpos(struct d2d_state *s, int sx, uint64_t sy, uint64_t dx,
     uint64_t dy, uint64_t dir) {
   gif_ad(s, GS_REG_TRXPOS,
-      sx | (sy << 16) | (dx << 32) | (dy << 48) | (dir << 59));
+      SHIFT(sx, 0x7ff, 0)
+      | SHIFT(sy, 0x7ff, 16)
+      | SHIFT(dx, 0x7ff, 32)
+      | SHIFT(dy, 0x7ff, 48)
+      | SHIFT(dir, 0x3, 59));
   return 1;
 }
 
 int giftag_ad_trxdir(struct d2d_state *s, int dir) {
   gif_ad(s, GS_REG_TRXDIR,
-      dir&0x1);
+      dir&0x3);
   return 1;
 }
 
 int giftag_ad_trxreg(struct d2d_state *s, int rrw, int rrh) {
   gif_ad(s, GS_REG_TRXREG,
-      SHIFT(rrw, 0x7ff, 0) | SHIFT(rrh, 0x7ff, 32));
+      SHIFT(rrw, 0xfff, 0) | SHIFT(rrh, 0xfff, 32));
   return 1;
 }
 
@@ -92,10 +96,10 @@ int giftag_ad_tex0(struct d2d_state *s,
     int reg, int tbp, int tbw, int psm, int tw, int th, int tcc, int tfx) {
   gif_ad(s, GS_REG_TEX0 + reg,
       SHIFT(tbp, 0x3fff, 0)
-      | SHIFT(tbw, 0x1f, 14)
-      | SHIFT(psm, 0x1f, 20)
+      | SHIFT(tbw, 0x3f, 14)
+      | SHIFT(psm, 0x3f, 20)
       | SHIFT(tw, 0xf, 26)
-      | SHIFT(th, 0x7, 30)
+      | SHIFT(th, 0xf, 30)
       | SHIFT(tcc, 0x1, 34)
       | SHIFT(tfx, 0x3, 35));
   return 1;
@@ -105,7 +109,7 @@ int giftag_ad_tex1(struct d2d_state *s, int lcm, int mxl, int mtba,
     int l, int k) {
   gif_ad(s, GS_REG_TEX1,
       SHIFT(lcm, 0x1, 0)
-      | SHIFT(mxl, 0x3, 2)
+      | SHIFT(mxl, 0x7, 2)
       | SHIFT(mtba, 0x1, 8)
       | SHIFT(l, 0x3, 19)
       | SHIFT(k, 0x7ff, 32));
