@@ -25,6 +25,8 @@ int draw2d_alloc() {
 #define GIF_REGS_TRIS_LEN 4
 #define GIF_REGS_SPRITE 0x512512
 #define GIF_REGS_SPRITE_LEN 6
+#define GIF_REGS_RECT 0x551
+#define GIF_REGS_RECT_LEN 3
 
 #define BLOCK_SIZE_BYTES 4496
 
@@ -164,6 +166,36 @@ int draw2d_triangle(float x1, float y1,
   return 1;
 }
 
+int draw2d_rect(float x1, float y1, float w, float h) {
+  trace("rect @ %u %f %f %f %f", state.drawbuffer_size, x1, y1, w, h);
+
+  if (state.gif.loop_count >= GIF_MAX_LOOPS - 1) {
+    draw2d_kick();
+  }
+
+  if (state.drawbuffer_size >= 10000) {
+    draw2d_kick();
+  }
+
+  if (state.draw_type != D2D_RECT) {
+    if(state.draw_type != D2D_NONE) {
+      draw2d_update_last_tag_loops();
+    }
+
+    giftag_new(&state, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
+    giftag_ad_prim(&state, PRIM_SPRITE, 0, 0, 0);
+    giftag_new(&state, 0, 1, 0, GIF_REGS_RECT_LEN, GIF_REGS_RECT);
+    state.draw_type = D2D_RECT;
+  }
+
+  push_rgbaq(&state, state.col);
+  push_xyz2(&state, to_coord(x1-320), to_coord(y1-224), 0);
+  push_xyz2(&state, to_coord(x1+w-320), to_coord(y1+h-224), 0);
+  state.gif.loop_count += 1;
+  state.this_frame.tris += 1;
+  return 1;
+}
+
 static zbuffer_t zb = {0};
 int draw2d_frame_start() {
   trace("frame start");
@@ -229,6 +261,8 @@ int draw2d_screen_dimensions(int w, int h) {
 int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
     int format, int vram_addr) {
   trace("uploading tex %p -> %d", texture, vram_addr);
+
+  draw2d_update_last_tag_loops();
   // setup
   giftag_new(&state, 0, 4, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
   giftag_ad_bitbltbuf(&state, vram_addr/64, width/64, format);

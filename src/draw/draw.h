@@ -22,6 +22,7 @@ void core_error(const char *);
 enum draw_type {
   D2D_NONE,
   D2D_GEOM,
+  D2D_RECT,
   D2D_SPRITE,
 };
 
@@ -68,6 +69,7 @@ struct d2d_state {
 int draw2d_frame_start();
 int draw2d_frame_end();
 int draw2d_triangle(float x1, float y1, float x2, float y2, float x3, float y3);
+int draw2d_rect(float x1, float y1, float w, float h);
 
 int draw2d_screen_dimensions(int w, int h);
 int draw2d_clear_colour(char r, char g, char b);

@@ -24,6 +24,16 @@ int draw2d_lua_triangle(lua_State *l) {
   return 0;
 }
 
+int draw2d_lua_rect(lua_State *l) {
+  float x1 = lua_tonumber(l, 2);
+  float y1 = lua_tonumber(l, 3);
+  float w = lua_tonumber(l, 4);
+  float h = lua_tonumber(l, 5);
+  draw2d_rect(x1, y1, w, h);
+  return 0;
+
+}
+
 int draw2d_lua_screen_dimensions(lua_State *l) {
   int width = lua_tointeger(l, 2);
   int height = lua_tointeger(l, 3);
@@ -140,6 +150,7 @@ int draw2d_lua_init(lua_State *l) {
   pushfn(draw2d_lua_frame_start, "frameStart");
   pushfn(draw2d_lua_frame_end, "frameEnd");
   pushfn(draw2d_lua_triangle, "triangle");
+  pushfn(draw2d_lua_rect, "rect");
   pushfn(draw2d_lua_sprite, "sprite");
   pushfn(draw2d_lua_set_colour, "setColour");
   pushfn(draw2d_lua_clear_colour, "clearColour");
