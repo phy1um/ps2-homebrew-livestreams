@@ -31,7 +31,6 @@ int draw2d_lua_rect(lua_State *l) {
   float h = lua_tonumber(l, 5);
   draw2d_rect(x1, y1, w, h);
   return 0;
-
 }
 
 int draw2d_lua_screen_dimensions(lua_State *l) {

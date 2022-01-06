@@ -178,7 +178,7 @@ int draw2d_rect(float x1, float y1, float w, float h) {
   }
 
   if (state.draw_type != D2D_RECT) {
-    if(state.draw_type != D2D_NONE) {
+    if (state.draw_type != D2D_NONE) {
       draw2d_update_last_tag_loops();
     }
 

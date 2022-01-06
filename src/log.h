@@ -13,10 +13,12 @@ extern int log_output_level;
 #define LOG_LEVEL_TRACE 15
 
 #ifndef LOG_NO_OUTPUT
-#define logmsg(lvl, i, msg, ...)                                                  \
-  do{if(log_output_level >= i) { \
-  printf(lvl " @ (%s:%d) " msg "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
-  }}while(0)
+#define logmsg(lvl, i, msg, ...)                                               \
+  do {                                                                         \
+    if (log_output_level >= i) {                                               \
+      printf(lvl " @ (%s:%d) " msg "\n", __FILE__, __LINE__, ##__VA_ARGS__);   \
+    }                                                                          \
+  } while (0)
 #else
 #define logmsg(lvl, msg, ...) ((void)0)
 #endif
