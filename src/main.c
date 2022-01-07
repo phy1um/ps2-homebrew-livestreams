@@ -23,7 +23,7 @@ static clock_t __time_now;
 static int is_running = 1;
 
 #ifndef LOG_LEVEL_DEFAUT
-#define LOG_LEVEL_DEFAULT 0
+#define LOG_LEVEL_DEFAULT LOG_LEVEL_INFO
 #endif
 int log_output_level = LOG_LEVEL_DEFAULT;
 

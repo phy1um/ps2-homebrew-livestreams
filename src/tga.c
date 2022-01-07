@@ -26,6 +26,7 @@ struct __attribute__((__packed__)) tga_header {
 };
 
 char tmp_buffer[256 * 256 * 4];
+// PRECONDITION: buffer is large enough to hold entire texture
 int load_tga_to_raw(const char *fname, void *buffer) {
   info("loading TGA %s", fname);
   FILE *f = fopen(fname, "rb");
@@ -55,7 +56,7 @@ int load_tga_to_raw(const char *fname, void *buffer) {
   // bytes per pixel from bits per pixel
   int bpp = header.bps / 8;
   info("reading image data - %d bytes", header.width * header.height * bpp);
-  rc = fread(tmp_buffer, bpp, header.width * header.height * bpp, f);
+  rc = fread(tmp_buffer, 1, header.width * header.height * bpp, f);
   char *to = (char *)buffer;
   for (int i = 0; i < header.width; i++) {
     for (int j = 0; j < header.height; j++) {
