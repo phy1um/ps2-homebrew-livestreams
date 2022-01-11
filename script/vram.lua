@@ -37,6 +37,7 @@ function vramslice:texture(tex)
   --local size = vram.size(tex.width, tex.height, tex.psm, 256)
   local size = tex.width*tex.height*4
   tex.basePtr = self:alloc(size, 256)
+  print("allocated texture in VRAM: " .. tex.fname .. " @ " .. tex.basePtr)
   return tex
 end
 
@@ -62,7 +63,11 @@ function vram.size(w, h, psm, align)
   elseif psm == GS.PSM4 then size = math.floor(w*h*2^-3) 
   end
 
-  return size + align - (size%align)
+  if align == 0 then 
+    return size
+  else
+    return size + align - (size%align)
+  end
 end
 
 vram.mem = vram.slice(0, max)

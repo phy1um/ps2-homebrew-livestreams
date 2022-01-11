@@ -40,6 +40,11 @@ local draw = {
   dmaTagQwPtr = 0,
   -- are we currently in a CNT DMATag?
   isInCnt = false,
+  -- clut settings
+  clut = {
+    texPtr = 0,
+    csm = 0,
+  },
   -- metrics from previous frame
   prev = {
     kc = 0,
@@ -133,10 +138,11 @@ function draw:sprite(tex, x, y, w, h, u1, v1, u2, v2)
     self.currentTexPtr = tex.basePtr
     local pb = math.floor(tex.basePtr/64)
     local pw = math.floor(tex.width/64)
-    GIF.tag(self.buf, GIF.PACKED, 4, false, {0xe})
+    GIF.tag(self.buf, GIF.PACKED, 5, false, {0xe})
     GIF.texA(self.buf, 0x80, 0x80)
     GIF.tex1(self.buf, true, 0, true, 0, 0)
     self.buf:settex(0, pb, pw, tex.format, math.floor(log2(tex.width)), math.floor(log2(tex.height)), 0, 1, 0, 0, 0)
+    GIF.tex2(self.buf, self.clut.texPtr, tex.format)
     -- GIF.mipTbp1(self.buf, 0, pb, pw, pb, pw, pb, pw)
     -- GIF.mipTbp2(self.buf, 0, pb, pw, pb, pw, pb, pw)
     GIF.primAd(self.buf, P.PRIM.SPRITE, false, true, false)
@@ -225,6 +231,18 @@ function draw.loadTexture(fname, w, h)
   return tt 
 end
 
+function draw.newTexture(w, h, fmt)
+  local tt = {
+    width = w,
+    height = h,
+    data = nil,
+    format = fmt,
+    fname = "?",
+  }
+  tt.data = RM.alloc(VRAM.size(w, h, fmt, 0))
+  return tt
+end
+
 -- upload a texture that has been VRAM allocated into GS memory
 function draw:uploadTexture(tt)
   if tt.basePtr == nil then
@@ -308,6 +326,12 @@ end
 function draw:screenDimensions(w, h)
   self.fbw = w
   self.fbh = h
+end
+
+function draw:setClut(tex)
+  print("setting clut to: " .. math.floor(tex.basePtr/64) .. "(" .. tex.basePtr .. ")")
+  self.clut.texPtr = math.floor(tex.basePtr/64)
+  self.clut.csm = 0
 end
 
 return draw

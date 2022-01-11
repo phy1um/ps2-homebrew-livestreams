@@ -13,6 +13,7 @@
 #include "script.h"
 
 static int drawlua_new_drawbuffer(lua_State *l);
+static int buffer_alloc(lua_State *l);
 
 static const unsigned int DRAW_BUFFER_MAX_SIZE = 20 * 1024;
 char *static_draw_buffer;
@@ -25,7 +26,13 @@ static int buffer_pushint(lua_State *l) {
   lua_pushstring(l, "head");
   lua_gettable(l, 1);
   int head = lua_tointeger(l, -1);
-  // TODO(Tom Marks): check size
+  lua_pushstring(l, "size");
+  lua_gettable(l, 1);
+  int size = lua_tointeger(l, -1);
+  if (head >= size) {
+    logerr("lua buffer pushint overflow: size=%d, head=%d", size, head);
+    return 0;
+  }
   // ASSUME 4byte int
   if (head % 4 != 0) {
     // TODO(Tom Marks): manually bitmask etc
@@ -225,6 +232,8 @@ int drawlua_init(lua_State *l) {
   lua_createtable(l, 0, 8);
   lua_pushcfunction(l, drawlua_new_drawbuffer);
   lua_setfield(l, -2, "getDrawBuffer");
+  lua_pushcfunction(l, buffer_alloc);
+  lua_setfield(l, -2, "alloc");
   lua_setglobal(l, "RM");
 
   info("allocating static draw buffer");
@@ -299,6 +308,27 @@ static int drawlua_end_frame(lua_State *l) {
 
 static int drawbuffer_free(lua_State *l) { return 0; }
 
+static int buffer_alloc(lua_State *l) {
+  int size = lua_tointeger(l, 1);
+  trace("allocating buffer for lua, size = %d", size);
+  void *buf = malloc(size);
+
+  lua_createtable(l, 0, 2);
+  lua_pushinteger(l, size);
+  lua_setfield(l, -2, "size");
+  lua_pushinteger(l, 0);
+  lua_setfield(l, -2, "head");
+  lua_pushlightuserdata(l, buf);
+  lua_setfield(l, -2, "ptr");
+  lua_pushinteger(l, (int)buf);
+  lua_setfield(l, -2, "addr");
+  luaL_getmetatable(l, "ps2.buffer");
+  lua_setmetatable(l, -2);
+  
+  return 1;
+}
+
+
 // TODO(Tom Marks): document this can only be called ONCE
 static int drawlua_new_drawbuffer(lua_State *l) {
   int size = lua_tointeger(l, 1);
@@ -321,8 +351,8 @@ static int drawlua_new_drawbuffer(lua_State *l) {
   lua_setfield(l, -2, "frameStart");
   lua_pushcfunction(l, drawlua_end_frame);
   lua_setfield(l, -2, "frameEnd");
-  lua_pushcfunction(l, drawbuffer_free);
-  lua_setfield(l, -2, "free");
+  //lua_pushcfunction(l, drawbuffer_free);
+  //lua_setfield(l, -2, "free");
   luaL_getmetatable(l, "ps2.buffer");
   lua_setmetatable(l, -2);
   return 1;
