@@ -329,7 +329,6 @@ function draw:screenDimensions(w, h)
 end
 
 function draw:setClut(tex)
-  print("setting clut to: " .. math.floor(tex.basePtr/64) .. "(" .. tex.basePtr .. ")")
   self.clut.texPtr = math.floor(tex.basePtr/64)
   self.clut.csm = 0
 end

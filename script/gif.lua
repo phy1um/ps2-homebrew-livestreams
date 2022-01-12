@@ -86,8 +86,7 @@ end
 
 function gif.tex2(b, cbp, psm, cpsm, csm)
   local v = cbp * 2^5
-  v = v + 0x40000000
-  print("setting CLUT tex base PTR to " .. cbp)
+  v = v + 0x40000000 
   gif.setAd(b, P.REG.TEX2, math.floor(psm * 2^20), v)
 end
 

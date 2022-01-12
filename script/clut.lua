@@ -13,19 +13,19 @@ local texturesInVram = false
 local vr = nil
 
 function build4Tex(t)
-  for j = 0,1,1 do
+  for j = 0,7,1 do
     for i = 0,63,1 do
-      local v = 11
-      t.data:pushint(v*0x11111111)
+      local v = j
+      t.data:pushint(math.floor(v*0x11111111))
     end
   end
 end
 
 
 function PS2PROG.start()
-  PS2PROG.logLevel(15)
-  testTex = D2D.loadTexture("host:test.tga", 64, 64)
-  pal = D2D.loadTexture("host:pico8_pal.tga", 16, 2)
+  PS2PROG.logLevel(5)
+  --testTex = D2D.loadTexture("host:test.tga", 64, 64)
+  pal = D2D.loadTexture("host:bigpal.tga", 64, 64)
   DMA.init(DMA.GIF)
   gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
   local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 256)
@@ -60,7 +60,6 @@ function PS2PROG.frame()
   uploadTextures()
   D2D:setColour(0x80,0x80,0x80,0x80)
   D2D:setClut(pal)
-  --D2D:sprite(testTex, 20, 20, 64, 64, 0, 0, 1, 1)
   D2D:sprite(img, 100, 100, 256, 256, 0, 0, 1, 1)
   D2D:frameEnd(gs)
 
