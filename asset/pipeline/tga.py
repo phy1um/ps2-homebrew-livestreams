@@ -50,6 +50,7 @@ def parse(b):
     col_spec = TgaColSpec(v[3], v[4], v[5])
     img_spec = TgaImgSpec(v[6], v[7], v[8], v[9], v[10], v[11])
     header = TgaHeader(v[0], v[1], v[2], col_spec, img_spec)
+    print(header)
     head = header_size
     ident = b[head:head+header.id_len] 
     head = head+header.id_len
@@ -65,6 +66,9 @@ def parse(b):
      
 
 def handle_pixels(bits_per_pix, img_data):
+    if len(img_data) == 0:
+        return b""
+    print(f"bits per pixel = {bits_per_pix}, BPP={bits_per_pix // 8}")
     bpp = bits_per_pix // 8
     if bpp == 1:
         return list(map(lambda x: x[0], struct.iter_unpack("B", img_data)))
@@ -78,15 +82,19 @@ def handle_pixels(bits_per_pix, img_data):
         raise Exception(f"unsupported BPP in image data: {bpp}")
 
 def encode_pixels(bits_per_pix, data):
+    if len(data) == 0:
+        return b""
+    if bits_per_pix == 4:
+        return packed_nibbles(data)
     bpp = bits_per_pix // 8
     if bpp == 1:
         return struct.pack("B"*len(data), *data)
     elif bpp == 2:
-        return struct.pack("<H"*len(data), *data)
+        return struct.pack("<" + "H"*len(data), *data)
     elif bpp == 3:
         return unthreeify(data)
     elif bpp == 4:
-        return struct.pack("<I"*len(data), *data)
+        return struct.pack("<" + "I"*len(data), *data)
     else:
         raise Exception(f"unsupported BPP in image data: {bpp}")
 
@@ -102,7 +110,7 @@ def threeify(d):
         b = fsts[i]
         g = snds[i]
         r = thrds[i]
-        out.append(b | (g<<8) | (r<<16))
+        out.append(b | (g<<8) | (r<<16) | 0xff000000)
     return out
 
 def unthreeify(pixels):
@@ -115,6 +123,18 @@ def unthreeify(pixels):
         out.append(g)
         out.append(r)
     return out
+
+def packed_nibbles(pixels):
+    out = bytearray()
+    ln = pixels[::2]
+    un = pixels[1::2]
+    for i in range(len(un)):
+        bb = (ln[i]&0xf | ((un[i]&0xf) << 4))
+        out.append(bb)
+    if len(ln) > len(un):
+        out.append(ln[-1]&0xf)
+    return out
+
 
 def write(tga):
     header_bytes = struct.pack(HEADER_FMT, 

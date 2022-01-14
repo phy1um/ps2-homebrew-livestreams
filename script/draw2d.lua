@@ -220,14 +220,17 @@ end
 -- TODO: move out of draw2d
 -- load a texture into EE memory
 function draw.loadTexture(fname, w, h)
+  meta = TGA.header(fname)
   local tt = {
-    width = w,
-    height = h,
+    width = meta.width,
+    height = meta.height,
     data = nil,
-    format = GS.PSM32,
+    format = TGA.BPS_TO_PSM[meta.bps],
     fname = fname,
   }
-  tt.data = TGA.load(fname, w, h)
+  print("loading texture [" .. meta.width .. ", " .. meta.height .. "] PSM=" .. tt.format)
+  tt.data = RM.alloc(VRAM.size(meta.width, meta.height, tt.format, 0) * 4)
+  TGA.load(fname, tt.data)
   return tt 
 end
 

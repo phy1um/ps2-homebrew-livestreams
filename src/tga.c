@@ -25,13 +25,13 @@ struct __attribute__((__packed__)) tga_header {
   uint8_t descriptor;
 };
 
-char tmp_buffer[256 * 256 * 4];
 // PRECONDITION: buffer is large enough to hold entire texture
-int load_tga_to_raw(const char *fname, void *buffer) {
+int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
   info("loading TGA %s", fname);
   FILE *f = fopen(fname, "rb");
   if (!f) {
     logerr("failed to read file %s", fname);
+    fclose(f);
     return 0;
   }
   struct tga_header header = {0};
@@ -39,12 +39,15 @@ int load_tga_to_raw(const char *fname, void *buffer) {
   if (rc != 18) {
     if (feof(f)) {
       logerr("malformed TGA %s, unexpected EOF in header", fname);
+      fclose(f);
       return 0;
     } else if (ferror(f)) {
       logerr("error reading %s", fname);
+      fclose(f);
       return 0;
     } else {
       logerr("unknown IO error with %s", fname);
+      fclose(f);
       return 0;
     }
   }
@@ -53,21 +56,40 @@ int load_tga_to_raw(const char *fname, void *buffer) {
   char idData[255];
   rc = fread(idData, 1, header.idlen, f);
 
+  if (header.bps != 4 && header.bps != 8 && header.bps != 16
+      && header.bps != 24 && header.bps != 32) {
+    logerr("unexpected bits per pixel in TGA: %d", header.bps);
+    fclose(f);
+    return 0;
+  }
+
   // bytes per pixel from bits per pixel
   int bpp = header.bps / 8;
-  info("reading image data - %d bytes", header.width * header.height * bpp);
-  rc = fread(tmp_buffer, 1, header.width * header.height * bpp, f);
-  char *to = (char *)buffer;
-  for (int i = 0; i < header.width; i++) {
-    for (int j = 0; j < header.height; j++) {
-      to[(j * header.width + i) * 4 + 3] =
-          tmp_buffer[(j * header.width + i) * 4 + 3];
-      to[(j * header.width + i) * 4 + 2] =
-          tmp_buffer[(j * header.width + i) * 4 + 0];
-      to[(j * header.width + i) * 4 + 1] =
-          tmp_buffer[(j * header.width + i) * 4 + 1];
-      to[(j * header.width + i) * 4 + 0] =
-          tmp_buffer[(j * header.width + i) * 4 + 2];
+  size_t size = header.width * header.height * bpp;
+  if (size > buffer_len) {
+    logerr("TGA image data (%d) too large for buffer (%d)", size, buffer_len);
+    fclose(f);
+    return 0;
+  }
+  info("reading image data - %d bytes (%d bytes/%d bits)", size, bpp, header.bps);
+  rc = fread(buffer, 1, size, f);
+  if (header.bps == 16) {
+     for (int i = 0; i < header.width; i++) {
+      for (int j = 0; j < header.height; j++) {
+        char tmp = buffer[(j*header.width + i) * bpp + 1];
+        buffer[(j * header.width + i) * bpp + 1] =
+            buffer[(j * header.width + i) * bpp];
+        buffer[(j * header.width + i) * bpp] = tmp;
+      }
+    }
+  } else if (header.bps == 24 || header.bps == 32) {
+    for (int i = 0; i < header.width; i++) {
+      for (int j = 0; j < header.height; j++) {
+        char tmp = buffer[(j*header.width + i) * bpp + 2];
+        buffer[(j * header.width + i) * bpp + 2] =
+            buffer[(j * header.width + i) * bpp];
+        buffer[(j * header.width + i) * bpp] = tmp;
+      }
     }
   }
   fclose(f);
@@ -75,26 +97,68 @@ int load_tga_to_raw(const char *fname, void *buffer) {
 }
 
 int load_tga_lua(lua_State *l) {
+  // ARG1 == fname, ARG2 == buffer
   const char *fname = lua_tostring(l, 1);
-  int width = lua_tointeger(l, 2);
-  int height = lua_tointeger(l, 3);
-  uint32_t *b = malloc(width * height * 4);
-  load_tga_to_raw(fname, b);
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 2);
+  void *buffer = lua_touserdata(l, -1);
 
-  lua_createtable(l, 0, 5);
-  lua_pushinteger(l, 0);
-  lua_setfield(l, -2, "head");
-  lua_pushinteger(l, width * height * 4);
-  lua_setfield(l, -2, "size");
-  lua_pushlightuserdata(l, b);
-  lua_setfield(l, -2, "ptr");
-  lua_pushinteger(l, (int)b);
-  lua_setfield(l, -2, "addr");
+  lua_pushstring(l, "size");
+  lua_gettable(l, 2);
+  int size = lua_tointeger(l, -1);
 
-  luaL_getmetatable(l, "ps2.buffer");
-  lua_setmetatable(l, -2);
+  lua_pushstring(l, "head");
+  lua_gettable(l, 2);
+  int head = lua_tointeger(l, -1);
 
-  // return new buffer
+  int rv = load_tga_to_raw(fname, buffer, size - head);
+  if (rv) {
+    char msg[200];
+    snprintf(msg, 200, "failed to load texture %s", fname);
+    lua_pushstring(l, msg);
+  }
+
+  return 0;
+}
+
+
+#define setint(name, value) \
+  lua_pushinteger(l, value); \
+  lua_setfield(l, -2, name)
+
+int lua_tga_get_header(lua_State *l) {
+  const char *fname = lua_tostring(l, 1);
+
+  FILE *f = fopen(fname, "rb");
+  if (!f) {
+    logerr("failed to read file %s", fname);
+    fclose(f);
+    return 0;
+  }
+  struct tga_header header = {0};
+  size_t rc = fread(&header, 1, 18, f);
+  if (rc != 18) {
+    if (feof(f)) {
+      logerr("malformed TGA %s, unexpected EOF in header", fname);
+      fclose(f);
+      return 0;
+    } else if (ferror(f)) {
+      logerr("error reading %s", fname);
+      fclose(f);
+      return 0;
+    } else {
+      logerr("unknown IO error with %s", fname);
+      fclose(f);
+      return 0;
+    }
+  }
+  fclose(f);
+
+  lua_createtable(l, 0, 4);
+  setint("width", header.width);
+  setint("height", header.height);
+  setint("bps", header.bps);
+  setint("imageType", header.imgType);
   return 1;
 }
 
@@ -102,6 +166,8 @@ int lua_tga_init(lua_State *l) {
   lua_createtable(l, 0, 1);
   lua_pushcfunction(l, load_tga_lua);
   lua_setfield(l, -2, "load");
+  lua_pushcfunction(l, lua_tga_get_header);
+  lua_setfield(l, -2, "header");
   lua_setglobal(l, "TGA");
   return 0;
 }

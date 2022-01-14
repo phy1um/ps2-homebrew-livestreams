@@ -6,7 +6,7 @@ local D2D = require("draw2d")
 local VRAM = require("vram")
 
 local gs = nil
-local testTex = {}
+local testTex = nil
 local pal = nil
 local img
 local texturesInVram = false
@@ -23,9 +23,10 @@ end
 
 
 function PS2PROG.start()
-  PS2PROG.logLevel(5)
+  PS2PROG.logLevel(15)
   --testTex = D2D.loadTexture("host:test.tga", 64, 64)
-  pal = D2D.loadTexture("host:bigpal.tga", 64, 64)
+  testTex = D2D.loadTexture("host:pp.tga")
+  pal = D2D.loadTexture("host:bigpal.tga")
   DMA.init(DMA.GIF)
   gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
   local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 256)
@@ -46,6 +47,7 @@ end
 function uploadTextures()
   if not texturesInVram then
     D2D:uploadTexture(pal)
+    D2D:uploadTexture(testTex)
     D2D:uploadTexture(img)
     texturesInVram = true
   end
@@ -61,6 +63,7 @@ function PS2PROG.frame()
   D2D:setColour(0x80,0x80,0x80,0x80)
   D2D:setClut(pal)
   D2D:sprite(img, 100, 100, 256, 256, 0, 0, 1, 1)
+  D2D:sprite(testTex, 200, 200, 64, 64, 0, 0, 1, 1)
   D2D:frameEnd(gs)
 
   if PAD.held(PAD.x) and db <= 0 then 
