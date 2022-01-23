@@ -229,7 +229,7 @@ function draw.loadTexture(fname, w, h)
     fname = fname,
   }
   print("loading texture [" .. meta.width .. ", " .. meta.height .. "] PSM=" .. tt.format)
-  tt.data = RM.alloc(VRAM.size(meta.width, meta.height, tt.format, 0) * 4)
+  tt.data = RM.alloc(VRAM.size(meta.width, meta.height, tt.format, 0))
   TGA.load(fname, tt.data)
   return tt 
 end
@@ -332,6 +332,7 @@ function draw:screenDimensions(w, h)
 end
 
 function draw:setClut(tex)
+  print("setting CLUT = " .. math.floor(tex.basePtr/64))
   self.clut.texPtr = math.floor(tex.basePtr/64)
   self.clut.csm = 0
 end
