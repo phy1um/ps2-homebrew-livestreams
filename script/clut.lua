@@ -1,5 +1,3 @@
-PS2PROG.slow2d = true
-
 local GIF = require("gif")
 local P = require("ps2const")
 local D2D = require("draw2d")
@@ -23,7 +21,7 @@ end
 
 
 function PS2PROG.start()
-  PS2PROG.logLevel(15)
+  PS2PROG.logLevel(5)
   testTex = D2D.loadTexture("host:picotiles4.tga")
   --testTex.data:print()
   pal = D2D.loadTexture("host:bigpal.tga")
@@ -69,12 +67,18 @@ function PS2PROG.frame()
   uploadTextures()
   D2D:setColour(0x80,0x80,0x80,0x80)
   D2D:setClut(pal)
+  for i=0,19,1 do
+    for j=0,15,1 do
+      drawTile(i, j, 0)
+    end
+  end
   for i=0,10,1 do
     drawTile(i, 0, 4)
   end
-  for i=0,10,1 do
-    drawTile(i, 1, 0)
-  end
+  drawTile(4, 9, 8)
+  drawTile(5, 9, 9)
+  drawTile(6, 9, 9)
+  drawTile(7, 9, 10)
   D2D:frameEnd(gs)
 end
 
