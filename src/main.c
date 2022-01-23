@@ -145,6 +145,7 @@ int ps2luaprog_onstart(lua_State *l) {
   if (rc) {
     const char *err = lua_tostring(l, -1);
     logerr("lua execution error (start event) -- %s", err);
+    return rc;
   }
   BENCH_INFO(timer, " PS2PROG onstart in %f");
 
@@ -165,6 +166,7 @@ int ps2luaprog_onframe(lua_State *l) {
   if (rc) {
     const char *err = lua_tostring(l, -1);
     logerr("lua execution error (frame event) -- %s", err);
+    return rc;
   }
 
   return 0;
@@ -299,7 +301,9 @@ int main(int argc, char *argv[]) {
     fatal("failed to run startup file %s", startup);
   }
 
-  ps2luaprog_onstart(L);
+  if (ps2luaprog_onstart(L)) {
+    fatal("failed to run starup callback");
+  }
   lua_pushnil(L);
   lua_setglobal(L, "dbgPrint");
 
