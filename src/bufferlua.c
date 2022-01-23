@@ -206,7 +206,7 @@ static int buffer_write(lua_State *l) {
 static int buffer_print(lua_State *l) {
   lua_pushstring(l, "ptr");
   lua_gettable(l, 1);
-  unsigned char *ptr = (unsigned char*) lua_touserdata(l, -1); 
+  unsigned char *ptr = (unsigned char *)lua_touserdata(l, -1);
   if (ptr == 0) {
     logerr("cannot print buffer with NULL pointer");
     return 0;
@@ -219,11 +219,11 @@ static int buffer_print(lua_State *l) {
     return 0;
   }
   info("BUFFER(%p): ", ptr);
-  for(int i = 0; i < size-7; i+=8) {
-    info(" %x %x %x %x   %x %x %x %x", ptr[i], ptr[i+1], ptr[i+2], ptr[i+3],
-        ptr[i+4], ptr[i+5], ptr[i+6], ptr[i+7]);
+  for (int i = 0; i < size - 7; i += 8) {
+    info(" %x %x %x %x   %x %x %x %x", ptr[i], ptr[i + 1], ptr[i + 2],
+         ptr[i + 3], ptr[i + 4], ptr[i + 5], ptr[i + 6], ptr[i + 7]);
   }
-  for(int i = 0; i < size%8; i++) {
+  for (int i = 0; i < size % 8; i++) {
     printf(" %d", ptr[i]);
   }
   return 0;
@@ -353,10 +353,9 @@ static int buffer_alloc(lua_State *l) {
   lua_setfield(l, -2, "addr");
   luaL_getmetatable(l, "ps2.buffer");
   lua_setmetatable(l, -2);
-  
+
   return 1;
 }
-
 
 // TODO(Tom Marks): document this can only be called ONCE
 static int drawlua_new_drawbuffer(lua_State *l) {
@@ -380,8 +379,8 @@ static int drawlua_new_drawbuffer(lua_State *l) {
   lua_setfield(l, -2, "frameStart");
   lua_pushcfunction(l, drawlua_end_frame);
   lua_setfield(l, -2, "frameEnd");
-  //lua_pushcfunction(l, drawbuffer_free);
-  //lua_setfield(l, -2, "free");
+  // lua_pushcfunction(l, drawbuffer_free);
+  // lua_setfield(l, -2, "free");
   luaL_getmetatable(l, "ps2.buffer");
   lua_setmetatable(l, -2);
   return 1;

@@ -135,7 +135,7 @@ int draw2d_lua_sprite(lua_State *l) {
 }
 
 int draw2d_lua_setclut(lua_State *l) {
-  lua_pushstring(l, "basePtr"); 
+  lua_pushstring(l, "basePtr");
   lua_gettable(l, 2);
   int addr = lua_tointeger(l, -1);
 

@@ -56,8 +56,8 @@ int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
   char idData[255];
   rc = fread(idData, 1, header.idlen, f);
 
-  if (header.bps != 4 && header.bps != 8 && header.bps != 16
-      && header.bps != 24 && header.bps != 32) {
+  if (header.bps != 4 && header.bps != 8 && header.bps != 16 &&
+      header.bps != 24 && header.bps != 32) {
     logerr("unexpected bits per pixel in TGA: %d", header.bps);
     fclose(f);
     return 0;
@@ -75,12 +75,13 @@ int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
     fclose(f);
     return 0;
   }
-  info("reading image data - %d bytes (%d bytes/%d bits)", size, bpp, header.bps);
+  info("reading image data - %d bytes (%d bytes/%d bits)", size, bpp,
+       header.bps);
   rc = fread(buffer, 1, size, f);
   if (header.bps == 16) {
-     for (int i = 0; i < header.width; i++) {
+    for (int i = 0; i < header.width; i++) {
       for (int j = 0; j < header.height; j++) {
-        char tmp = buffer[(j*header.width + i) * bpp + 1];
+        char tmp = buffer[(j * header.width + i) * bpp + 1];
         buffer[(j * header.width + i) * bpp + 1] =
             buffer[(j * header.width + i) * bpp];
         buffer[(j * header.width + i) * bpp] = tmp;
@@ -89,7 +90,7 @@ int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
   } else if (header.bps == 24 || header.bps == 32) {
     for (int i = 0; i < header.width; i++) {
       for (int j = 0; j < header.height; j++) {
-        char tmp = buffer[(j*header.width + i) * bpp + 2];
+        char tmp = buffer[(j * header.width + i) * bpp + 2];
         buffer[(j * header.width + i) * bpp + 2] =
             buffer[(j * header.width + i) * bpp];
         buffer[(j * header.width + i) * bpp] = tmp;
@@ -118,16 +119,15 @@ int load_tga_lua(lua_State *l) {
   int rv = load_tga_to_raw(fname, buffer, size - head);
   if (rv) {
     char msg[200];
-    snprintf(msg, 200, "failed to load texture %s", fname);
+    snprintf(msg, sizeof(msg), "failed to load texture %s", fname);
     lua_pushstring(l, msg);
   }
 
   return 0;
 }
 
-
-#define setint(name, value) \
-  lua_pushinteger(l, value); \
+#define setint(name, value)                                                    \
+  lua_pushinteger(l, value);                                                   \
   lua_setfield(l, -2, name)
 
 int lua_tga_get_header(lua_State *l) {
