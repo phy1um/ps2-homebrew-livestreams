@@ -24,14 +24,14 @@ end
 
 function PS2PROG.start()
   PS2PROG.logLevel(15)
-  --testTex = D2D.loadTexture("host:test.tga", 64, 64)
-  testTex = D2D.loadTexture("host:pp.tga")
+  testTex = D2D.loadTexture("host:picotiles4.tga")
+  --testTex.data:print()
   pal = D2D.loadTexture("host:bigpal.tga")
   DMA.init(DMA.GIF)
   gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
-  local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 256)
-  local fb2 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 256)
-  local zb = VRAM.mem:framebuffer(640, 448, GS.PSMZ24, 256)
+  local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 2048)
+  local fb2 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 2048)
+  local zb = VRAM.mem:framebuffer(640, 448, GS.PSMZ24, 2048)
   GS.setBuffers(fb1, fb2, zb)
   D2D:screenDimensions(640, 448)
   D2D:clearColour(0x2b, 0x2b, 0x2b)
@@ -42,6 +42,7 @@ function PS2PROG.start()
   vr = VRAM.slice(VRAM.mem.head)
   vr:texture(pal)
   vr:texture(img)
+  vr:texture(testTex)
 end
 
 function uploadTextures()
@@ -53,6 +54,12 @@ function uploadTextures()
   end
 end
 
+function drawTile(x, y, i)
+  local ix = i % 4
+  local iy = math.floor(i/4)
+  D2D:sprite(testTex, x*32, y*32, 32, 32, 0.25*ix, 0.25*iy, 0.25*ix + 0.25, 0.25*iy + 0.25)
+end
+
 xx = 200
 local dt = 1/60
 local tt = false
@@ -62,16 +69,13 @@ function PS2PROG.frame()
   uploadTextures()
   D2D:setColour(0x80,0x80,0x80,0x80)
   D2D:setClut(pal)
-  D2D:sprite(img, 100, 100, 256, 256, 0, 0, 1, 1)
-  D2D:sprite(testTex, 200, 200, 64, 64, 0, 0, 1, 1)
-  D2D:frameEnd(gs)
-
-  if PAD.held(PAD.x) and db <= 0 then 
-    tt = not tt 
-    print("state " .. tostring(tt))
-    db = 30
+  for i=0,10,1 do
+    drawTile(i, 0, 4)
   end
-  db = db - 1 
+  for i=0,10,1 do
+    drawTile(i, 1, 0)
+  end
+  D2D:frameEnd(gs)
 end
 
 
