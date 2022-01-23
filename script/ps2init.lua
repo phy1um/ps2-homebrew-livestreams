@@ -10,6 +10,7 @@ end
 
 local d2d = require("draw2d")
 FAST_DRAW2D.loadTexture = d2d.loadTexture
+FAST_DRAW2D.newTexture = d2d.newTexture
 FAST_DRAW2D.vramAllocTexture = d2d.vramAllocTexture
 
 local trueRequire = require

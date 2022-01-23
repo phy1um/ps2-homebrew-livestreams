@@ -50,8 +50,9 @@ int draw2d_new_buffer() {
 
 
 int draw2d_update_last_tag_loops() {
-  trace("D2D update last tag loop");
+  trace("D2D update last tag @ %p", state.gif.head);
   if (state.gif.head) {
+    trace("D2D update last tag loop: %d", state.gif.loop_count);
     if (state.gif.loop_count <= GIF_MAX_LOOPS) {
       uint32_t eop = *state.gif.head & 0x8000;
       *state.gif.head = state.gif.loop_count | eop;
@@ -351,7 +352,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
     }
 
     state.active_tex = state.tex_vram_addr;
-    giftag_new(&state, 0, 4, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
+    giftag_new(&state, 0, 5, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_texa(&state, 0x80, 0x80);
     giftag_ad_tex1(&state, 1, 0, 1, 0, 0);
     giftag_ad_tex0(&state, 0,
@@ -361,6 +362,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
         floorlog2(state.tex_width),
         floorlog2(state.tex_height),
         1, 0);
+    giftag_ad_tex2(&state, state.tex_psm, state.clut_tex, state.clut_psm, 0, 0, 0x2);
     giftag_ad_prim(&state, PRIM_SPRITE, 0, 1, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_SPRITE_LEN, GIF_REGS_SPRITE);
     state.draw_type = D2D_SPRITE;
@@ -377,3 +379,8 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
   return 1;
 }
 
+int draw2d_set_clut_state(int texture_base, int clut_psm) {
+  state.clut_tex = texture_base/64;
+  state.clut_psm = clut_psm;
+  return 1;
+}

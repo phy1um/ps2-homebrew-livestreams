@@ -18,6 +18,9 @@ int giftag_ad_tex0(struct d2d_state *s,
     int reg, int tbp, int tbw, int psm, int tw, int th, int tcc, int tfx);
 int giftag_ad_tex1(struct d2d_state *s, int lcm, int mxl, int mtba,
     int l, int k);
+int giftag_ad_tex2(struct d2d_state *s, int psm, int cbp, int cpsm,
+    int csm, int csa, int cld);
+
 
 int push_rgbaq(struct d2d_state *s, unsigned char cols[4]);
 int push_xyz2(struct d2d_state *s, uint16_t x, uint16_t y, uint32_t z);
