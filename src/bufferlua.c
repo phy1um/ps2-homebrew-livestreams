@@ -98,7 +98,7 @@ static int buffer_settex(lua_State *l) {
 
   int v1 = tbp | (tbw << 14) | (psm << 20) | (tw << 26) | ((th & 0x3) << 30);
   // TODO(Tom Marks): 0x5??? i must mean 0x4
-  int v2 = ((th & 0x5) >> 2) | (tcc << 1) | (tfx << 2);
+  int v2 = ((th & 0xc) >> 2) | (tcc << 1) | (tfx << 2);
   int v3 = 0x6 + reg;
   int v4 = 0;
   *(base) = v1;
@@ -203,6 +203,32 @@ static int buffer_write(lua_State *l) {
   return 0;
 }
 
+static int buffer_print(lua_State *l) {
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 1);
+  unsigned char *ptr = (unsigned char*) lua_touserdata(l, -1); 
+  if (ptr == 0) {
+    logerr("cannot print buffer with NULL pointer");
+    return 0;
+  }
+  lua_pushstring(l, "size");
+  lua_gettable(l, 1);
+  int size = lua_tointeger(l, -1);
+  if (size == 0) {
+    info("BUFFER = []");
+    return 0;
+  }
+  info("BUFFER(%p): ", ptr);
+  for(int i = 0; i < size-7; i+=8) {
+    info(" %x %x %x %x   %x %x %x %x", ptr[i], ptr[i+1], ptr[i+2], ptr[i+3],
+        ptr[i+4], ptr[i+5], ptr[i+6], ptr[i+7]);
+  }
+  for(int i = 0; i < size%8; i++) {
+    printf(" %d", ptr[i]);
+  }
+  return 0;
+}
+
 int drawlua_init(lua_State *l) {
   luaL_newmetatable(l, "ps2.buffer");
   lua_createtable(l, 0, 5);
@@ -221,6 +247,9 @@ int drawlua_init(lua_State *l) {
 
   lua_pushcfunction(l, buffer_copy);
   lua_setfield(l, -2, "copy");
+
+  lua_pushcfunction(l, buffer_print);
+  lua_setfield(l, -2, "print");
 
   lua_pushcfunction(l, buffer_read);
   lua_setfield(l, -2, "read");
