@@ -66,6 +66,10 @@ int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
   // bytes per pixel from bits per pixel
   int bpp = header.bps / 8;
   size_t size = header.width * header.height * bpp;
+  if (header.bps == 4) {
+    size = header.width * header.height * 0.5;
+  }
+
   if (size > buffer_len) {
     logerr("TGA image data (%d) too large for buffer (%d)", size, buffer_len);
     fclose(f);
@@ -129,6 +133,7 @@ int load_tga_lua(lua_State *l) {
 int lua_tga_get_header(lua_State *l) {
   const char *fname = lua_tostring(l, 1);
 
+  info("loading TGA header %s", fname);
   FILE *f = fopen(fname, "rb");
   if (!f) {
     logerr("failed to read file %s", fname);
