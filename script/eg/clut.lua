@@ -10,14 +10,6 @@ local img
 local texturesInVram = false
 local vr = nil
 
-function build4Tex(t)
-  for j = 0,7,1 do
-    for i = 0,63,1 do
-      local v = j
-      t.data:pushint(math.floor(v*0x11111111))
-    end
-  end
-end
 
 
 function PS2PROG.start()
