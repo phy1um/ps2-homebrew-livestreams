@@ -43,7 +43,6 @@ local draw = {
   -- clut settings
   clut = {
     texPtr = 0,
-    csm = 0,
   },
   -- metrics from previous frame
   prev = {
