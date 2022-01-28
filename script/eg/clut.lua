@@ -29,7 +29,6 @@ function PS2PROG.start()
 
   vr = VRAM.slice(VRAM.mem.head)
   vr:texture(pal)
-  vr:texture(img)
   vr:texture(testTex)
 end
 
