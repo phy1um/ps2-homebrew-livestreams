@@ -56,6 +56,7 @@ function gif.setAd(b, reg, v1, v2)
 end
 
 function gif.bitBltBuf(b, dba, dbw, psm)
+  if dbw == 0 then dbw = 1 end
   gif.setAd(b, P.REG.BITBLTBUF, 0, dba + (dbw*2^16) + (psm*2^24))
 end
 
@@ -83,8 +84,10 @@ function gif.texA(b, a0, a1)
   gif.setAd(b, P.REG.TEXA, a0, a1)
 end
 
-function gif.tex2(b, v)
-  gif.setAd(b, P.REG.TEX2, v, 0)
+function gif.tex2(b, cbp, psm, cpsm, csm)
+  local v = cbp * 2^5
+  v = v + 0x40000000 
+  gif.setAd(b, P.REG.TEX2, math.floor(psm * 2^20), v)
 end
 
 function gif.mipTbp1(b, ctx, p1, w1, p2, w2, p3, w3)

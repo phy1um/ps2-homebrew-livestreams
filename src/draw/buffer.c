@@ -7,10 +7,10 @@
 
 int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs,
     uint64_t regs) {
-  trace("GIFTag %d @ %p", flag, s->drawbuffer_head);
   // update giftag tracking state
   s->gif.loop_count = 0;
   s->gif.head = (uint32_t *) s->drawbuffer_head;
+  trace("GIFTag %d @ %p", flag, s->gif.head);
 
   // write giftag
   uint64_t *ld = (uint64_t*)s->drawbuffer_head;
@@ -113,6 +113,17 @@ int giftag_ad_tex1(struct d2d_state *s, int lcm, int mxl, int mtba,
       | SHIFT(mtba, 0x1, 8)
       | SHIFT(l, 0x3, 19)
       | SHIFT(k, 0x7ff, 32));
+  return 1;
+}
+
+int giftag_ad_tex2(struct d2d_state *s, int psm, int cbp, int cpsm,
+    int csm, int csa, int cld) {
+  gif_ad(s, GS_REG_TEX2,
+      SHIFT(psm, 0x3f, 20)
+      | SHIFT(cbp, 0x3fff, 37)
+      | SHIFT(csm, 1, 55)
+      | SHIFT(csa, 0x1f, 56)
+      | SHIFT(cld, 0x7, 61));
   return 1;
 }
 

@@ -134,6 +134,15 @@ int draw2d_lua_sprite(lua_State *l) {
   return 1;
 }
 
+int draw2d_lua_setclut(lua_State *l) {
+  lua_pushstring(l, "basePtr");
+  lua_gettable(l, 2);
+  int addr = lua_tointeger(l, -1);
+
+  draw2d_set_clut_state(addr);
+  return 0;
+}
+
 int draw2d_lua_undefined(lua_State *l) {
   logerr("undefined function called");
   return 0;
@@ -155,6 +164,7 @@ int draw2d_lua_init(lua_State *l) {
   pushfn(draw2d_lua_clear_colour, "clearColour");
   pushfn(draw2d_lua_screen_dimensions, "screenDimensions");
   pushfn(draw2d_lua_upload_texture, "uploadTexture");
+  pushfn(draw2d_lua_setclut, "setClut");
   lua_setglobal(l, "FAST_DRAW2D");
   return 0;
 }

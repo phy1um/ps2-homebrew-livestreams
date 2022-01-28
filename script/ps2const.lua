@@ -18,6 +18,7 @@ return {
     TEXFLUSH=0x3F,
     TEX0 = 0x06,
     TEX1 = 0x14,
+    TEX2 = 0x16,
     TEXA = 0x3B,
     MIPTBP1 = 0x34,
     MIPTBP2 = 0x36,

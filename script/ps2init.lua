@@ -10,6 +10,7 @@ end
 
 local d2d = require("draw2d")
 FAST_DRAW2D.loadTexture = d2d.loadTexture
+FAST_DRAW2D.newTexture = d2d.newTexture
 FAST_DRAW2D.vramAllocTexture = d2d.vramAllocTexture
 
 local trueRequire = require
@@ -22,6 +23,13 @@ function require(p)
   end
   return trueRequire(p)
 end
+
+TGA.BPS_TO_PSM = {}
+TGA.BPS_TO_PSM[4] = GS.PSM4
+TGA.BPS_TO_PSM[8] = GS.PSM8
+TGA.BPS_TO_PSM[16] = GS.PSM16
+TGA.BPS_TO_PSM[24] = GS.PSM24
+TGA.BPS_TO_PSM[32] = GS.PSM32
 
 return function() end
 

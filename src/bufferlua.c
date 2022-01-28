@@ -13,6 +13,7 @@
 #include "script.h"
 
 static int drawlua_new_drawbuffer(lua_State *l);
+static int buffer_alloc(lua_State *l);
 
 static const unsigned int DRAW_BUFFER_MAX_SIZE = 20 * 1024;
 char *static_draw_buffer;
@@ -25,7 +26,13 @@ static int buffer_pushint(lua_State *l) {
   lua_pushstring(l, "head");
   lua_gettable(l, 1);
   int head = lua_tointeger(l, -1);
-  // TODO(Tom Marks): check size
+  lua_pushstring(l, "size");
+  lua_gettable(l, 1);
+  int size = lua_tointeger(l, -1);
+  if (head >= size) {
+    logerr("lua buffer pushint overflow: size=%d, head=%d", size, head);
+    return 0;
+  }
   // ASSUME 4byte int
   if (head % 4 != 0) {
     // TODO(Tom Marks): manually bitmask etc
@@ -91,7 +98,7 @@ static int buffer_settex(lua_State *l) {
 
   int v1 = tbp | (tbw << 14) | (psm << 20) | (tw << 26) | ((th & 0x3) << 30);
   // TODO(Tom Marks): 0x5??? i must mean 0x4
-  int v2 = ((th & 0x5) >> 2) | (tcc << 1) | (tfx << 2);
+  int v2 = ((th & 0xc) >> 2) | (tcc << 1) | (tfx << 2);
   int v3 = 0x6 + reg;
   int v4 = 0;
   *(base) = v1;
@@ -196,6 +203,32 @@ static int buffer_write(lua_State *l) {
   return 0;
 }
 
+static int buffer_print(lua_State *l) {
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 1);
+  unsigned char *ptr = (unsigned char *)lua_touserdata(l, -1);
+  if (ptr == 0) {
+    logerr("cannot print buffer with NULL pointer");
+    return 0;
+  }
+  lua_pushstring(l, "size");
+  lua_gettable(l, 1);
+  int size = lua_tointeger(l, -1);
+  if (size == 0) {
+    info("BUFFER = []");
+    return 0;
+  }
+  info("BUFFER(%p): ", ptr);
+  for (int i = 0; i < size - 7; i += 8) {
+    info(" %x %x %x %x   %x %x %x %x", ptr[i], ptr[i + 1], ptr[i + 2],
+         ptr[i + 3], ptr[i + 4], ptr[i + 5], ptr[i + 6], ptr[i + 7]);
+  }
+  for (int i = 0; i < size % 8; i++) {
+    printf(" %d", ptr[i]);
+  }
+  return 0;
+}
+
 int drawlua_init(lua_State *l) {
   luaL_newmetatable(l, "ps2.buffer");
   lua_createtable(l, 0, 5);
@@ -215,6 +248,9 @@ int drawlua_init(lua_State *l) {
   lua_pushcfunction(l, buffer_copy);
   lua_setfield(l, -2, "copy");
 
+  lua_pushcfunction(l, buffer_print);
+  lua_setfield(l, -2, "print");
+
   lua_pushcfunction(l, buffer_read);
   lua_setfield(l, -2, "read");
   lua_pushcfunction(l, buffer_write);
@@ -225,6 +261,8 @@ int drawlua_init(lua_State *l) {
   lua_createtable(l, 0, 8);
   lua_pushcfunction(l, drawlua_new_drawbuffer);
   lua_setfield(l, -2, "getDrawBuffer");
+  lua_pushcfunction(l, buffer_alloc);
+  lua_setfield(l, -2, "alloc");
   lua_setglobal(l, "RM");
 
   info("allocating static draw buffer");
@@ -299,6 +337,26 @@ static int drawlua_end_frame(lua_State *l) {
 
 static int drawbuffer_free(lua_State *l) { return 0; }
 
+static int buffer_alloc(lua_State *l) {
+  int size = lua_tointeger(l, 1);
+  trace("allocating buffer for lua, size = %d", size);
+  void *buf = malloc(size);
+
+  lua_createtable(l, 0, 2);
+  lua_pushinteger(l, size);
+  lua_setfield(l, -2, "size");
+  lua_pushinteger(l, 0);
+  lua_setfield(l, -2, "head");
+  lua_pushlightuserdata(l, buf);
+  lua_setfield(l, -2, "ptr");
+  lua_pushinteger(l, (int)buf);
+  lua_setfield(l, -2, "addr");
+  luaL_getmetatable(l, "ps2.buffer");
+  lua_setmetatable(l, -2);
+
+  return 1;
+}
+
 // TODO(Tom Marks): document this can only be called ONCE
 static int drawlua_new_drawbuffer(lua_State *l) {
   int size = lua_tointeger(l, 1);
@@ -321,8 +379,8 @@ static int drawlua_new_drawbuffer(lua_State *l) {
   lua_setfield(l, -2, "frameStart");
   lua_pushcfunction(l, drawlua_end_frame);
   lua_setfield(l, -2, "frameEnd");
-  lua_pushcfunction(l, drawbuffer_free);
-  lua_setfield(l, -2, "free");
+  // lua_pushcfunction(l, drawbuffer_free);
+  // lua_setfield(l, -2, "free");
   luaL_getmetatable(l, "ps2.buffer");
   lua_setmetatable(l, -2);
   return 1;
