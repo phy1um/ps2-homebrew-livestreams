@@ -61,7 +61,6 @@ struct d2d_state {
   int active_tex;
 
   int clut_tex;
-  int clut_psm;
 
   struct d2d_gif gif;
   struct d2d_dma dma;
@@ -88,7 +87,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
 
 int draw2d_bind_texture(int tex_vram_addr, int width, int height, int psm);
 
-int draw2d_set_clut_state(int texture_base, int clut_psm);
+int draw2d_set_clut_state(int texture_base);
 
 
 #endif

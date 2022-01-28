@@ -380,7 +380,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
   return 1;
 }
 
-int draw2d_set_clut_state(int texture_base, int clut_psm) {
+int draw2d_set_clut_state(int texture_base) {
   state.clut_tex = texture_base/64;
   return 1;
 }

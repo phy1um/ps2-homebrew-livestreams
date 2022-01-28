@@ -333,7 +333,6 @@ end
 function draw:setClut(tex)
   print("setting CLUT = " .. math.floor(tex.basePtr/64))
   self.clut.texPtr = math.floor(tex.basePtr/64)
-  self.clut.csm = 0
 end
 
 return draw

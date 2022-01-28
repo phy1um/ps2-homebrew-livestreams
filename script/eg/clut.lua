@@ -9,8 +9,6 @@ local pal = nil
 local texturesInVram = false
 local vr = nil
 
-
-
 function PS2PROG.start()
   PS2PROG.logLevel(5)
   testTex = D2D.loadTexture("host:picotiles4.tga")
@@ -36,7 +34,6 @@ function uploadTextures()
   if not texturesInVram then
     D2D:uploadTexture(pal)
     D2D:uploadTexture(testTex)
-    D2D:uploadTexture(img)
     texturesInVram = true
   end
 end
@@ -47,10 +44,6 @@ function drawTile(x, y, i)
   D2D:sprite(testTex, x*32, y*32, 32, 32, 0.25*ix, 0.25*iy, 0.25*ix + 0.25, 0.25*iy + 0.25)
 end
 
-xx = 200
-local dt = 1/60
-local tt = false
-local db = 0
 function PS2PROG.frame()
   D2D:frameStart(gs)
   uploadTextures()
