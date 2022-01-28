@@ -59,7 +59,7 @@ clean:
 
 .PHONY: run
 run: scripts
-	PCSX2 --elf=$(PWD)/$(BIN) 
+	pcsx2 --elf=$(PWD)/$(BIN) 
 
 # TODO(Tom Marks): this could be improved, hard-coded ELF name is bad
 .PHONY: runps2
