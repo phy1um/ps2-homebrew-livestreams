@@ -27,7 +27,6 @@ function PS2PROG.start()
   D2D:clearColour(0x2b, 0x2b, 0x2b)
 
   img = D2D.newTexture(64, 64, GS.PSM4)
-  build4Tex(img)
 
   vr = VRAM.slice(VRAM.mem.head)
   vr:texture(pal)
