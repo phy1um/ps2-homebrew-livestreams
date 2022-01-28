@@ -39,16 +39,13 @@ int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
   if (rc != 18) {
     if (feof(f)) {
       logerr("malformed TGA %s, unexpected EOF in header", fname);
-      fclose(f);
-      return 0;
+      goto ERR;
     } else if (ferror(f)) {
       logerr("error reading %s", fname);
-      fclose(f);
-      return 0;
+      goto ERR;
     } else {
       logerr("unknown IO error with %s", fname);
-      fclose(f);
-      return 0;
+      goto ERR;
     }
   }
 
@@ -59,8 +56,7 @@ int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
   if (header.bps != 4 && header.bps != 8 && header.bps != 16 &&
       header.bps != 24 && header.bps != 32) {
     logerr("unexpected bits per pixel in TGA: %d", header.bps);
-    fclose(f);
-    return 0;
+    goto ERR;
   }
 
   // bytes per pixel from bits per pixel
@@ -72,8 +68,7 @@ int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
 
   if (size > buffer_len) {
     logerr("TGA image data (%d) too large for buffer (%d)", size, buffer_len);
-    fclose(f);
-    return 0;
+    goto ERR;
   }
   info("reading image data - %d bytes (%d bytes/%d bits)", size, bpp,
        header.bps);
@@ -98,6 +93,9 @@ int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
     }
   }
   fclose(f);
+  return 0;
+ERR:
+  fclose(f);
   return 1;
 }
 
@@ -121,6 +119,8 @@ int load_tga_lua(lua_State *l) {
     char msg[200];
     snprintf(msg, sizeof(msg), "failed to load texture %s", fname);
     lua_pushstring(l, msg);
+    lua_error(l);
+    return 1;
   }
 
   return 0;
@@ -137,24 +137,20 @@ int lua_tga_get_header(lua_State *l) {
   FILE *f = fopen(fname, "rb");
   if (!f) {
     logerr("failed to read file %s", fname);
-    fclose(f);
-    return 0;
+    goto ERR;
   }
   struct tga_header header = {0};
   size_t rc = fread(&header, 1, 18, f);
   if (rc != 18) {
     if (feof(f)) {
       logerr("malformed TGA %s, unexpected EOF in header", fname);
-      fclose(f);
-      return 0;
+      goto ERR;
     } else if (ferror(f)) {
       logerr("error reading %s", fname);
-      fclose(f);
-      return 0;
+      goto ERR;
     } else {
       logerr("unknown IO error with %s", fname);
-      fclose(f);
-      return 0;
+      goto ERR;
     }
   }
   fclose(f);
@@ -164,6 +160,11 @@ int lua_tga_get_header(lua_State *l) {
   setint("height", header.height);
   setint("bps", header.bps);
   setint("imageType", header.imgType);
+  return 1;
+ERR:
+  fclose(f);
+  lua_pushstring(l, "failed to load TGA header");
+  lua_error(l);
   return 1;
 }
 
