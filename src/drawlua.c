@@ -139,11 +139,7 @@ int draw2d_lua_setclut(lua_State *l) {
   lua_gettable(l, 2);
   int addr = lua_tointeger(l, -1);
 
-  lua_pushstring(l, "format");
-  lua_gettable(l, 2);
-  int psm = lua_tointeger(l, -1);
-
-  draw2d_set_clut_state(addr, psm);
+  draw2d_set_clut_state(addr);
   return 0;
 }
 
