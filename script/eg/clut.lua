@@ -6,7 +6,6 @@ local VRAM = require("vram")
 local gs = nil
 local testTex = nil
 local pal = nil
-local img
 local texturesInVram = false
 local vr = nil
 
