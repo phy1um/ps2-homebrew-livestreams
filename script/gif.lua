@@ -9,7 +9,7 @@ local gif = {
 
 function gif.tag(b, flg, nloop, eop, regs) 
   local lpp = b.head
-  -- print("GIFTAG: pushing " .. string.format("0x%x", nloop))
+  LOG.trace("GIFTAG: pushing " .. string.format("0x%x", nloop))
   if eop then
     b:pushint(nloop + 0x8000)
   else
@@ -19,8 +19,8 @@ function gif.tag(b, flg, nloop, eop, regs)
   if nreg > 16 then error("invalid gif tag: nreg = " .. #regs) end
   if nreg == 16 then nreg = 0 end
   local w2 = (math.floor(nreg * 2^28) + flg)
-  --print("GIFTAG: pushing " .. string.format("0x%x", w2) .. " :: " .. w2)
-  --print("GIFTAG: flag = " .. flg)
+  LOG.trace("GIFTAG: pushing " .. string.format("0x%x", w2) .. " :: " .. w2)
+  LOG.trace("GIFTAG: flag = " .. flg)
   b:pushint(w2)
   local reg = 0
   local regc = 0
@@ -32,7 +32,7 @@ function gif.tag(b, flg, nloop, eop, regs)
     regc = regc + 1
     if regc >=8 then
       b:pushint(reg)
-      -- print("GIFTAG: pushing regword " .. string.format("0x%x", reg))
+      LOG.trace("GIFTAG: pushing regword " .. string.format("0x%x", reg))
       regc = 0
       max = max - 1
     end
@@ -41,7 +41,7 @@ function gif.tag(b, flg, nloop, eop, regs)
   -- pad out the rest
   for i=max,0,-1 do
     b:pushint(reg)
-    -- print("GIFTAG: pushing regword " .. string.format("0x%x", reg))
+    LOG.trace("GIFTAG: pushing regword " .. string.format("0x%x", reg))
     reg = 0
   end
 
@@ -126,7 +126,6 @@ end
 
 function gif.packedUV(b, u, v)
   local vv = u + math.floor(v * 2^16)
-  print("u,v -> " .. vv)
   b:pushint(vv)
   b:pushint(0)
   b:pushint(0)

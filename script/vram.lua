@@ -16,11 +16,11 @@ function vramslice:alloc(b, align)
   --out = out + align - (out%align)
   while out % align ~= 0 do out = out + 1 end
   if out + b >= max then
-    print("vram buffer overflow")
+    LOG.error("vram buffer overflow")
     error("vram buffer overflow")
   end
   self.head = out + b
-  -- print("vram alloc: " .. out .. " base -> " .. basePtr)
+  LOG.trace("vram alloc: " .. out .. " base -> " .. basePtr)
   return out
 end
 
@@ -33,7 +33,7 @@ function vramslice:framebuffer(w, h, psm, align)
     height = h,
     format = psm,
   }
-  print("VRAM framebuffer -- @ " .. fb.address .. ", size = " .. sz)
+  LOG.debug("VRAM framebuffer -- @ " .. fb.address .. ", size = " .. sz)
   return fb
 end
 
@@ -41,7 +41,7 @@ function vramslice:texture(tex)
   --local size = vram.size(tex.width, tex.height, tex.psm, 256)
   local size = tex.width*tex.height*4
   tex.basePtr = self:alloc(size, 256)
-  print("allocated texture in VRAM: " .. tex.fname .. " @ " .. tex.basePtr)
+  LOG.debug("allocated texture in VRAM: " .. tex.fname .. " @ " .. tex.basePtr)
   return tex
 end
 
@@ -66,7 +66,7 @@ function vram.size(w, h, psm, align)
     size = math.floor(w*h*0.5) 
   end
 
-  print("VRAM sizeof " .. w .. ", " .. h .. " @" .. psm .. " :: " .. size)
+  LOG.trace("VRAM sizeof " .. w .. ", " .. h .. " @" .. psm .. " :: " .. size)
 
   return size
 end
