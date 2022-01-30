@@ -10,7 +10,7 @@ local texturesInVram = false
 local vr = nil
 
 function PS2PROG.start()
-  PS2PROG.logLevel(5)
+  PS2PROG.logLevel(LOG.debugLevel)
   testTex = D2D.loadTexture("host:picotiles4.tga")
   --testTex.data:print()
   pal = D2D.loadTexture("host:bigpal.tga")

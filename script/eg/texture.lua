@@ -12,7 +12,7 @@ local vr = nil
 
 
 function PS2PROG.start()
-  PS2PROG.logLevel(5)
+  PS2PROG.logLevel(LOG.infoLevel)
   testTex = D2D.loadTexture("host:test.tga", 64, 64)
   fnt = D2D.loadTexture("host:bigfont.tga", 256, 64)
   DMA.init(DMA.GIF)
@@ -50,7 +50,7 @@ function PS2PROG.frame()
 
   if PAD.held(PAD.x) and db <= 0 then 
     tt = not tt 
-    print("state " .. tostring(tt))
+    LOG.info("state " .. tostring(tt))
     db = 30
   end
   db = db - 1 
