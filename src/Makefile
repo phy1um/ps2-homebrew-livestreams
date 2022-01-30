@@ -1,7 +1,11 @@
 PS2SDK=/usr/local/ps2dev/ps2sdk
 
+MAIN_OBJ=main.o utils.o
+LUA_OBJ=gslua.o dmalua.o bufferlua.o tga.o padlua.o drawlua.o loglua.o ps2luaprog.o
+DRAW_OBJ=draw/draw2d.o draw/buffer.o
+
 EE_BIN=test.elf
-EE_OBJS=main.o gslua.o dmalua.o bufferlua.o tga.o padlua.o drawlua.o loglua.o draw/draw2d.o draw/buffer.o 
+EE_OBJS= $(MAIN_OBJ) $(LUA_OBJ) $(DRAW_OBJ)
 EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d -lm -lpad -llua
 EE_CFLAGS+=-Wall --std=c99 -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2 -DLOG_TRACE
 

@@ -7,7 +7,6 @@
 #include <graph.h>
 #include <math.h>
 #include <string.h>
-#include <time.h>
 
 #include <debug.h>
 #include <kernel.h>
@@ -18,40 +17,17 @@
 #include "gs.h"
 #include "pad.h"
 #include "script.h"
+#include "bench.h"
+#include "utils.h"
+#include "ps2luaprog.h"
 
-static clock_t __time_now;
 static int is_running = 1;
 
 #ifndef LOG_LEVEL_DEFAUT
 #define LOG_LEVEL_DEFAULT LOG_LEVEL_INFO
 #endif
+
 int log_output_level = LOG_LEVEL_DEFAULT;
-
-int print_buffer(qword_t *b, int len) {
-#ifdef LOG_TRACE
-  if (log_output_level >= LOG_LEVEL_TRACE) {
-    info("-- buffer %p\n", b);
-    for (int i = 0; i < len; i++) {
-      printf("%016llx %016llx\n", b->dw[0], b->dw[1]);
-      b++;
-    }
-    info("-- /buffer\n");
-  }
-#endif
-  return 0;
-}
-
-void core_error(const char *msg) {
-  is_running = 0;
-  logerr("FATAL ERROR: %s", msg);
-}
-
-#define BENCH_START(vname) clock_t vname = clock()
-#define BENCH_INFO(vname, m)                                                   \
-  do {                                                                         \
-    __time_now = clock();                                                      \
-    info(m, ((float)__time_now - vname) / (float)CLOCKS_PER_SEC);              \
-  } while (0)
 
 #define BASE_PATH_MAX_LEN 180
 #define FILE_NAME_MAX_LEN 300
@@ -75,100 +51,14 @@ char main_script[FILE_NAME_MAX_LEN];
     }                                                                          \
   } while (0)
 
-/**
- * get the last index of a character in a string
- */
-int last_index_of(const char *str, int str_len, char c) {
-  int ind = -1;
-  for (int i = 0; i < str_len; i++) {
-    if (str[i] == c) {
-      ind = i;
-    }
-  }
-  return ind;
+void core_error(const char *msg) {
+  is_running = 0;
+  logerr("FATAL ERROR: %s", msg);
 }
 
 static int ps2lua_scr_print(lua_State *l) {
   const char *msg = lua_tostring(l, 1);
   scr_printf("LUA: %s\n", msg);
-  return 0;
-}
-
-int lua_tga_init(lua_State *l);
-int draw2d_lua_init(lua_State *l);
-
-static int ps2luaprog_start_nil(lua_State *l) {
-  info("default start...");
-  return 0;
-}
-
-static int ps2luaprog_frame_nil(lua_State *l) { return 0; }
-
-static int ps2lua_log2(lua_State *l) {
-  int n = lua_tointeger(l, 1);
-  float res = log2f(n);
-  lua_pushnumber(l, res);
-  return 1;
-}
-
-int ps2luaprog_set_log_level(lua_State *l) {
-  log_output_level = lua_tointeger(l, 1);
-  info("updated log level = %d", log_output_level);
-  return 0;
-}
-
-int ps2luaprog_init(lua_State *l) {
-  lua_createtable(l, 0, 2);
-  lua_pushcfunction(l, ps2luaprog_start_nil);
-  lua_setfield(l, -2, "start");
-  lua_pushcfunction(l, ps2luaprog_frame_nil);
-  lua_setfield(l, -2, "frame");
-  lua_pushcfunction(l, ps2luaprog_set_log_level);
-  lua_setfield(l, -2, "logLevel");
-  lua_setglobal(l, "PS2PROG");
-  lua_pushcfunction(l, ps2lua_log2);
-  lua_setglobal(l, "log2");
-  return 0;
-}
-
-int ps2luaprog_onstart(lua_State *l) {
-  BENCH_START(timer);
-  lua_getglobal(l, "PS2PROG");
-  lua_pushstring(l, "start");
-  lua_gettable(l, -2);
-  /*
-  int type = lua_type(l, -1);
-  info("start fn has type :: %s (%d)", lua_typename(l, type), type);
-  */
-
-  int rc = lua_pcall(l, 0, 0, 0);
-  if (rc) {
-    const char *err = lua_tostring(l, -1);
-    logerr("lua execution error (start event) -- %s", err);
-    return rc;
-  }
-  BENCH_INFO(timer, " PS2PROG onstart in %f");
-
-  return 0;
-}
-
-int ps2luaprog_onframe(lua_State *l) {
-  lua_getglobal(l, "PS2PROG");
-  lua_pushstring(l, "frame");
-  lua_gettable(l, -2);
-  /*
-  int type = lua_type(l, -1);
-  info("frame fn has type :: %s (%d)", lua_typename(l, type), type);
-  */
-
-  int rc = lua_pcall(l, 0, 0, 0);
-
-  if (rc) {
-    const char *err = lua_tostring(l, -1);
-    logerr("lua execution error (frame event) -- %s", err);
-    return rc;
-  }
-
   return 0;
 }
 
@@ -181,8 +71,6 @@ int ps2luaprog_onframe(lua_State *l) {
   printf("[INIT] " m "\n", ##__VA_ARGS__);                                     \
   scr_printf(m "\n", ##__VA_ARGS__)
 #endif
-
-// int ps2luaprog_is_running(lua_State *l) { return 1; }
 
 static int runfile(lua_State *l, const char *fname) {
   BENCH_START(runfile_time);
@@ -320,6 +208,7 @@ int main(int argc, char *argv[]) {
     ps2luaprog_onframe(L);
     // may be required? -- dma_wait_fast();
     trace("WAIT DRAW");
+    // TODO: draw2d flag to know if draw was submitted
     draw_wait_finish();
     trace("WAIT VSYNC");
     graph_wait_vsync();
