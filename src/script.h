@@ -7,5 +7,6 @@
 int gs_lua_init(lua_State *l);
 int dma_lua_init(lua_State *l);
 int drawlua_init(lua_State *l);
+int loglua_init(lua_State *l);
 
 #endif

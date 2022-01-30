@@ -61,7 +61,6 @@ function PS2PROG.frame()
     s:draw()
   end
   D2D:frameEnd(gs)
-  --print("tris/frame = " .. D2D.prev.rawtri .. ", KC=" .. D2D.prev.kc)
   if r > 0 then
     g = 0xff
     r = 0xff
@@ -69,7 +68,7 @@ function PS2PROG.frame()
     g = 0
     r = 0xff
   end
-  print("FPS: " .. FPS)
+  LOG.info("FPS: " .. FPS)
 end
 
 

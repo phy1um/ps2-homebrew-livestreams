@@ -278,6 +278,7 @@ int main(int argc, char *argv[]) {
   lua_tga_init(L);
   pad_lua_init(L);
   draw2d_lua_init(L);
+  loglua_init(L);
 
   // TODO(Tom Marks): better abstraction for drawlua_*
   drawlua_init(L);
