@@ -24,7 +24,10 @@ function require(p)
   return trueRequire(p)
 end
 
+<<<<<<< HEAD
 -- TODO: make this a function
+=======
+>>>>>>> main
 TGA.BPS_TO_PSM = {}
 TGA.BPS_TO_PSM[4] = GS.PSM4
 TGA.BPS_TO_PSM[8] = GS.PSM8
