@@ -39,16 +39,21 @@ end
 
 xx = 200
 local dt = 1/60
+local tt = false
+local db = 0
 function PS2PROG.frame()
   D2D:frameStart(gs)
   uploadTextures()
   D2D:setColour(0x80,0x80,0x80,0x80)
-  D2D:sprite(testTex, xx, 200, 200, 200, 0, 0, 1, 1)
-  D2D:sprite(fnt, 50, 100, 256, 64, 0, 0, 1, 1)
+  D2D:sprite(testTex, 20, 20, 64, 64, 0, 0, 1, 1)
   D2D:frameEnd(gs)
 
-  if PAD.held(PAD.LEFT) then xx = xx - 50*dt end
-  if PAD.held(PAD.RIGHT) then xx = xx + 50*dt end
+  if PAD.held(PAD.x) and db <= 0 then 
+    tt = not tt 
+    print("state " .. tostring(tt))
+    db = 30
+  end
+  db = db - 1 
 end
 
 

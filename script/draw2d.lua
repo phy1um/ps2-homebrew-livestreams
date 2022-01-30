@@ -40,6 +40,10 @@ local draw = {
   dmaTagQwPtr = 0,
   -- are we currently in a CNT DMATag?
   isInCnt = false,
+  -- clut settings
+  clut = {
+    texPtr = 0,
+  },
   -- metrics from previous frame
   prev = {
     kc = 0,
@@ -133,10 +137,11 @@ function draw:sprite(tex, x, y, w, h, u1, v1, u2, v2)
     self.currentTexPtr = tex.basePtr
     local pb = math.floor(tex.basePtr/64)
     local pw = math.floor(tex.width/64)
-    GIF.tag(self.buf, GIF.PACKED, 4, false, {0xe})
+    GIF.tag(self.buf, GIF.PACKED, 5, false, {0xe})
     GIF.texA(self.buf, 0x80, 0x80)
     GIF.tex1(self.buf, true, 0, true, 0, 0)
     self.buf:settex(0, pb, pw, tex.format, math.floor(log2(tex.width)), math.floor(log2(tex.height)), 0, 1, 0, 0, 0)
+    GIF.tex2(self.buf, self.clut.texPtr, tex.format)
     -- GIF.mipTbp1(self.buf, 0, pb, pw, pb, pw, pb, pw)
     -- GIF.mipTbp2(self.buf, 0, pb, pw, pb, pw, pb, pw)
     GIF.primAd(self.buf, P.PRIM.SPRITE, false, true, false)
@@ -214,15 +219,30 @@ end
 -- TODO: move out of draw2d
 -- load a texture into EE memory
 function draw.loadTexture(fname, w, h)
+  meta = TGA.header(fname)
+  local tt = {
+    width = meta.width,
+    height = meta.height,
+    data = nil,
+    format = TGA.BPS_TO_PSM[meta.bps],
+    fname = fname,
+  }
+  print("loading texture [" .. meta.width .. ", " .. meta.height .. "] PSM=" .. tt.format)
+  tt.data = RM.alloc(VRAM.size(meta.width, meta.height, tt.format, 0))
+  TGA.load(fname, tt.data)
+  return tt 
+end
+
+function draw.newTexture(w, h, fmt)
   local tt = {
     width = w,
     height = h,
     data = nil,
-    format = GS.PSM32,
-    fname = fname,
+    format = fmt,
+    fname = "?",
   }
-  tt.data = TGA.load(fname, w, h)
-  return tt 
+  tt.data = RM.alloc(VRAM.size(w, h, fmt, 0))
+  return tt
 end
 
 -- upload a texture that has been VRAM allocated into GS memory
@@ -308,6 +328,11 @@ end
 function draw:screenDimensions(w, h)
   self.fbw = w
   self.fbh = h
+end
+
+function draw:setClut(tex)
+  print("setting CLUT = " .. math.floor(tex.basePtr/64))
+  self.clut.texPtr = math.floor(tex.basePtr/64)
 end
 
 return draw
