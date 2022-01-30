@@ -16,7 +16,7 @@ extern int log_output_level;
 #define logmsg(lvl, i, msg, ...)                                               \
   do {                                                                         \
     if (log_output_level >= i) {                                               \
-      printf(lvl " (%s:%d) " msg "\n", __FILE__, __LINE__, ##__VA_ARGS__);   \
+      printf(lvl " (%s:%d) " msg "\n", __FILE__, __LINE__, ##__VA_ARGS__);     \
     }                                                                          \
   } while (0)
 #else
