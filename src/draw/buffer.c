@@ -25,7 +25,7 @@ int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs,
 
   // advance head
   s->drawbuffer_head += QW_SIZE;
-  s->drawbuffer_size += QW_SIZE;
+  s->drawbuffer_head_offset += QW_SIZE;
   return 1;
 }
 
@@ -40,7 +40,7 @@ int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs,
 int gif_ad(struct d2d_state *s, uint64_t reg, uint64_t value) {
   GIF_AD(s->drawbuffer_head, reg, value);
   s->drawbuffer_head += QW_SIZE;
-  s->drawbuffer_size += QW_SIZE;
+  s->drawbuffer_head_offset += QW_SIZE;
   return 1;
 }
 
@@ -134,7 +134,7 @@ int push_rgbaq(struct d2d_state *s, unsigned char cols[4]) {
   v[2] = cols[2];
   v[3] = cols[3];
   s->drawbuffer_head += QW_SIZE;
-  s->drawbuffer_size += QW_SIZE;
+  s->drawbuffer_head_offset += QW_SIZE;
   return 1;
 }
 
@@ -145,7 +145,7 @@ int push_xyz2(struct d2d_state *s, uint16_t x, uint16_t y, uint32_t z) {
   v[2] = z;
   v[3] = 0;
   s->drawbuffer_head += QW_SIZE;
-  s->drawbuffer_size += QW_SIZE;
+  s->drawbuffer_head_offset += QW_SIZE;
   return 1;
 }
 
@@ -157,7 +157,7 @@ int push_st(struct d2d_state *state, float s, float t) {
   v[2] = 1.0;
   v[3] = 0;
   state->drawbuffer_head += QW_SIZE;
-  state->drawbuffer_size += QW_SIZE;
+  state->drawbuffer_head_offset += QW_SIZE;
   return 1;
 }
 
