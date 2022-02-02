@@ -2,6 +2,9 @@ local GIF = require("gif")
 local P = require("ps2const")
 local VRAM = require("vram")
 
+-- most functions assume buf != nil
+-- please set a buffer with d2d:bindBuffer() or you will crash
+
 -- enum for how this script tracks current
 -- drawing mode to minimize GIFTag swapping
 local DRAW_NONE = 0
@@ -12,8 +15,6 @@ local DRAW_SPRITE = 2
 local DRAW_FMT_GEOM = {1,5,5,5}
 -- GS Registers to set when drawing SPRITE primitives
 local DRAW_FMT_SPRITE = {2,1,5,2,1,5}
--- Size of each drawbuffer before we have to split it
-local DB_SIZE = 20000
 
 -- Local draw state
 local draw = {
@@ -30,7 +31,7 @@ local draw = {
   tagLoopPtr = -1,
   -- VRAM addr of texture we are currently drawing
   currentTexPtr = 0,
-  -- current drawbuffer (initialized each frame)
+  -- current drawbuffer (set by self:bindBuffer)
   buf = nil,
   -- how many drawbuffer "kick"s this frame
   kc = 0,
@@ -89,11 +90,11 @@ function draw:dmaEnd()
 end
 
 -- get a new drawbuffer, called at frame start or after "kick"
-function draw:newBuffer()
+function draw:clearBuffer()
   self.state = DRAW_NONE
   self.loopCount = 0
   self.tagLoopPtr = -1
-  self.buf = RM.getDrawBuffer(DB_SIZE)
+  self.buf.head = 0
   -- start a CNT by default, if we end the CNT without pushing anything 
   -- into it this is has no effect
   self:newCnt()
@@ -197,7 +198,7 @@ function draw:kick()
   DMA.sendChain(self.buf, DMA.GIF)
   -- refresh our drawbuffer, basically free so no concerns doing this at the
   --  end of the frame
-  self:newBuffer()
+  self:clearBuffer()
   self.kc = self.kc + 1
 end
 
@@ -306,7 +307,7 @@ end
 function draw:frameStart(gs)
   self.kc = 0
   self.rawtri = 0
-  self:newBuffer() 
+  self:clearBuffer() 
   self.buf:frameStart(self.fbw, self.fbh, self.clearR, self.clearG, self.clearB)
 end
 
@@ -333,6 +334,11 @@ end
 function draw:setClut(tex)
   LOG.trace("setting CLUT = " .. math.floor(tex.basePtr/64))
   self.clut.texPtr = math.floor(tex.basePtr/64)
+end
+
+function draw:bindBuffer(b)
+  LOG.debug("binding buffer")
+  self.buf = b
 end
 
 return draw
