@@ -249,7 +249,6 @@ int drawlua_init(lua_State *l) {
   lua_pushcfunction(l, drawlua_end_frame);
   lua_setfield(l, -2, "frameEnd");
 
-
   lua_pushcfunction(l, buffer_copy);
   lua_setfield(l, -2, "copy");
 
@@ -357,4 +356,3 @@ static int buffer_alloc(lua_State *l) {
 
   return 1;
 }
-

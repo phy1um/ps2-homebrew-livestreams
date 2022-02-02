@@ -149,7 +149,7 @@ int draw2d_lua_undefined(lua_State *l) {
 }
 
 static int draw2d_lua_bind_buffer(lua_State *l) {
-  lua_pushstring(l, "ptr");  
+  lua_pushstring(l, "ptr");
   lua_gettable(l, 2);
   void *ptr = lua_touserdata(l, -1);
   lua_pushstring(l, "size");
