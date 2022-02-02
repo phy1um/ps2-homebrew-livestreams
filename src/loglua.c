@@ -2,16 +2,7 @@
 #include <stdio.h>
 
 #include "log.h"
-
-static inline int last_index_of(const char *str, int str_len, char c) {
-  int ind = -1;
-  for (int i = 0; i < str_len; i++) {
-    if (str[i] == c) {
-      ind = i;
-    }
-  }
-  return ind;
-}
+#include "utils.h"
 
 static inline void lua_log_message(lua_State *l, int level, const char *pre) {
   if (log_output_level >= level) {
