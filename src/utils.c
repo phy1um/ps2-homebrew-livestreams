@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include "utils.h"
 #include "log.h"
 
@@ -31,5 +32,3 @@ int last_index_of(const char *str, int str_len, char c) {
   }
   return ind;
 }
-
-

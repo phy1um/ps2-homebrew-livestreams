@@ -1,9 +1,9 @@
 #include <lua.h>
 #include <math.h>
 
-#include "ps2luaprog.h"
-#include "log.h"
 #include "bench.h"
+#include "log.h"
+#include "ps2luaprog.h"
 
 static int ps2luaprog_start_nil(lua_State *l) {
   info("default start...");
@@ -71,5 +71,3 @@ int ps2luaprog_onframe(lua_State *l) {
 
   return 0;
 }
-
-

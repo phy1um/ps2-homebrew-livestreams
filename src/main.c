@@ -14,12 +14,12 @@
 
 #include "log.h"
 
+#include "bench.h"
 #include "gs.h"
 #include "pad.h"
-#include "script.h"
-#include "bench.h"
-#include "utils.h"
 #include "ps2luaprog.h"
+#include "script.h"
+#include "utils.h"
 
 static int is_running = 1;
 
@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
     ps2luaprog_onframe(L);
     // may be required? -- dma_wait_fast();
     trace("WAIT DRAW");
-    // TODO: draw2d flag to know if draw was submitted
+    // TODO(tommarks): draw2d flag to know if draw was submitted
     draw_wait_finish();
     trace("WAIT VSYNC");
     graph_wait_vsync();
