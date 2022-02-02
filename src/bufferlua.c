@@ -12,11 +12,9 @@
 #include "log.h"
 #include "script.h"
 
-static int drawlua_new_drawbuffer(lua_State *l);
 static int buffer_alloc(lua_State *l);
-
-static const unsigned int DRAW_BUFFER_MAX_SIZE = 20 * 1024;
-char *static_draw_buffer;
+static int drawlua_start_frame(lua_State *l);
+static int drawlua_end_frame(lua_State *l);
 
 static int buffer_pushint(lua_State *l) {
   int value = lua_tointeger(l, 2);
@@ -245,6 +243,13 @@ int drawlua_init(lua_State *l) {
   lua_pushcfunction(l, buffer_pushmiptbp);
   lua_setfield(l, -2, "setMipTbp");
 
+  // NOTE: this is a hack
+  lua_pushcfunction(l, drawlua_start_frame);
+  lua_setfield(l, -2, "frameStart");
+  lua_pushcfunction(l, drawlua_end_frame);
+  lua_setfield(l, -2, "frameEnd");
+
+
   lua_pushcfunction(l, buffer_copy);
   lua_setfield(l, -2, "copy");
 
@@ -258,15 +263,12 @@ int drawlua_init(lua_State *l) {
   lua_setfield(l, -2, "__index");
   lua_pop(l, 1);
 
-  lua_createtable(l, 0, 8);
-  lua_pushcfunction(l, drawlua_new_drawbuffer);
-  lua_setfield(l, -2, "getDrawBuffer");
+  lua_createtable(l, 0, 1);
   lua_pushcfunction(l, buffer_alloc);
   lua_setfield(l, -2, "alloc");
+  // lua_pushcfunction(l, buffer_lua_alloc);
+  // lua_setfield(l, -2 ,"lalloc");
   lua_setglobal(l, "RM");
-
-  info("allocating static draw buffer");
-  static_draw_buffer = malloc(DRAW_BUFFER_MAX_SIZE);
 
   return 0;
 }
@@ -305,7 +307,6 @@ static int drawlua_start_frame(lua_State *l) {
                  b);
 
   head = (char *)q - ptr;
-  // info("db head -> %d", head);
   lua_pushinteger(l, head);
   lua_setfield(l, 1, "head");
   return 0;
@@ -357,31 +358,3 @@ static int buffer_alloc(lua_State *l) {
   return 1;
 }
 
-// TODO(Tom Marks): document this can only be called ONCE
-static int drawlua_new_drawbuffer(lua_State *l) {
-  int size = lua_tointeger(l, 1);
-  if (size >= DRAW_BUFFER_MAX_SIZE) {
-    logerr("invalid drawbuffer size: %d must be smaller than %d", size,
-           DRAW_BUFFER_MAX_SIZE);
-    lua_pushstring(l, "drawbuffer size is too big");
-    lua_error(l);
-    return 0;
-  }
-  lua_createtable(l, 0, 5);
-  lua_pushinteger(l, size);
-  lua_setfield(l, -2, "size");
-  lua_pushinteger(l, 0);
-  lua_setfield(l, -2, "head");
-  char *buf = static_draw_buffer;
-  lua_pushlightuserdata(l, buf);
-  lua_setfield(l, -2, "ptr");
-  lua_pushcfunction(l, drawlua_start_frame);
-  lua_setfield(l, -2, "frameStart");
-  lua_pushcfunction(l, drawlua_end_frame);
-  lua_setfield(l, -2, "frameEnd");
-  // lua_pushcfunction(l, drawbuffer_free);
-  // lua_setfield(l, -2, "free");
-  luaL_getmetatable(l, "ps2.buffer");
-  lua_setmetatable(l, -2);
-  return 1;
-}
