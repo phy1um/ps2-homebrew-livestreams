@@ -148,12 +148,23 @@ int draw2d_lua_undefined(lua_State *l) {
   return 0;
 }
 
+static int draw2d_lua_bind_buffer(lua_State *l) {
+  lua_pushstring(l, "ptr");  
+  lua_gettable(l, 2);
+  void *ptr = lua_touserdata(l, -1);
+  lua_pushstring(l, "size");
+  lua_gettable(l, 2);
+  int len = lua_tointeger(l, -1);
+
+  draw2d_bind_buffer(ptr, len);
+  return 0;
+}
+
 #define pushfn(f, n)                                                           \
   lua_pushcfunction(l, f);                                                     \
   lua_setfield(l, -2, n)
 
 int draw2d_lua_init(lua_State *l) {
-  draw2d_alloc();
   lua_createtable(l, 0, 5);
   pushfn(draw2d_lua_frame_start, "frameStart");
   pushfn(draw2d_lua_frame_end, "frameEnd");
@@ -165,6 +176,7 @@ int draw2d_lua_init(lua_State *l) {
   pushfn(draw2d_lua_screen_dimensions, "screenDimensions");
   pushfn(draw2d_lua_upload_texture, "uploadTexture");
   pushfn(draw2d_lua_setclut, "setClut");
+  pushfn(draw2d_lua_bind_buffer, "bindBuffer");
   lua_setglobal(l, "FAST_DRAW2D");
   return 0;
 }
