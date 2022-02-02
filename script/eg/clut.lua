@@ -28,6 +28,9 @@ function PS2PROG.start()
   vr = VRAM.slice(VRAM.mem.head)
   vr:texture(pal)
   vr:texture(testTex)
+
+  local drawbuffer = RM.alloc(200 * 1024)
+  D2D:bindBuffer(drawbuffer)
 end
 
 function uploadTextures()

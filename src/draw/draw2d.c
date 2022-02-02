@@ -14,11 +14,6 @@
 
 static struct d2d_state state;
 
-int draw2d_alloc() {
-  state.drawbuffer = malloc(20000);
-  return 1;
-}
-
 #define GIF_REGS_AD 0xe
 #define GIF_REGS_AD_LEN 1
 #define GIF_REGS_TRIS 0x5551
@@ -37,14 +32,14 @@ int draw2d_alloc() {
 #define floorlog2(x) (int)(log2(x))
 
 // easy :D
-int draw2d_new_buffer() {
-  trace("D2D new buffer");
+static int draw2d_clear_buffer() {
+  trace("D2D clear buffer");
   state.drawbuffer_head = state.drawbuffer;
+  state.drawbuffer_head_offset = 0;
   state.gif.head = 0;
   state.dma.head = 0;
   state.dma.in_cnt = 0;
   state.draw_type = D2D_NONE;
-  state.drawbuffer_size = 0;
   return 1;
 }
 
@@ -68,14 +63,14 @@ int draw2d_start_cnt() {
   state.dma.head = state.drawbuffer_head;
   dma_tag((uint32_t*) state.drawbuffer_head, 0, 0x1<<28, 0);
   state.drawbuffer_head += QW_SIZE;
-  state.drawbuffer_size += QW_SIZE;
+  state.drawbuffer_head_offset += QW_SIZE;
   return 1;
 }
 
 int dmatag_raw(int qwc, int type, int addr) {
   dma_tag((uint32_t*) state.drawbuffer_head, qwc, type, addr);
   state.drawbuffer_head += QW_SIZE;
-  state.drawbuffer_size += QW_SIZE;
+  state.drawbuffer_head_offset += QW_SIZE;
   return 1;
 }
 
@@ -98,7 +93,7 @@ int draw2d_dma_end() {
   draw2d_end_cnt();
   dma_tag((uint32_t*) state.drawbuffer_head, 0, 0x7<<28, 0);
   state.drawbuffer_head += QW_SIZE;
-  state.drawbuffer_size += QW_SIZE;
+  state.drawbuffer_head_offset += QW_SIZE;
   return 1;
 }
 
@@ -106,7 +101,7 @@ int draw2d_dma_ref(uint32_t addr) {
   draw2d_end_cnt();
   dma_tag((uint32_t*) state.drawbuffer_head, 0, 0x3<<28, addr);
   state.drawbuffer_head += QW_SIZE;
-  state.drawbuffer_size += QW_SIZE;
+  state.drawbuffer_head_offset += QW_SIZE;
   return 1;
 }
 
@@ -126,7 +121,7 @@ int draw2d_kick() {
       0);
   // dma_wait_fast();
   // TODO(phy1um): get new memory?
-  draw2d_new_buffer();
+  draw2d_clear_buffer();
   draw2d_start_cnt();
   state.this_frame.kick_count += 1;
   return 1;
@@ -137,13 +132,13 @@ int draw2d_kick() {
 
 int draw2d_triangle(float x1, float y1,
     float x2, float y2, float x3, float y3) {
-  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.drawbuffer_size, x1, y1,
+  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.drawbuffer_head_offset, x1, y1,
       x2, y2, x3, y3);
   if (state.gif.loop_count >= GIF_MAX_LOOPS - 1) {
     draw2d_kick();
   }
 
-  if (state.drawbuffer_size >= 10000) {
+  if (state.drawbuffer_head_offset >= state.drawbuffer_len - 80) {
     draw2d_kick();
   }
 
@@ -168,13 +163,13 @@ int draw2d_triangle(float x1, float y1,
 }
 
 int draw2d_rect(float x1, float y1, float w, float h) {
-  trace("rect @ %u %f %f %f %f", state.drawbuffer_size, x1, y1, w, h);
+  trace("rect @ %u %f %f %f %f", state.drawbuffer_head_offset, x1, y1, w, h);
 
   if (state.gif.loop_count >= GIF_MAX_LOOPS - 1) {
     draw2d_kick();
   }
 
-  if (state.drawbuffer_size >= 10000) {
+  if (state.drawbuffer_head_offset >= state.drawbuffer_len - 80) {
     draw2d_kick();
   }
 
@@ -201,7 +196,7 @@ static zbuffer_t zb = {0};
 int draw2d_frame_start() {
   trace("frame start");
   memset(&state.this_frame, 0, sizeof(struct d2d_stats));
-  draw2d_new_buffer();
+  draw2d_clear_buffer();
   draw2d_start_cnt();
 
   // Clear the screen using PS2SDK functions
@@ -224,7 +219,7 @@ int draw2d_frame_start() {
       state.screen_w, state.screen_h,
       2048.0f - halfw, 2048.0f - halfh, state.drawbuffer_head, q);
   state.drawbuffer_head = (char *) q;
-  state.drawbuffer_size = ((char *) q - state.drawbuffer);
+  state.drawbuffer_head_offset = ((char *) q - state.drawbuffer);
   return 1;
 }
 
@@ -296,7 +291,7 @@ int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
   // split upload into reasonably sized blocks
   int img_addr = (int) texture;
   while (packet_count > 0) {
-    if (state.drawbuffer_size < 5*QW_SIZE) {
+    if (state.drawbuffer_head_offset >= state.drawbuffer_len - 5*QW_SIZE) {
       draw2d_kick();
     }
     dmatag_raw(1, 0x1<<28, 0);
@@ -309,7 +304,7 @@ int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
 
   // if there is any leftover, handle that here
   if (remain > 0) {
-    if (state.drawbuffer_size < 5*QW_SIZE) {
+    if (state.drawbuffer_head_offset >= state.drawbuffer_len - 5*QW_SIZE) {
       draw2d_kick();
     }
     dmatag_raw(1, 0x1<<28, 0);
@@ -341,7 +336,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
     draw2d_kick();
   }
 
-  if (state.drawbuffer_size >= 10000) {
+  if (state.drawbuffer_head_offset >= state.drawbuffer_len - 80) {
     draw2d_kick();
   }
 
@@ -384,3 +379,12 @@ int draw2d_set_clut_state(int texture_base) {
   state.clut_tex = texture_base/64;
   return 1;
 }
+
+int draw2d_bind_buffer(void *buf, size_t buf_len) {
+  logdbg("bind buffer %p", buf);
+  state.drawbuffer = buf;
+  state.drawbuffer_len = buf_len;
+  return draw2d_clear_buffer();
+}
+
+

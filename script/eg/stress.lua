@@ -33,10 +33,6 @@ function PS2PROG.start()
 
   local vr = VRAM:slice(VRAM.mem.head)
 
---  local len = math.floor((VRAM.max - VRAM.mem.head) / 2)
---  local abuf = VRAM:slice(VRAM.mem.head, len)
---  local bbuf = VRAM:slice(VRAM.mem.head + len, len)
-
   local dd = 100
   local dx = math.floor(640/dd)
   local dy = math.floor(448/dd)
@@ -46,6 +42,9 @@ function PS2PROG.start()
       table.insert(scene, tt)
     end
   end
+
+  local db = RM.alloc(200*1024)
+  D2D:bindBuffer(db)
 end
 
 local r = 0xff

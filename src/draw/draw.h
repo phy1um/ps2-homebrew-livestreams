@@ -50,8 +50,8 @@ struct d2d_state {
   int vram_texture_ptr;
   char *drawbuffer;
   char *drawbuffer_head;
-  size_t drawbuffer_size;
-  int drawbuffer_len;
+  size_t drawbuffer_head_offset;
+  size_t drawbuffer_len;
   void *zbuffer_ref;
 
   int tex_vram_addr;
@@ -88,6 +88,8 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
 int draw2d_bind_texture(int tex_vram_addr, int width, int height, int psm);
 
 int draw2d_set_clut_state(int texture_base);
+
+int draw2d_bind_buffer(void *buf, size_t buf_len);
 
 
 #endif
