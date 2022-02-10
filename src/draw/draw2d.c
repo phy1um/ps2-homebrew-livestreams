@@ -203,7 +203,6 @@ int draw2d_frame_start() {
   float halfw = (state.screen_w*1.0f) / 2.0f;
   float halfh = (state.screen_h*1.0f) / 2.0f;
   qword_t *q = (qword_t *) state.drawbuffer_head;
-  q = draw_disable_tests(q, 0, &zb);
   PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
   q++;
   PACK_GIFTAG(q,

@@ -304,16 +304,20 @@ function draw:uploadTexture(tt)
 end
 
 -- setup frame and setup drawbuffer
-function draw:frameStart(gs)
+function draw:frameStart()
   self.kc = 0
   self.rawtri = 0
   self:clearBuffer() 
-  self.buf:frameStart(self.fbw, self.fbh, self.clearR, self.clearG, self.clearB)
+  GIF.tag(self.buf, GIF.PACKED, 1, false, {0xe})
+  GIF.test(self.buf, 2)
+  self:setColour(self.clearR, self.clearG, self.clearB, 0x80)
+  self:rect(0, 0, 640, 448)
 end
 
 -- setup frame end, kick drawbuffer
-function draw:frameEnd(gs)
-  self.buf:frameEnd(gs)
+function draw:frameEnd()
+  GIF.tag(self.buf, GIF.PACKED, 1, true, {0xe})
+  GIF.finish(self.buf)
   self:kick()
   self.prev.kc = self.kc
   self.prev.rawtri = self.rawtri

@@ -7,7 +7,7 @@ local VRAM = require("vram")
 local gs = nil
 
 function PS2PROG.start()
-  PS2PROG.logLevel(5)
+  PS2PROG.logLevel(LOG.traceLevel)
   DMA.init(DMA.GIF)
   gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
   local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 2048)
@@ -22,10 +22,10 @@ function PS2PROG.start()
 end
 
 function PS2PROG.frame()
-  D2D:frameStart(gs)
+  D2D:frameStart()
   D2D:setColour(255,0,0,0x80)
   D2D:rect(20, 20, 220, 220)
-  D2D:frameEnd(gs)
+  D2D:frameEnd()
 end
 
 

@@ -22,6 +22,8 @@ return {
     TEXA = 0x3B,
     MIPTBP1 = 0x34,
     MIPTBP2 = 0x36,
+    TEST = 0x47,
+    FINISH = 0x61,
   },
   ENABLE=0x1,
   DISABLE=0x0,

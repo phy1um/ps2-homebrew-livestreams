@@ -110,6 +110,14 @@ function gif.primAd(b, primType, shaded, textured, aa)
   gif.setAd(b, P.REG.PRIM, bits, 0)
 end
 
+function gif.test(b, ztest)
+  gif.setAd(b, P.REG.TEST, ztest * 2^17, 0)
+end
+
+function gif.finish(b)
+  gif.setAd(b, P.REG.FINISH, 1, 0)
+end
+
 function gif.packedRGBAQ(bu, r, g, b, a)
   bu:pushint(r)
   bu:pushint(g)

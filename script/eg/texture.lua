@@ -12,7 +12,7 @@ local vr = nil
 
 
 function PS2PROG.start()
-  PS2PROG.logLevel(LOG.infoLevel)
+  PS2PROG.logLevel(LOG.traceLevel)
   testTex = D2D.loadTexture("host:test.tga", 64, 64)
   fnt = D2D.loadTexture("host:bigfont.tga", 256, 64)
   DMA.init(DMA.GIF)

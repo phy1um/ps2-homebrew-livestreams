@@ -272,7 +272,6 @@ int drawlua_init(lua_State *l) {
   return 0;
 }
 
-zbuffer_t zb = {0};
 static int drawlua_start_frame(lua_State *l) {
   // drawbuffer is arg #1
   lua_pushstring(l, "head");
@@ -293,7 +292,6 @@ static int drawlua_start_frame(lua_State *l) {
   float halfh = height / 2.f;
 
   qword_t *q = (qword_t *)(ptr + head);
-  q = draw_disable_tests(q, 0, &zb);
   PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
   q++;
   PACK_GIFTAG(q,
