@@ -41,6 +41,7 @@ int gif_ad(struct d2d_state *s, uint64_t reg, uint64_t value) {
   GIF_AD(s->drawbuffer_head, reg, value);
   s->drawbuffer_head += QW_SIZE;
   s->drawbuffer_head_offset += QW_SIZE;
+  s->gif.loop_count += 1;
   return 1;
 }
 
@@ -124,6 +125,17 @@ int giftag_ad_tex2(struct d2d_state *s, int psm, int cbp, int cpsm,
       | SHIFT(csm, 1, 55)
       | SHIFT(csa, 0x1f, 56)
       | SHIFT(cld, 0x7, 61));
+  return 1;
+}
+
+int giftag_ad_test(struct d2d_state *s, int test) {
+  gif_ad(s, GS_REG_TEST,
+      SHIFT(test, 0x3, 17));
+  return 1;
+}
+
+int giftag_ad_finish(struct d2d_state *s) {
+  gif_ad(s, GS_REG_FINISH, 1);
   return 1;
 }
 

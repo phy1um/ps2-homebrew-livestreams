@@ -13,8 +13,6 @@
 #include "script.h"
 
 static int buffer_alloc(lua_State *l);
-static int drawlua_start_frame(lua_State *l);
-static int drawlua_end_frame(lua_State *l);
 
 static int buffer_pushint(lua_State *l) {
   int value = lua_tointeger(l, 2);
@@ -243,12 +241,6 @@ int drawlua_init(lua_State *l) {
   lua_pushcfunction(l, buffer_pushmiptbp);
   lua_setfield(l, -2, "setMipTbp");
 
-  // NOTE: this is a hack
-  lua_pushcfunction(l, drawlua_start_frame);
-  lua_setfield(l, -2, "frameStart");
-  lua_pushcfunction(l, drawlua_end_frame);
-  lua_setfield(l, -2, "frameEnd");
-
   lua_pushcfunction(l, buffer_copy);
   lua_setfield(l, -2, "copy");
 
@@ -269,67 +261,6 @@ int drawlua_init(lua_State *l) {
   // lua_setfield(l, -2 ,"lalloc");
   lua_setglobal(l, "RM");
 
-  return 0;
-}
-
-static int drawlua_start_frame(lua_State *l) {
-  // drawbuffer is arg #1
-  lua_pushstring(l, "head");
-  lua_gettable(l, 1);
-  int head = lua_tointeger(l, -1);
-
-  lua_pushstring(l, "ptr");
-  lua_gettable(l, 1);
-  char *ptr = (char *)lua_touserdata(l, -1);
-
-  int width = lua_tointeger(l, 2);
-  int height = lua_tointeger(l, 3);
-  int r = lua_tointeger(l, 4);
-  int g = lua_tointeger(l, 5);
-  int b = lua_tointeger(l, 6);
-
-  float halfw = width / 2.f;
-  float halfh = height / 2.f;
-
-  qword_t *q = (qword_t *)(ptr + head);
-  PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
-  q++;
-  PACK_GIFTAG(q,
-              GS_SET_TEST(DRAW_ENABLE, ATEST_METHOD_NOTEQUAL, 0x00,
-                          ATEST_KEEP_FRAMEBUFFER, DRAW_DISABLE, DRAW_DISABLE,
-                          DRAW_ENABLE, ZTEST_METHOD_ALLPASS),
-              GS_REG_TEST);
-  q++;
-  q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - halfh, width, height, r, g,
-                 b);
-
-  head = (char *)q - ptr;
-  lua_pushinteger(l, head);
-  lua_setfield(l, 1, "head");
-  return 0;
-}
-
-static int drawlua_end_frame(lua_State *l) {
-  // drawbuffer is arg #1
-  lua_pushstring(l, "head");
-  lua_gettable(l, 1);
-  int head = lua_tointeger(l, -1);
-  /*
-  lua_pushstring("size");
-  lua_gettable(l, 1);
-  int size = lua_tointeger(l, -1);
-  */
-  lua_pushstring(l, "ptr");
-  lua_gettable(l, 1);
-  char *ptr = (char *)lua_touserdata(l, -1);
-
-  qword_t *q = (qword_t *)(ptr + head);
-  q = draw_finish(q);
-
-  head = (char *)q - ptr;
-  // info("db head -> %d", head);
-  lua_pushinteger(l, head);
-  lua_setfield(l, 1, "head");
   return 0;
 }
 

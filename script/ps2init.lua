@@ -1,4 +1,3 @@
-
 local SEARCH_PATH = PS2_SCRIPT_PATH .. "script/?.lua"
 
 dbgPrint("search path = " .. SEARCH_PATH)

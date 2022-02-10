@@ -192,40 +192,24 @@ int draw2d_rect(float x1, float y1, float w, float h) {
   return 1;
 }
 
-static zbuffer_t zb = {0};
 int draw2d_frame_start() {
   trace("frame start");
   memset(&state.this_frame, 0, sizeof(struct d2d_stats));
   draw2d_clear_buffer();
   draw2d_start_cnt();
 
-  // Clear the screen using PS2SDK functions
-  float halfw = (state.screen_w*1.0f) / 2.0f;
-  float halfh = (state.screen_h*1.0f) / 2.0f;
-  qword_t *q = (qword_t *) state.drawbuffer_head;
-  PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
-  q++;
-  PACK_GIFTAG(q,
-              GS_SET_TEST(DRAW_ENABLE, ATEST_METHOD_NOTEQUAL, 0x00,
-                          ATEST_KEEP_FRAMEBUFFER, DRAW_DISABLE, DRAW_DISABLE,
-                          DRAW_ENABLE, ZTEST_METHOD_ALLPASS),
-              GS_REG_TEST);
-  q++;
-  q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - halfh,
-      state.screen_w, state.screen_h,
-      state.clear[0], state.clear[1], state.clear[2]);
-  trace("clear screen: %d, %d, %f, %f, %p -> %p",
-      state.screen_w, state.screen_h,
-      2048.0f - halfw, 2048.0f - halfh, state.drawbuffer_head, q);
-  state.drawbuffer_head = (char *) q;
-  state.drawbuffer_head_offset = ((char *) q - state.drawbuffer);
+  giftag_new(&state, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
+  giftag_ad_test(&state, 2);
+  draw2d_set_colour(state.clear[0], state.clear[1], state.clear[2], 0x80);
+  draw2d_rect(0, 0, 640, 480);
   return 1;
 }
 
 int draw2d_frame_end() {
   trace("frame end");
-  qword_t *q = draw_finish((qword_t *) state.drawbuffer_head);
-  state.drawbuffer_head = (char *) q;
+  draw2d_update_last_tag_loops();
+  giftag_new(&state, 0, 1, 1, GIF_REGS_AD_LEN, GIF_REGS_AD);
+  giftag_ad_finish(&state);
   draw2d_kick();
   memcpy(&state.last_frame, &state.this_frame, sizeof(struct d2d_stats));
   return 1;
