@@ -113,6 +113,7 @@ static int gslua_set_buffers(lua_State *l) {
   q = draw_primitive_xyoffset(q, 0, 2048 - (fb_width / 2),
                               2048 - (fb_height / 2));
   q = draw_finish(q);
+  print_buffer(head, q - head);
   dma_channel_send_normal(DMA_CHANNEL_GIF, head, q - head, 0, 0);
   draw_wait_finish();
   free(head);
