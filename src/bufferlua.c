@@ -186,6 +186,26 @@ static int buffer_read(lua_State *l) {
   return 1;
 }
 
+static int buffer_getfloat(lua_State *l) {
+  int index = lua_tointeger(l, 2);
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 1);
+  float *ptr = (float*) lua_touserdata(l, -1);
+  float res = ptr[index];
+  lua_pushnumber(l, res);
+  return 1;
+}
+
+static int buffer_setfloat(lua_State *l) {
+  int index = lua_tointeger(l, 2);
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 1);
+  float *ptr = (float*) lua_touserdata(l, -1);
+  float value = lua_tonumber(l, 3);
+  ptr[index] = value;
+  return 0;
+}
+
 static int buffer_write(lua_State *l) {
   int index = lua_tointeger(l, 2);
   if (index % 4 != 0) {
@@ -259,6 +279,11 @@ int drawlua_init(lua_State *l) {
   lua_setfield(l, -2, "read");
   lua_pushcfunction(l, buffer_write);
   lua_setfield(l, -2, "write");
+  lua_pushcfunction(l, buffer_getfloat);
+  lua_setfield(l, -2, "getFloat");
+  lua_pushcfunction(l, buffer_setfloat);
+  lua_setfield(l, -2, "setFloat");
+  
   lua_setfield(l, -2, "__index");
   lua_pop(l, 1);
 
