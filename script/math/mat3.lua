@@ -20,7 +20,7 @@ function mat3.__newindex(o, k, v)
   end
 end
 
-function mat3:__string()
+function mat3:__tostring()
   base = "[" 
   for i=0,8,1 do
     if i > 0 and i % 3 == 0 

@@ -32,7 +32,7 @@ function vec3.__newindex(o, k, v)
   end
 end
 
-function vec3:__string()
+function vec3:__tostring()
   return "[" .. self.x .. "," .. self.y .. "," .. self.z .. "]"
 end
 

@@ -42,7 +42,7 @@ function tests()
   local rm = M.mat3({ {math.cos(0.2), -1 * math.sin(0.2), 10}, {math.sin(0.2), math.cos(0.2), 4}, {0,0,1} })
   -- local rm = M.mat3({ {math.cos(0.2), math.sin(0.2), 0}, {-1 * math.sin(0.2), math.cos(0.2), 0}, {10, 4, 1} })
   rm:apply(ra)
-  print(ra:__string() .. " -> " .. rx:__string())
+  print(tostring(ra) .. " -> " .. tostring(rx))
   assert(ra:equal(rx))
 end
 

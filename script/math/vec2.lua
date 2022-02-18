@@ -26,7 +26,7 @@ function vec2.__newindex(o, k, v)
   end
 end
 
-function vec2:__string()
+function vec2:__tostring()
   return "[" .. self.x .. "," .. self.y .. "]"
 end
 
