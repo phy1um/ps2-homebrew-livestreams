@@ -4,7 +4,7 @@
 #include "log.h"
 
 #define buffer_null_check(p, s) \
-  do{ if(!p) { lua_pushstring(l, "got null buffer for " s); \
+  do { if (!p) { lua_pushstring(l, "got null buffer for " s); \
                 lua_error(l); return 1; } }while(0)
 
 #define get_buf(i, to, msg) \

@@ -4,7 +4,7 @@
 #include "log.h"
 
 #define buffer_null_check(p, s) \
-  do{ if(!p) { lua_pushstring(l, "got null buffer for " s); \
+  do { if (!p) { lua_pushstring(l, "got null buffer for " s); \
                 lua_error(l); return 1; } }while(0)
 
 #define get_buf(i, to, msg) \
@@ -19,7 +19,7 @@ static int lua_add_vec3(lua_State *l) {
   get_buf(1, buf1, "copy vec3");
   get_buf(2, buf2, "copy vec3");
 
-  buf1[0] += buf2[0]; 
+  buf1[0] += buf2[0];
   buf1[1] += buf2[1];
   buf1[2] += buf2[2];
 
@@ -30,7 +30,7 @@ static int lua_sub_vec3(lua_State *l) {
   get_buf(1, buf1, "sub vec3");
   get_buf(2, buf2, "sub vec3");
 
-  buf1[0] -= buf2[0]; 
+  buf1[0] -= buf2[0];
   buf1[1] -= buf2[1];
   buf1[2] -= buf2[2];
 
@@ -42,7 +42,7 @@ static int lua_copy_vec3(lua_State *l) {
   get_buf(1, buf1, "copy vec3");
   get_buf(2, buf2, "copy vec3");
 
-  buf1[0] = buf2[0]; 
+  buf1[0] = buf2[0];
   buf1[1] = buf2[1];
   buf1[2] = buf2[2];
 
