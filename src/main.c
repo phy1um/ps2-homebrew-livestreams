@@ -168,6 +168,12 @@ int main(int argc, char *argv[]) {
   draw2d_lua_init(L);
   loglua_init(L);
 
+  lua_createtable(L, 0, 20);
+  lua_setglobal(L, "MATH_C_LIB");
+  vec2lua_init(L);
+  vec3lua_init(L);
+  mat3lua_init(L);
+
   // TODO(Tom Marks): better abstraction for drawlua_*
   drawlua_init(L);
 
