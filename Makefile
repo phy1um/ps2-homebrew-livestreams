@@ -77,6 +77,8 @@ lint:
 .PHONY: lualint
 lualint:
 	luac5.1 -p script/*.lua
+	luac5.1 -p script/math/*.lua
+	luac5.1 -p script/eg/*.lua
 
 .PHONY: format
 format:
