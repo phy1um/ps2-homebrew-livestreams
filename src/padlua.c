@@ -1,10 +1,9 @@
 #include <lua.h>
 
+#include <gs_privileged.h>
 #include <kernel.h>
 #include <libpad.h>
 #include <loadfile.h>
-#include <gs_privileged.h>
-
 
 #include <malloc.h>
 
@@ -36,7 +35,8 @@ static void wait_vblank() {
   *GS_REG_CSR |= GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 
   // Wait for the vsync interrupt.
-  while (!(*GS_REG_CSR & (GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)))) { }
+  while (!(*GS_REG_CSR & (GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)))) {
+  }
 
   // Disable the vsync interrupt.
   *GS_REG_CSR &= ~GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -70,14 +70,16 @@ int pad_init() {
     int32_t state = padGetState(0, 0);
     if (state == PAD_STATE_STABLE || state == PAD_STATE_FINDCTP1) {
       int modes = padInfoMode(0, 0, PAD_MODETABLE, -1);
-      for(int i = 0; i < modes; i++) {
+      for (int i = 0; i < modes; i++) {
         if (padInfoMode(0, 0, PAD_MODETABLE, i) == PAD_TYPE_DUALSHOCK) {
           info("found dualshock controller in 0:0");
         }
       }
       padSetMainMode(0, 0, 1, 3);
-      while(padGetReqState(0, 0) != PAD_RSTAT_COMPLETE) {}
-      while(padGetState(0, 0) != PAD_STATE_STABLE) {}
+      while (padGetReqState(0, 0) != PAD_RSTAT_COMPLETE) {
+      }
+      while (padGetState(0, 0) != PAD_STATE_STABLE) {
+      }
       return 1;
     }
     busy_loops -= 1;
@@ -86,7 +88,6 @@ int pad_init() {
 
   logerr("failed to set pad mode, state never stable");
   return 0;
-
 }
 
 static int pad_wait(int port, int slot, int tries) {
@@ -149,7 +150,7 @@ static int pad_lua_button_held(lua_State *l) {
 
 static int pad_lua_joy_value(lua_State *l) {
   int axis_id = lua_tointeger(l, 1);
-  //logdbg("axis %d = %d", axis_id, joysticks[axis_id]);
+  // logdbg("axis %d = %d", axis_id, joysticks[axis_id]);
   lua_pushinteger(l, joysticks[axis_id] - 127);
   return 1;
 }
