@@ -153,8 +153,9 @@ static int pad_lua_button_held(lua_State *l) {
 static int pad_lua_joy_value(lua_State *l) {
   int axis_id = lua_tointeger(l, 1);
   // logdbg("axis %d = %d", axis_id, joysticks[axis_id]);
-  float joy_value = ((joysticks[axis_id] - 127)*1.0) / 127.0;
-  if ((joy_value < 0 && joy_value > -DEADZONE) || (joy_value > 0 && joy_value < DEADZONE)) {
+  float joy_value = ((joysticks[axis_id] - 127) * 1.0) / 127.0;
+  if ((joy_value < 0 && joy_value > -DEADZONE) ||
+      (joy_value > 0 && joy_value < DEADZONE)) {
     lua_pushinteger(l, 0);
   } else {
     lua_pushnumber(l, joy_value);
