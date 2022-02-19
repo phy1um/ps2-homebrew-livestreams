@@ -1,5 +1,6 @@
 #include <lua.h>
 
+#include <gs_privileged.h>
 #include <kernel.h>
 #include <libpad.h>
 #include <loadfile.h>
@@ -8,6 +9,8 @@
 
 #include "log.h"
 #include "pad.h"
+
+#define DEADZONE 0.2
 
 #define pad_test(b, v)                                                         \
   do {                                                                         \
@@ -21,13 +24,25 @@ struct padButtonStatus *pad_read_space;
 
 int *btn_held;
 
-unsigned char joysticks[JOY_AXIS_COUNT];
+int joysticks[JOY_AXIS_COUNT];
 
 int prev_inputs;
 
 int button_held(int b) { return btn_held[b]; }
 
-unsigned char joy_axis_value(int a) { return joysticks[a]; }
+int joy_axis_value(int a) { return joysticks[a]; }
+
+static void wait_vblank() {
+  // Enable the vsync interrupt.
+  *GS_REG_CSR |= GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+
+  // Wait for the vsync interrupt.
+  while (!(*GS_REG_CSR & (GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)))) {
+  }
+
+  // Disable the vsync interrupt.
+  *GS_REG_CSR &= ~GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+}
 
 int pad_init() {
   btn_held = memalign(256, 12 * sizeof(int));
@@ -52,8 +67,29 @@ int pad_init() {
   padInit(0);
   padPortOpen(0, 0, pad_buffer);
   // TODO(phy1um): check for dualshock controller
-  padSetMainMode(0, 0, 1, 3);
-  return 1;
+  int busy_loops = 100;
+  while (busy_loops > 0) {
+    int32_t state = padGetState(0, 0);
+    if (state == PAD_STATE_STABLE || state == PAD_STATE_FINDCTP1) {
+      int modes = padInfoMode(0, 0, PAD_MODETABLE, -1);
+      for (int i = 0; i < modes; i++) {
+        if (padInfoMode(0, 0, PAD_MODETABLE, i) == PAD_TYPE_DUALSHOCK) {
+          info("found dualshock controller in 0:0");
+        }
+      }
+      padSetMainMode(0, 0, 1, 3);
+      while (padGetReqState(0, 0) != PAD_RSTAT_COMPLETE) {
+      }
+      while (padGetState(0, 0) != PAD_STATE_STABLE) {
+      }
+      return 1;
+    }
+    busy_loops -= 1;
+    wait_vblank();
+  }
+
+  logerr("failed to set pad mode, state never stable");
+  return 0;
 }
 
 static int pad_wait(int port, int slot, int tries) {
@@ -71,7 +107,6 @@ static int pad_wait(int port, int slot, int tries) {
   }
   return 0;
 }
-
 void pad_poll() {
   if (pad_wait(0, 0, 10) < 0) {
     return;
@@ -93,12 +128,10 @@ void pad_poll() {
     pad_test(PAD_R1, BUTTON_R1);
     pad_test(PAD_R2, BUTTON_R2);
     pad_test(PAD_SELECT, BUTTON_SELECT);
-    /*
-    joysticks[AXIS_LEFT_X] = pad_read_space->ljoy_h;
-    joysticks[AXIS_LEFT_Y] = pad_read_space->ljoy_v;
-    joysticks[AXIS_RIGHT_X] = pad_read_space->rjoy_h;
-    joysticks[AXIS_RIGHT_Y] = pad_read_space->rjoy_v;
-    */
+    joysticks[AXIS_LEFT_X] = (int)pad_read_space->ljoy_h;
+    joysticks[AXIS_LEFT_Y] = (int)pad_read_space->ljoy_v;
+    joysticks[AXIS_RIGHT_X] = (int)pad_read_space->rjoy_h;
+    joysticks[AXIS_RIGHT_Y] = (int)pad_read_space->rjoy_v;
   }
 }
 
@@ -117,6 +150,19 @@ static int pad_lua_button_held(lua_State *l) {
   return 1;
 }
 
+static int pad_lua_joy_value(lua_State *l) {
+  int axis_id = lua_tointeger(l, 1);
+  // logdbg("axis %d = %d", axis_id, joysticks[axis_id]);
+  float joy_value = ((joysticks[axis_id] - 127) * 1.0) / 127.0;
+  if ((joy_value < 0 && joy_value > -DEADZONE) ||
+      (joy_value > 0 && joy_value < DEADZONE)) {
+    lua_pushinteger(l, 0);
+  } else {
+    lua_pushnumber(l, joy_value);
+  }
+  return 1;
+}
+
 #define bind_int(v, name)                                                      \
   lua_pushinteger(l, v);                                                       \
   lua_setfield(l, -2, name)
@@ -129,6 +175,8 @@ int pad_lua_init(lua_State *l) {
   lua_createtable(l, 0, 5);
   lua_pushcfunction(l, pad_lua_button_held);
   lua_setfield(l, -2, "held");
+  lua_pushcfunction(l, pad_lua_joy_value);
+  lua_setfield(l, -2, "axis");
   bind_int(BUTTON_X, "X");
   bind_int(BUTTON_SQUARE, "TRIANGLE");
   bind_int(BUTTON_TRIANGLE, "SQUARE");
@@ -142,6 +190,10 @@ int pad_lua_init(lua_State *l) {
   bind_int(BUTTON_L2, "L2");
   bind_int(BUTTON_R1, "R1");
   bind_int(BUTTON_R2, "R2");
+  bind_int(AXIS_LEFT_X, "axisLeftX");
+  bind_int(AXIS_LEFT_Y, "axisLeftY");
+  bind_int(AXIS_RIGHT_X, "axisRightX");
+  bind_int(AXIS_RIGHT_Y, "axisRightY");
   lua_setglobal(l, "PAD");
   return 0;
 }
