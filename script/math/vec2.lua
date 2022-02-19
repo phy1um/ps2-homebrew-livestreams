@@ -97,6 +97,10 @@ function vec2:scale(s)
   M.scaleVec2(self.buf, s)
 end
 
+function vec2:normalize()
+  M.normalizeVec2(self.buf)
+end
+
 function feq(a, b)
   return math.abs(a-b) < 0.00001
 end

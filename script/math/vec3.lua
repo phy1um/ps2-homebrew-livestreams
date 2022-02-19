@@ -94,6 +94,10 @@ function vec3:scale(s)
   M.scaleVec3(self.buf, s)
 end
 
+function vec3:normalize()
+  M.normalizeVec2(self.buf)
+end
+
 function feq(a, b)
   return math.abs(a-b) < 0.00001
 end

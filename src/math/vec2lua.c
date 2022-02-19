@@ -53,6 +53,14 @@ static int lua_length_vec2(lua_State *l) {
   return 1;
 }
 
+static int lua_normalize_vec2(lua_State *l) {
+  get_buf(1, buf1, "normalize vec2");
+  float len = p2m_vec2_length(buf1);
+  buf1[0] /= len;
+  buf1[1] /= len;
+  return 0;
+}
+
 static int lua_dot_vec2(lua_State *l) {
   get_buf(1, buf1, "dot vec2");
   get_buf(2, buf2, "dot vec2");
@@ -85,6 +93,8 @@ int vec2lua_init(lua_State *l) {
   lua_setfield(l, -2, "copyVec2");
   lua_pushcfunction(l, lua_length_vec2);
   lua_setfield(l, -2, "lenVec2");
+  lua_pushcfunction(l, lua_normalize_vec2);
+  lua_setfield(l, -2, "normalizeVec2");
   lua_pushcfunction(l, lua_dot_vec2);
   lua_setfield(l, -2, "dotVec2");
   lua_pushcfunction(l, lua_rotate_vec2);
