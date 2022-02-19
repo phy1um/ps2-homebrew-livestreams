@@ -31,7 +31,7 @@
 int button_pressed(int b);
 int button_held(int b);
 int button_released(int b);
-unsigned char joy_axis_value(int a);
+int joy_axis_value(int a);
 
 int pad_init();
 void pad_poll();
