@@ -26,5 +26,12 @@ function suite.vec2_add()
   assert(v3.y == 97)
 end
 
+function suite.vec2_scale()
+  local v = M.vec2(4, 7)
+  local n = v * 5
+  assert(n.x == 20)
+  assert(n.y == 35)
+end
+
 
 return function() test.run_suite(suite.name, suite) end

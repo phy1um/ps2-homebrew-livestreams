@@ -15,7 +15,7 @@ end
 function t.mat3_add()
   local a = M.mat3()
   local b = M.mat3({ {1,2,3},{0,0,0},{0,0,0} })
-  M.mat3_mt.add(a, b)
+  a:add(b)
   local c = M.mat3({ {2,2,3},{0,1,0},{0,0,1} })
   assert(a:equal(c))
 end
