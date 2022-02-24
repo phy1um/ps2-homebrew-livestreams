@@ -24,8 +24,6 @@ end
 local pos = M.vec2(100, 100)
 local angle = 0
 local fwd = M.vec2(1, 0)
-local work = M.vec2(0, 0)
-local w2 = M.vec2(0,0)
 local rv = 0.07
 local v = 1.6
 
@@ -42,7 +40,7 @@ function stepPlayer()
   if PAD.held(PAD.UP) then velocity = v end
   if angle > TAU then angle = angle - TAU end
   if angle < 0 then angle = angle + TAU end
-  MATH_C_LIB.copyVec2(work.buf, fwd.buf)
+  local work = M.vec2From(fwd)
   work:rotate(angle)
   work:scale(velocity)
   pos:add(work)
@@ -53,7 +51,7 @@ function PS2PROG.frame()
   stepPlayer()
   D2D:setColour(255,0,0,0x80)
   D2D:rect(pos.x, pos.y, 20, 20)
-  MATH_C_LIB.copyVec2(w2.buf, fwd.buf)
+  local w2 = M.vec2From(fwd)
   w2:rotate(angle)
   w2:scale(60)
   D2D:setColour(0, 255, 255, 0x80)

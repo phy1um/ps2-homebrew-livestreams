@@ -32,7 +32,7 @@ function mat3:__tostring()
 end
 
 function mat3.new(x)
-  local buf = RM.alloc(4 * 9) 
+  local buf = RM.gcAlloc(4 * 9) 
   if x == nil then 
     -- if no args initialize to identity matrix
     M.identityMat3(buf)

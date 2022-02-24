@@ -55,7 +55,7 @@ function vec3.__mul(a, s)
 end
 
 function vec3.new(x,y, z)
-  local buf = RM.alloc(4 * 3)  
+  local buf = RM.gcAlloc(4 * 3)  
   local o = {buf = buf}
   setmetatable(o, vec3)
   o.x = x

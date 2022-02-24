@@ -13,6 +13,7 @@
 #include "script.h"
 
 static int buffer_alloc(lua_State *l);
+static int buffer_gcalloc(lua_State *l);
 static int drawlua_start_frame(lua_State *l);
 static int drawlua_end_frame(lua_State *l);
 
@@ -247,8 +248,21 @@ static int buffer_print(lua_State *l) {
   return 0;
 }
 
+#ifdef TRACE_LUA_BUFFER_GC
+int buffer_on_gc(lua_State *l) {
+  trace("some buffer was GC'd");
+  return 0;
+}
+#endif
+
 int drawlua_init(lua_State *l) {
   luaL_newmetatable(l, "ps2.buffer");
+
+#ifdef TRACE_LUA_BUFFER_GC
+  lua_pushcfunction(l, buffer_on_gc);
+  lua_setfield(l, -2, "__gc");
+#endif
+
   lua_createtable(l, 0, 5);
 
   lua_pushcfunction(l, buffer_pushint);
@@ -290,8 +304,8 @@ int drawlua_init(lua_State *l) {
   lua_createtable(l, 0, 1);
   lua_pushcfunction(l, buffer_alloc);
   lua_setfield(l, -2, "alloc");
-  // lua_pushcfunction(l, buffer_lua_alloc);
-  // lua_setfield(l, -2 ,"lalloc");
+  lua_pushcfunction(l, buffer_gcalloc);
+  lua_setfield(l, -2 ,"gcAlloc");
   lua_setglobal(l, "RM");
 
   return 0;
@@ -368,6 +382,27 @@ static int buffer_alloc(lua_State *l) {
   void *buf = malloc(size);
 
   lua_createtable(l, 0, 2);
+  lua_pushinteger(l, size);
+  lua_setfield(l, -2, "size");
+  lua_pushinteger(l, 0);
+  lua_setfield(l, -2, "head");
+  lua_pushlightuserdata(l, buf);
+  lua_setfield(l, -2, "ptr");
+  lua_pushinteger(l, (int)buf);
+  lua_setfield(l, -2, "addr");
+  luaL_getmetatable(l, "ps2.buffer");
+  lua_setmetatable(l, -2);
+
+  return 1;
+}
+
+static int buffer_gcalloc(lua_State *l) {
+  int size = lua_tointeger(l, 1);
+  trace("allocating GC buffer for lua, size = %d", size);
+
+  lua_createtable(l, 0, 2);
+  void *buf = lua_newuserdata(l, size);
+  lua_setfield(l, -2, "_gc_ref");
   lua_pushinteger(l, size);
   lua_setfield(l, -2, "size");
   lua_pushinteger(l, 0);

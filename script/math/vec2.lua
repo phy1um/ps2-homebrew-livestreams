@@ -49,7 +49,7 @@ function vec2.__mul(a, s)
 end
 
 function vec2.new(x,y)
-  local buf = RM.alloc(4 * 2)  
+  local buf = RM.gcAlloc(4 * 2)  
   local o = {buf = buf}
   setmetatable(o, vec2)
   o.x = x
