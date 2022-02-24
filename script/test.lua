@@ -20,6 +20,7 @@ function test.run_suite(name, t)
   if pass < ran then st = "FAIL" end
   LOG.info(" === " .. st .. " " .. name)
   LOG.info( " @ " .. tostring(pass) .. " / " .. tostring(ran))
+  return pass == ran
 end
 
 return test

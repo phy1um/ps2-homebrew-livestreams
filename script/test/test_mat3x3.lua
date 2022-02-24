@@ -53,6 +53,6 @@ function t.test_mat3_apply_rotate()
   assert(ra:equal(rx))
 end
 
-return function() test.run_suite("3x3 Matrix", t) end
+return function() return test.run_suite("3x3 Matrix", t) end
 
 
