@@ -7,45 +7,6 @@ local M = require("ps2math")
 
 local gs = nil
 
-function tests()
-  local a = M.mat3()
-  assert(a[0] == 1)
-  assert(a[1] == 0)
-  assert(a[3] == 0)
-  assert(a[4] == 1)
-  local b = M.mat3({ {1,2,3},{0,0,0},{0,0,0} })
-  M.mat3_mt.add(a, b)
-  local c = M.mat3({ {2,2,3},{0,1,0},{0,0,1} })
-  assert(a:equal(c))
-  assert(a[2] == a:get(2, 0))
-  assert(a[8] == a:get(2,2))
-  local ii = M.mat3()
-  local x = M.mat3()
-  x:copy(a)
-  x:mul(ii)
-  assert(a:equal(x))
-
-  local ta = M.mat3({ {5,12,9},{2,4.2,1},{11,8,0.2} })
-  local tb = M.mat3({ {7,12,122},{0.1,17,8},{5,100,-2} })
-  local tres = M.mat3({ {81.2,1164,688},{19.42,195.4,275.6},{78.8,288,1405.6} })
-  ta:mul(tb)
-  assert(ta:equal(tres))
-
-  local va = M.vec3(5,12,7.4)
-  local vb = M.vec3From(va)
-  ii:apply(va)
-  assert(va:equal(vb))
-
-  local ra = M.vec3(12, 8, 1)
-
-  local rx = M.vec3(10.17144 + 10, 10.22456 + 4, 1)
-  local rm = M.mat3({ {math.cos(0.2), -1 * math.sin(0.2), 10}, {math.sin(0.2), math.cos(0.2), 4}, {0,0,1} })
-  -- local rm = M.mat3({ {math.cos(0.2), math.sin(0.2), 0}, {-1 * math.sin(0.2), math.cos(0.2), 0}, {10, 4, 1} })
-  rm:apply(ra)
-  print(tostring(ra) .. " -> " .. tostring(rx))
-  assert(ra:equal(rx))
-end
-
 function PS2PROG.start()
   PS2PROG.logLevel(5)
   DMA.init(DMA.GIF)
@@ -60,7 +21,6 @@ function PS2PROG.start()
   D2D:bindBuffer(db)
 end
 
-local done = false
 local pos = M.vec2(100, 100)
 local angle = 0
 local fwd = M.vec2(1, 0)
@@ -89,21 +49,6 @@ function stepPlayer()
 end
 
 function PS2PROG.frame()
-  if not done then
-    done = true
-
-    local v1 = M.vec2(5, 4)
-    local v2 = M.vec2(7, 7)
-    local perp = M.vec2(-11, 12)
-    v1:add(v2)
-    local l = v1:length()
-    local d = v1:dot(v2)
-    LOG.info("vector add result: " .. tostring(v1))
-    LOG.info("len = " .. l .. ", dot = " .. d)
-    LOG.info("zero = " .. v1:dot(perp))
-    v1:copyRotate(1)
-    tests()
-  end
   D2D:frameStart(gs)
   stepPlayer()
   D2D:setColour(255,0,0,0x80)
