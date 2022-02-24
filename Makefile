@@ -78,7 +78,7 @@ lint:
 
 .PHONY: lualint
 lualint:
-	luac5.1 -p $(LUA_FILES)
+	luac5.3 -p $(LUA_FILES)
 
 .PHONY: format
 format:
