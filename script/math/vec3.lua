@@ -100,7 +100,7 @@ function vec3:scale(s)
 end
 
 function vec3:normalize()
-  M.normalizeVec2(self.buf)
+  M.normalizeVec3(self.buf)
 end
 
 return vec3

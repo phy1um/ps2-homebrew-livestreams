@@ -32,7 +32,6 @@ function mat3:__tostring()
 end
 
 function mat3:__eq(other)
-  LOG.info("testing m " .. tostring(self) .. ", " .. tostring(other))
   for i=0,8,1 do
     if M.floatCmp(self[i], other[i]) == false then 
       LOG.info("mismatch @ (" .. i .. ") " .. self[i] .. " -> " .. other[i])

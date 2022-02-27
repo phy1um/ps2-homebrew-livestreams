@@ -58,7 +58,7 @@ static int lua_length_vec3(lua_State *l) {
 
 static int lua_normalize_vec3(lua_State *l) {
   get_buf(1, buf1, "normalize vec3");
-  float len = p2m_vec2_length(buf1);
+  float len = p2m_vec3_length(buf1);
   buf1[0] /= len;
   buf1[1] /= len;
   buf1[2] /= len;
