@@ -173,6 +173,7 @@ int main(int argc, char *argv[]) {
   vec2lua_init(L);
   vec3lua_init(L);
   mat3lua_init(L);
+  floatmath_init(L);
 
   // TODO(Tom Marks): better abstraction for drawlua_*
   drawlua_init(L);

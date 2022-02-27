@@ -31,6 +31,17 @@ function mat3:__tostring()
   return base .. "]"
 end
 
+function mat3:__eq(other)
+  LOG.info("testing m " .. tostring(self) .. ", " .. tostring(other))
+  for i=0,8,1 do
+    if M.floatCmp(self[i], other[i]) == false then 
+      LOG.info("mismatch @ (" .. i .. ") " .. self[i] .. " -> " .. other[i])
+      return false 
+    end
+  end
+  return true
+end
+
 function mat3.new(x)
   local buf = RM.gcAlloc(4 * 9) 
   if x == nil then 
@@ -65,13 +76,6 @@ end
 
 function mat3:copy(from)
   M.copyMat3(self.buf, from.buf)
-end
-
-function mat3:equal(other)
-  for i=0,8,1 do
-    if math.abs(self[i] - other[i]) > 0.0001 then return false end
-  end
-  return true
 end
 
 return mat3

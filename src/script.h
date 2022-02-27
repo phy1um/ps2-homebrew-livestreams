@@ -15,5 +15,6 @@ int draw2d_lua_init(lua_State *l);
 int vec2lua_init(lua_State *l);
 int vec3lua_init(lua_State *l);
 int mat3lua_init(lua_State *l);
+int floatmath_init(lua_State *l);
 
 #endif

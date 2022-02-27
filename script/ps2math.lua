@@ -11,5 +11,11 @@ types.vec3 = types.vec3_mt.new
 types.vec3From = types.vec3_mt.from
 types.mat3 = types.mat3_mt.new
 
+local EPSILON = 0.0001
+
+function types.floatCmp(a, b)
+  return math.abs(a-b) < EPSILON
+end
+
 return types
 

@@ -1,8 +1,10 @@
 
 local test = {}
 
-function test.handler(err)
-  LOG.error("TEST FAILED: " .. err)
+function test.handler(testName)
+  return function(err)
+    LOG.error(" % Failed Test (" .. testName .. ") :: " .. err)
+  end
 end
 
 function test.run_suite(name, t)
@@ -12,7 +14,7 @@ function test.run_suite(name, t)
   for name,fn in pairs(t) do
     if type(fn) == "function" then 
       ran = ran + 1
-      local rv = xpcall(fn, test.handler)
+      local rv = xpcall(fn, test.handler(name))
       if rv then pass = pass + 1 end
     end
   end
@@ -22,5 +24,12 @@ function test.run_suite(name, t)
   LOG.info( " @ " .. tostring(pass) .. " / " .. tostring(ran))
   return pass == ran
 end
+
+function test.equal(exp, actual)
+  if (exp == actual) == false then
+    error("expected: " .. tostring(exp) .. ", actual: " .. tostring(actual))
+  end
+end
+
 
 return test

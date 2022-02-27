@@ -8,7 +8,7 @@ local M = require("ps2math")
 local gs = nil
 
 function PS2PROG.start()
-  PS2PROG.logLevel(5)
+  PS2PROG.logLevel(LOG.debugLevel)
   DMA.init(DMA.GIF)
   gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
   local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 2048)

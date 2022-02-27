@@ -26,6 +26,10 @@ function vec2.__newindex(o, k, v)
   end
 end
 
+function vec2:__eq(other)
+  return M.floatCmp(self.x, other.x) and M.floatCmp(self.y, other.y)
+end
+
 function vec2:__tostring()
   return "[" .. self.x .. "," .. self.y .. "]"
 end
@@ -99,14 +103,6 @@ end
 
 function vec2:normalize()
   M.normalizeVec2(self.buf)
-end
-
-function feq(a, b)
-  return math.abs(a-b) < 0.00001
-end
-
-function vec2:equal(other)
-  return feq(self.x, other.x) and feq(self.y, other.y) 
 end
 
 return vec2

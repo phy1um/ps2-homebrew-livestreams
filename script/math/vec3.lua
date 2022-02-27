@@ -32,6 +32,11 @@ function vec3.__newindex(o, k, v)
   end
 end
 
+function vec3:__eq(other)
+  return M.floatCmp(self.x, other.x) and M.floatCmp(self.y, other.y) and M.floatCmp(self.z, other.z)
+end
+
+
 function vec3:__tostring()
   return "[" .. self.x .. "," .. self.y .. "," .. self.z .. "]"
 end
@@ -97,14 +102,5 @@ end
 function vec3:normalize()
   M.normalizeVec2(self.buf)
 end
-
-function feq(a, b)
-  return math.abs(a-b) < 0.00001
-end
-
-function vec3:equal(other)
-  return feq(self.x, other.x) and feq(self.y, other.y) and feq(self.z, other.z)
-end
-
 
 return vec3
