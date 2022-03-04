@@ -12,6 +12,8 @@ LUA_BRANCH=ee-v5.4.4
 VERSION?=$(shell git rev-parse --short HEAD)
 ISO_FLAGS?=-l --allow-lowercase -A "game by Tom Marks" -V "LGJ21 $(VERSION)"
 
+LUA_FILES=$(shell find script -type f -name "*.lua")
+
 include .lintvars
 
 dist: $(BIN) assets
@@ -76,7 +78,7 @@ lint:
 
 .PHONY: lualint
 lualint:
-	luac5.1 -p script/*.lua
+	luac5.3 -p $(LUA_FILES)
 
 .PHONY: format
 format:
