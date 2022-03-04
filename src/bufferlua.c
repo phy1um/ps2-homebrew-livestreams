@@ -305,7 +305,7 @@ int drawlua_init(lua_State *l) {
   lua_pushcfunction(l, buffer_alloc);
   lua_setfield(l, -2, "alloc");
   lua_pushcfunction(l, buffer_gcalloc);
-  lua_setfield(l, -2 ,"gcAlloc");
+  lua_setfield(l, -2, "gcAlloc");
   lua_setglobal(l, "RM");
 
   return 0;
