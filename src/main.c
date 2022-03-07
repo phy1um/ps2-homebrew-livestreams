@@ -20,11 +20,12 @@
 #include "ps2luaprog.h"
 #include "script.h"
 #include "utils.h"
+#include "net.h"
 
 static int is_running = 1;
 
 #ifndef LOG_LEVEL_DEFAUT
-#define LOG_LEVEL_DEFAULT LOG_LEVEL_INFO
+#define LOG_LEVEL_DEFAULT LOG_LEVEL_TRACE
 #endif
 
 int log_output_level = LOG_LEVEL_DEFAULT;
@@ -151,6 +152,10 @@ int main(int argc, char *argv[]) {
 
   info("default log level = %d", log_output_level);
 
+  if (net_init()) {
+    logerr("failed to initialize networking");
+  }
+
   BENCH_START(lua_init_time);
 
   struct lua_State *L;
@@ -167,6 +172,7 @@ int main(int argc, char *argv[]) {
   pad_lua_init(L);
   draw2d_lua_init(L);
   loglua_init(L);
+  listen_lua_init(L);
 
   lua_createtable(L, 0, 20);
   lua_setglobal(L, "MATH_C_LIB");

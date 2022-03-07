@@ -18,7 +18,7 @@ if pcall(run_unit_tests) ~= true then
 end
 
 
-require("eg.math")
+require("eg.net")
 return {}
 
 -- default entrypoint - do nothing and hang!

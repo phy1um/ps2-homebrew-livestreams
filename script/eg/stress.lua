@@ -33,7 +33,7 @@ function PS2PROG.start()
 
   local vr = VRAM:slice(VRAM.mem.head)
 
-  local dd = 100
+  local dd = 50
   local dx = math.floor(640/dd)
   local dy = math.floor(448/dd)
   for x=0,620,dx do
