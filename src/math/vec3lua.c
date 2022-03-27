@@ -1,7 +1,7 @@
 #include <lua.h>
 
-#include "ps2math.h"
-#include "log.h"
+#include "../ps2math.h"
+#include "../log.h"
 
 #define buffer_null_check(p, s) \
   do { if (!p) { lua_pushstring(l, "got null buffer for " s); \

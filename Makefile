@@ -14,6 +14,10 @@ ISO_FLAGS?=-l --allow-lowercase -A "game by Tom Marks" -V "LGJ21 $(VERSION)"
 
 LUA_FILES=$(shell find script -type f -name "*.lua")
 
+PREFIX=src/
+
+include src/Makefile
+
 include .lintvars
 
 dist: $(BIN) assets
@@ -27,14 +31,11 @@ assets: scripts
 	cp distfiles/* dist/
 	cp LICENSE dist/
 
-$(BIN): src/test.elf
+.PHONY: $(BIN)
+$(BIN): 
 	if ! [ -d dist ]; then mkdir dist; fi
-	cp src/test.elf dist/test.elf
-
-.PHONY: src/test.elf
-src/test.elf:
-	$(MAKE) platform=PS2 -C src test.elf
-
+	$(MAKE) platform=PS2 src/test.elf
+	cp src/test.elf $@
 
 .PHONY: scripts
 scripts:
@@ -53,8 +54,8 @@ docker-elf:
 docker-iso:
 	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
 
-.PHONY: clean
-clean: 
+.PHONY: clean-all
+clean-all: 
 	$(MAKE) -C src clean
 	$(MAKE) -C asset clean
 	rm -rf dist/
@@ -97,4 +98,5 @@ lua-samples:
 
 docker-image:
 	$(DOCKER) build -t $(DOCKER_IMG) .
+
 

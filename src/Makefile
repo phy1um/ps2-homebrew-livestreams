@@ -5,10 +5,12 @@ LUA_OBJ=gslua.o dmalua.o bufferlua.o tga.o padlua.o drawlua.o loglua.o ps2luapro
 DRAW_OBJ=draw/draw2d.o draw/buffer.o
 MATH_OBJ=ps2math.o math/vec2lua.o math/vec3lua.o math/mat3lua.o math/float.o
 
-EE_BIN=test.elf
+EE_BIN=$(PREFIX)test.elf
 EE_OBJS= $(MAIN_OBJ) $(LUA_OBJ) $(DRAW_OBJ) $(MATH_OBJ)
 EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d -lm -lpad -llua
 EE_CFLAGS+=-Wall --std=c99 -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2 -DLOG_TRACE
+
+EE_OBJS:=$(addprefix $(PREFIX), $(EE_OBJS))
 
 EE_INCS+=-I$(PS2SDK)/ports/include
 EE_LDFLAGS=-L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib -L$(PS2SDK)/ports/lib

@@ -1,7 +1,7 @@
 #include <math.h>
 #include <lua.h>
 
-#include "log.h"
+#include "../log.h"
 
 #define EPSILON 0.000001
 
