@@ -168,6 +168,9 @@ int main(int argc, char *argv[]) {
   draw2d_lua_init(L);
   loglua_init(L);
 
+
+  slot_list_lua_init(L);
+
   lua_createtable(L, 0, 20);
   lua_setglobal(L, "MATH_C_LIB");
   vec2lua_init(L);
