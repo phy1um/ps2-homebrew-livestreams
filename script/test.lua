@@ -31,5 +31,8 @@ function test.equal(exp, actual)
   end
 end
 
+function test.fail(msg)
+  error(msg)
+end
 
 return test

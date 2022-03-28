@@ -3,7 +3,7 @@ BIN=dist/test.elf
 
 PS2HOST?=192.168.20.99
 
-DOCKER_IMG=ps2build-test
+DOCKER_IMG=ps2build
 DOCKERFLAGS=--user "$(shell id -u):$(shell id -g)"
 DOCKER?=docker
 

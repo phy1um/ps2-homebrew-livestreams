@@ -1,7 +1,7 @@
 
 local startup_ok = true
 
-local test_files = {"test_vec2", "test_mat3x3", "test_vec3"}
+local test_files = {"test_vec2", "test_mat3x3", "test_vec3", "test_slotlist"}
 function run_unit_tests()
   local ok = true
   for _, name in ipairs(test_files) do
