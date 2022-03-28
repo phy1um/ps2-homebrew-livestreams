@@ -51,6 +51,23 @@ char main_script[FILE_NAME_MAX_LEN];
     }                                                                          \
   } while (0)
 
+
+static script_binding SCRIPT_CORE_LIBS[] = {
+  {"gs", gs_lua_init},
+  {"dma", dma_lua_init},
+  {"pad", pad_lua_init},
+  {"buffer", drawlua_init},
+  {"log", loglua_init},
+  {"tga", lua_tga_init},
+  {"slotlist", slot_list_lua_init},
+  {"draw2d", draw2d_lua_init},
+  {"math_vec2", vec2lua_init},
+  {"math_vec3", vec3lua_init},
+  {"math_mat3", mat3lua_init},
+  {"math_misc", floatmath_init},
+  {0, 0},
+};
+
 void core_error(const char *msg) {
   is_running = 0;
   logerr("FATAL ERROR: %s", msg);
@@ -108,6 +125,22 @@ static int runfile(lua_State *l, const char *fname) {
   return 0;
 }
 
+int bind_core_libs(lua_State *l) {
+  lua_createtable(l, 0, sizeof(SCRIPT_CORE_LIBS)/sizeof(script_binding));
+  for (int i = 0; i < 999; i++) {
+    script_binding *b = &SCRIPT_CORE_LIBS[i];
+    if (b->name == 0) return 1;
+    trace("init core lib %s", b->name);
+    if (b->open(l) != 1) {
+      logerr("failed to open library: %s", b->name);
+      return 0;
+    }
+    lua_setfield(l, -2, b->name);
+    trace("core set field: %s", b->name);
+  }
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
 
 #ifndef NO_SCREEN_PRINT
@@ -161,24 +194,9 @@ int main(int argc, char *argv[]) {
   luaL_openlibs(L);
 
   ps2luaprog_init(L);
-  dma_lua_init(L);
-  gs_lua_init(L);
-  lua_tga_init(L);
-  pad_lua_init(L);
-  draw2d_lua_init(L);
-  loglua_init(L);
 
-  slot_list_lua_init(L);
-
-  lua_createtable(L, 0, 20);
-  lua_setglobal(L, "MATH_C_LIB");
-  vec2lua_init(L);
-  vec3lua_init(L);
-  mat3lua_init(L);
-  floatmath_init(L);
-
-  // TODO(Tom Marks): better abstraction for drawlua_*
-  drawlua_init(L);
+  bind_core_libs(L);
+  lua_setglobal(L, "P2GCORE");
 
   BENCH_INFO(lua_init_time, "lua startup time = %f");
   info("finished lua state setup");

@@ -184,12 +184,11 @@ static const struct luaL_Reg methods[] = {
 };
 
 int slot_list_lua_init(lua_State *l) {
-  info("init lua lib %s", libname);
   luaL_newmetatable(l, libname);
   lua_pushvalue(l, -1);
   lua_setfield(l, -2, "__index");
   luaL_setfuncs(l, methods, 0);
+  lua_pop(l, 1);
   luaL_newlib(l, lib);
-  lua_setglobal(l, "CORE_SLOT_LIST");
-  return 0;
+  return 1;
 }

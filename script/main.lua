@@ -17,8 +17,9 @@ if pcall(run_unit_tests) ~= true then
   return {}
 end
 
+LOG.info("loading entrypoint")
 
-require("eg.math")
+require("eg.texture")
 return {}
 
 -- default entrypoint - do nothing and hang!

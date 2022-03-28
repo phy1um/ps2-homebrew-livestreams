@@ -194,6 +194,5 @@ int pad_lua_init(lua_State *l) {
   bind_int(AXIS_LEFT_Y, "axisLeftY");
   bind_int(AXIS_RIGHT_X, "axisRightX");
   bind_int(AXIS_RIGHT_Y, "axisRightY");
-  lua_setglobal(l, "PAD");
-  return 0;
+  return 1;
 }

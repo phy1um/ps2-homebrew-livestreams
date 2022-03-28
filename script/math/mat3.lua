@@ -1,4 +1,7 @@
-local M = MATH_C_LIB
+local M = P2GCORE.math_mat3
+local floatCmp = P2GCORE.math_misc.floatCmp
+
+
 
 local mat3 = {}
 
@@ -33,7 +36,7 @@ end
 
 function mat3:__eq(other)
   for i=0,8,1 do
-    if M.floatCmp(self[i], other[i]) == false then 
+    if floatCmp(self[i], other[i]) == false then 
       LOG.info("mismatch @ (" .. i .. ") " .. self[i] .. " -> " .. other[i])
       return false 
     end

@@ -10,7 +10,9 @@ static int ps2luaprog_start_nil(lua_State *l) {
   return 0;
 }
 
-static int ps2luaprog_frame_nil(lua_State *l) { return 0; }
+static int ps2luaprog_frame_nil(lua_State *l) { 
+  return 0; 
+}
 
 static int ps2lua_log2(lua_State *l) {
   int n = lua_tointeger(l, 1);

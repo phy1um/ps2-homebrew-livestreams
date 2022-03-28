@@ -84,7 +84,8 @@ static int lua_scale_vec2(lua_State *l) {
 }
 
 int vec2lua_init(lua_State *l) {
-  lua_getglobal(l, "MATH_C_LIB");
+  info("init core lib math.vec2");
+  lua_createtable(l, 0, 8);
   lua_pushcfunction(l, lua_add_vec2);
   lua_setfield(l, -2, "addVec2");
   lua_pushcfunction(l, lua_sub_vec2);
@@ -101,6 +102,5 @@ int vec2lua_init(lua_State *l) {
   lua_setfield(l, -2, "rotateVec2");
   lua_pushcfunction(l, lua_scale_vec2);
   lua_setfield(l, -2, "scaleVec2");
-  lua_pop(l, 1);
-  return 0;
+  return 1;
 }

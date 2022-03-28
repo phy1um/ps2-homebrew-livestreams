@@ -3,7 +3,7 @@
 local list = {
   new = function(n)
     LOG.info("new list")
-    return CORE_SLOT_LIST.new(n)
+    return P2GCORE.slotlist.new(n)
   end
 }
 

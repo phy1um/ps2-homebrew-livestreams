@@ -37,6 +37,4 @@ int pad_init();
 void pad_poll();
 void pad_frame_start();
 
-int pad_lua_init(lua_State *l);
-
 #endif

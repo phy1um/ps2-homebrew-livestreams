@@ -306,9 +306,8 @@ int drawlua_init(lua_State *l) {
   lua_setfield(l, -2, "alloc");
   lua_pushcfunction(l, buffer_gcalloc);
   lua_setfield(l, -2, "gcAlloc");
-  lua_setglobal(l, "RM");
 
-  return 0;
+  return 1;
 }
 
 zbuffer_t zb = {0};
