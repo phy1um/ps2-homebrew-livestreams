@@ -8,7 +8,6 @@ local M = require("ps2math")
 local gs = nil
 
 function PS2PROG.start()
-  LOG.info("GO GO GO")
   PS2PROG.logLevel(LOG.debugLevel)
   DMA.init(DMA.GIF)
   gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)

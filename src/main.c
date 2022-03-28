@@ -64,7 +64,6 @@ static script_binding SCRIPT_CORE_LIBS[] = {
     {"math_vec3", vec3lua_init},
     {"math_mat3", mat3lua_init},
     {"math_misc", floatmath_init},
-    {0, 0},
 };
 
 void core_error(const char *msg) {
@@ -125,11 +124,11 @@ static int runfile(lua_State *l, const char *fname) {
 }
 
 int bind_core_libs(lua_State *l) {
-  lua_createtable(l, 0, sizeof(SCRIPT_CORE_LIBS) / sizeof(script_binding));
-  for (int i = 0; i < 999; i++) {
+  int num_libs = sizeof(SCRIPT_CORE_LIBS) / sizeof(script_binding);
+  info("initializing %d core libraries", num_libs);
+  lua_createtable(l, 0, num_libs);
+  for (int i = 0; i < num_libs; i++) {
     script_binding *b = &SCRIPT_CORE_LIBS[i];
-    if (b->name == 0)
-      return 1;
     trace("init core lib %s", b->name);
     if (b->open(l) != 1) {
       logerr("failed to open library: %s", b->name);
@@ -138,7 +137,7 @@ int bind_core_libs(lua_State *l) {
     lua_setfield(l, -2, b->name);
     trace("core set field: %s", b->name);
   }
-  return 0;
+  return 1;
 }
 
 int main(int argc, char *argv[]) {
