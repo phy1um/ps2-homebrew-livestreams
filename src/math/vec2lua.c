@@ -84,7 +84,7 @@ static int lua_scale_vec2(lua_State *l) {
 }
 
 int vec2lua_init(lua_State *l) {
-  info("init core lib math.vec2");
+  trace("init core lib math.vec2");
   lua_createtable(l, 0, 8);
   lua_pushcfunction(l, lua_add_vec2);
   lua_setfield(l, -2, "addVec2");

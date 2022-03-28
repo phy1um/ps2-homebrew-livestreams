@@ -56,7 +56,7 @@ static int lua_apply_mat3(lua_State *l) {
 }
 
 int mat3lua_init(lua_State *l) {
-  info("init core lib math.mat3");
+  trace("init core lib math.mat3");
   lua_createtable(l, 0, 8);
   lua_pushcfunction(l, lua_add_mat3);
   lua_setfield(l, -2, "addMat3");

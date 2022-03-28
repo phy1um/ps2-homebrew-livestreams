@@ -14,7 +14,7 @@ static int float_compare(lua_State *l) {
 }
 
 int floatmath_init(lua_State *l) {
-  info("init core lib math.misc");
+  trace("init core lib math.misc");
   lua_createtable(l, 0, 1);
   lua_pushcfunction(l, float_compare);
   lua_setfield(l, -2, "floatCmp");

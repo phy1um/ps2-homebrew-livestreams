@@ -81,7 +81,7 @@ static int lua_scale_vec3(lua_State *l) {
 }
 
 int vec3lua_init(lua_State *l) {
-  info("init core lib math.vec3");
+  trace("init core lib math.vec3");
   lua_createtable(l, 0, 8);
   lua_pushcfunction(l, lua_add_vec3);
   lua_setfield(l, -2, "addVec3");
