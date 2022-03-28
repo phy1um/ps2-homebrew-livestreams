@@ -1,3 +1,14 @@
+#include <lua.h>
+#include <lauxlib.h>
+
+#include <stdlib.h>
+
+#include "log.h"
+#include "script.h"
+
+static const char libname[] = MAKE_LUA_LIB_NAME("slotlist");
+
+#define SLOT_FREE 0
 
 struct slot_list {
   int *slots;
@@ -50,7 +61,7 @@ int slot_list_push(struct slot_list *sl, int m, int new_state) {
   return 0;
 }
 
-int slot_set_lua_value(lua_State *l) {
+int slot_list_lua_push(lua_State *l) {
   // lua args: 1 = slot_list, 2 = value, 3 = state
   struct slot_list *st = lua_touserdata(l, 1);
   lua_pushvalue(l, 2);
@@ -63,7 +74,7 @@ int slot_set_lua_value(lua_State *l) {
 int slot_list_lua_each(lua_State *l) {
   // lua args: 1 = slot_list, 2 = fn to call on each slot
   struct slot_list *st = lua_touserdata(l, 1);
-  for (int i = 0; i < capacity; i++) {
+  for (int i = 0; i < st->capacity; i++) {
     if (st->states[i] > SLOT_FREE) {
       // push function
       lua_pushvalue(l, 2);
@@ -80,13 +91,14 @@ int slot_list_lua_each(lua_State *l) {
       }
     }
   }
+  return 0;
 }
 
 int slot_list_lua_each_state(lua_State *l) {
   // lua args: 1 = slot_list, 2 = expected state, 3 = fn to call on each slot
   struct slot_list *st = lua_touserdata(l, 1);
   int state = lua_tointeger(l, 2);
-  for (int i = 0; i < capacity; i++) {
+  for (int i = 0; i < st->capacity; i++) {
     if (st->states[i] == state) {
       // push function
       lua_pushvalue(l, 3);
@@ -116,10 +128,69 @@ int slot_list_lua_set_state(lua_State *l) {
     // noreturn
   }
   int m = st->slots[index];
-  slot_list_set(st, index, 0, state);
-  if (state == SLOT_FREE) {
+  slot_list_set(st, index, 0, new_state);
+  if (new_state == SLOT_FREE) {
     luaL_unref(l, LUA_REGISTRYINDEX, m);
   }
+  return 0;
+}
+
+int slot_list_lua_new(lua_State *l) {
+  // lua args: 1 = capacity 
+  int capacity = lua_tointeger(l, 1);
+  trace("allocate new slot list with capacity=%d", capacity);
+  struct slot_list *st = lua_newuserdata(l, sizeof(struct slot_list));
+  if (!st) {
+    luaL_error(l, "failed to allocate new userdata");
+    // noreturn
+  }
+
+  st->slots = (int*) calloc(capacity, sizeof(int));
+  st->states = (int*) calloc(capacity, sizeof(int));
+  st->capacity = capacity;
+  st->head = 0;
+
+  luaL_getmetatable(l, libname);
+  lua_setmetatable(l, -2);
+
+  return 1;
+}
+
+int slot_list_lua_free(lua_State *l) {
+  trace("cleanup slot list");
+  struct slot_list *st = lua_touserdata(l, 1);
+  if (!st) {
+    luaL_error(l, "failed to cleanup NULL slot list");
+    // noreturn
+  }
+
+  free(st->slots);
+  free(st->states);
+  trace("cleanup slot list complete");
+  return 0;
+}
+
+static const struct luaL_Reg lib [] = {
+  {"new", slot_list_lua_new},
+  {0, 0},
+};
+
+static const struct luaL_Reg methods [] = {
+  {"push", slot_list_lua_push},
+  {"setState", slot_list_lua_set_state},
+  {"each", slot_list_lua_each},
+  {"eachState", slot_list_lua_each_state},
+  {0, 0},
+};
+
+int slot_list_lua_init(lua_State *l) {
+  info("init lua lib %s", libname);
+  luaL_newmetatable(l, libname);
+  lua_pushvalue(l, -1);
+  lua_setfield(l, -2, "__index");
+  luaL_setfuncs(l, methods, 0);
+  luaL_newlib(l, lib);
+  lua_setglobal(l, "CORE_SLOT_LIST");
   return 0;
 }
 
