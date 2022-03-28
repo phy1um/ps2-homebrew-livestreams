@@ -14,7 +14,6 @@ int loglua_init(lua_State *l);
 int lua_tga_init(lua_State *l);
 int draw2d_lua_init(lua_State *l);
 
-
 int slot_list_lua_init(lua_State *l);
 
 // math...

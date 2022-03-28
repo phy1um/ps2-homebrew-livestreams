@@ -1,5 +1,5 @@
-#include <lua.h>
 #include <lauxlib.h>
+#include <lua.h>
 
 #include <stdlib.h>
 
@@ -136,7 +136,7 @@ int slot_list_lua_set_state(lua_State *l) {
 }
 
 int slot_list_lua_new(lua_State *l) {
-  // lua args: 1 = capacity 
+  // lua args: 1 = capacity
   int capacity = lua_tointeger(l, 1);
   trace("allocate new slot list with capacity=%d", capacity);
   struct slot_list *st = lua_newuserdata(l, sizeof(struct slot_list));
@@ -145,8 +145,8 @@ int slot_list_lua_new(lua_State *l) {
     // noreturn
   }
 
-  st->slots = (int*) calloc(capacity, sizeof(int));
-  st->states = (int*) calloc(capacity, sizeof(int));
+  st->slots = (int *)calloc(capacity, sizeof(int));
+  st->states = (int *)calloc(capacity, sizeof(int));
   st->capacity = capacity;
   st->head = 0;
 
@@ -170,17 +170,17 @@ int slot_list_lua_free(lua_State *l) {
   return 0;
 }
 
-static const struct luaL_Reg lib [] = {
-  {"new", slot_list_lua_new},
-  {0, 0},
+static const struct luaL_Reg lib[] = {
+    {"new", slot_list_lua_new},
+    {0, 0},
 };
 
-static const struct luaL_Reg methods [] = {
-  {"push", slot_list_lua_push},
-  {"setState", slot_list_lua_set_state},
-  {"each", slot_list_lua_each},
-  {"eachState", slot_list_lua_each_state},
-  {0, 0},
+static const struct luaL_Reg methods[] = {
+    {"push", slot_list_lua_push},
+    {"setState", slot_list_lua_set_state},
+    {"each", slot_list_lua_each},
+    {"eachState", slot_list_lua_each_state},
+    {0, 0},
 };
 
 int slot_list_lua_init(lua_State *l) {
@@ -193,4 +193,3 @@ int slot_list_lua_init(lua_State *l) {
   lua_setglobal(l, "CORE_SLOT_LIST");
   return 0;
 }
-
