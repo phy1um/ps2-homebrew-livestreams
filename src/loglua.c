@@ -66,7 +66,5 @@ int loglua_init(lua_State *l) {
   lua_pushinteger(l, LOG_LEVEL_TRACE);
   lua_setfield(l, -2, "traceLevel");
 
-  lua_setglobal(l, "LOG");
-
-  return 0;
+  return 1;
 }

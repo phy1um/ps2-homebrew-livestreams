@@ -1,4 +1,5 @@
-local M = MATH_C_LIB
+local M = P2GCORE.math_vec2
+local floatCmp = P2GCORE.math_misc.floatCmp
 
 local vec2 = {}
 
@@ -27,7 +28,7 @@ function vec2.__newindex(o, k, v)
 end
 
 function vec2:__eq(other)
-  return M.floatCmp(self.x, other.x) and M.floatCmp(self.y, other.y)
+  return floatCmp(self.x, other.x) and floatCmp(self.y, other.y)
 end
 
 function vec2:__tostring()

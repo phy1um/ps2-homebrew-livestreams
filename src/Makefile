@@ -1,7 +1,7 @@
 PS2SDK=/usr/local/ps2dev/ps2sdk
 
 MAIN_OBJ=main.o utils.o 
-LUA_OBJ=gslua.o dmalua.o bufferlua.o tga.o padlua.o drawlua.o loglua.o ps2luaprog.o 
+LUA_OBJ=gslua.o dmalua.o bufferlua.o tga.o padlua.o drawlua.o loglua.o ps2luaprog.o slotlistlua.o
 DRAW_OBJ=draw/draw2d.o draw/buffer.o
 MATH_OBJ=ps2math.o math/vec2lua.o math/vec3lua.o math/mat3lua.o math/float.o
 

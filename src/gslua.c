@@ -170,7 +170,5 @@ int gs_lua_init(lua_State *l) {
   bind("HDTV_576P", GRAPH_MODE_HDTV_576P);
   bind("HDTV_720P", GRAPH_MODE_HDTV_720P);
 
-  // bind this table to global name GS, nothing left on stack
-  lua_setglobal(l, "GS");
-  return 0;
+  return 1;
 }

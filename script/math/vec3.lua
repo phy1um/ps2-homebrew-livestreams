@@ -1,5 +1,6 @@
 local vec3 = {}
-local M = MATH_C_LIB
+local M = P2GCORE.math_vec3
+local floatCmp = P2GCORE.math_misc.floatCmp
 
 
 function vec3.__index(o, k)
@@ -33,7 +34,7 @@ function vec3.__newindex(o, k, v)
 end
 
 function vec3:__eq(other)
-  return M.floatCmp(self.x, other.x) and M.floatCmp(self.y, other.y) and M.floatCmp(self.z, other.z)
+  return floatCmp(self.x, other.x) and floatCmp(self.y, other.y) and floatCmp(self.z, other.z)
 end
 
 

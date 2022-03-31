@@ -92,6 +92,5 @@ int dma_lua_init(lua_State *l) {
   lua_pushinteger(l, 2 << 28);
   lua_setfield(l, -2, "NEXT");
 
-  lua_setglobal(l, "DMA");
-  return 0;
+  return 1;
 }

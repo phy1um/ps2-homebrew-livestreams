@@ -174,6 +174,5 @@ int lua_tga_init(lua_State *l) {
   lua_setfield(l, -2, "load");
   lua_pushcfunction(l, lua_tga_get_header);
   lua_setfield(l, -2, "header");
-  lua_setglobal(l, "TGA");
-  return 0;
+  return 1;
 }

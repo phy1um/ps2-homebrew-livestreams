@@ -177,6 +177,5 @@ int draw2d_lua_init(lua_State *l) {
   pushfn(draw2d_lua_upload_texture, "uploadTexture");
   pushfn(draw2d_lua_setclut, "setClut");
   pushfn(draw2d_lua_bind_buffer, "bindBuffer");
-  lua_setglobal(l, "FAST_DRAW2D");
-  return 0;
+  return 1;
 }

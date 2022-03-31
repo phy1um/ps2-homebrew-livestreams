@@ -81,7 +81,8 @@ static int lua_scale_vec3(lua_State *l) {
 }
 
 int vec3lua_init(lua_State *l) {
-  lua_getglobal(l, "MATH_C_LIB");
+  trace("init core lib math.vec3");
+  lua_createtable(l, 0, 8);
   lua_pushcfunction(l, lua_add_vec3);
   lua_setfield(l, -2, "addVec3");
   lua_pushcfunction(l, lua_sub_vec3);
@@ -96,6 +97,5 @@ int vec3lua_init(lua_State *l) {
   lua_setfield(l, -2, "dotVec3");
   lua_pushcfunction(l, lua_scale_vec3);
   lua_setfield(l, -2, "scaleVec3");
-  lua_pop(l, 1);
-  return 0;
+  return 1;
 }
