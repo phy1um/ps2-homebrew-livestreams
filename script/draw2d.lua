@@ -2,6 +2,14 @@ local GIF = require("gif")
 local P = require("ps2const")
 local VRAM = require("vram")
 
+function lts(l)
+  local out = ""
+  for i,v in ipairs(l) do
+    out = out .. tostring(v) .. ", "
+  end
+  return out
+end
+
 -- most functions assume buf != nil
 -- please set a buffer with d2d:bindBuffer() or you will crash
 
@@ -10,9 +18,12 @@ local VRAM = require("vram")
 local DRAW_NONE = 0
 local DRAW_GEOM = 1
 local DRAW_SPRITE = 2
+local DRAW_TEXTRI = 3
 
 -- GS Registers to set when drawing geometry
 local DRAW_FMT_GEOM = {1,5,5,5}
+-- GS Registers to set when drawing textured triangles
+local DRAW_FMT_TEXTRI = {1,2,5,2,5,2,5}
 -- GS Registers to set when drawing SPRITE primitives
 local DRAW_FMT_SPRITE = {2,1,5,2,1,5}
 
@@ -186,6 +197,46 @@ function draw:triangle(x1, y1, x2, y2, x3, y3)
   self.loopCount = self.loopCount + 1
   self.rawtri = self.rawtri + 1
 end
+
+function draw:textri(tex, x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3)
+  LOG.trace("textri start")
+  if self.loopCount > 10000 then self:kick() end
+  if self.buf.size - self.buf.head < 80 then self:kick() end
+  -- if we are not currently drawing raw geometry then...
+  if self.state ~= DRAW_TEXTRI then
+    -- cleanup previous GIFTag
+    if self.state ~= DRAW_NONE then
+      draw:updateLastTagLoops() 
+    end
+    LOG.trace("setting tex ptr = " .. tostring(tex.basePtr))
+    self.currentTexPtr = tex.basePtr
+    local pb = math.floor(tex.basePtr/64)
+    local pw = math.floor(tex.width/64)
+    GIF.tag(self.buf, GIF.PACKED, 5, false, {0xe})
+    GIF.texA(self.buf, 0x80, 0x80)
+    GIF.tex1(self.buf, true, 0, true, 0, 0)
+    self.buf:settex(0, pb, pw, tex.format, math.floor(log2(tex.width)), math.floor(log2(tex.height)), 0, 1, 0, 0, 0)
+    GIF.tex2(self.buf, self.clut.texPtr, tex.format)
+    GIF.primAd(self.buf, P.PRIM.TRI, false, false, false)
+
+    LOG.trace("setting fmt to textri >> " .. lts(DRAW_FMT_TEXTRI))
+    self.tagLoopPtr = GIF.tag(self.buf, 0, 1, false, DRAW_FMT_TEXTRI)
+    self.loopCount = 0
+    self.state = DRAW_TEXTRI
+  end
+  -- push PACKED triangle data into draw buffer
+  GIF.packedRGBAQ(self.buf, self.col.r, self.col.g, self.col.b, self.col.a)
+  GIF.packedST(self.buf, u1, v1)
+  GIF.packedXYZ2(self.buf, toCoord(x1-320), toCoord(y1-224), 0)
+  GIF.packedST(self.buf, u2, v2)
+  GIF.packedXYZ2(self.buf, toCoord(x2-320), toCoord(y2-224), 0)
+  GIF.packedST(self.buf, u3, v3)
+  GIF.packedXYZ2(self.buf, toCoord(x3-320), toCoord(y3-224), 0)
+  self.loopCount = self.loopCount + 1
+  self.rawtri = self.rawtri + 1
+end
+
+
 
 -- submit the current drawbuffer for rendering
 function draw:kick()
