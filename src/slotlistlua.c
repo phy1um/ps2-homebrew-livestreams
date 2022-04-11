@@ -64,16 +64,27 @@ int slot_list_push(struct slot_list *sl, int m, int new_state) {
 int slot_list_lua_push(lua_State *l) {
   // lua args: 1 = slot_list, 2 = value, 3 = state
   struct slot_list *st = lua_touserdata(l, 1);
+  if (!st) {
+    luaL_error(l, "cannot push to null slot list");
+  }
+
   lua_pushvalue(l, 2);
   int r = luaL_ref(l, LUA_REGISTRYINDEX);
   int state = lua_tointeger(l, 3);
-  slot_list_push(st, r, state);
+  if (!slot_list_push(st, r, state)) {
+    luaL_error(l, "no slots left in slot list");
+    // noreturn
+  }
   return 0;
 }
 
 int slot_list_lua_each(lua_State *l) {
   // lua args: 1 = slot_list, 2 = fn to call on each slot
   struct slot_list *st = lua_touserdata(l, 1);
+  if (!st) {
+    luaL_error(l, "cannot call each on null slot list");
+  }
+
   for (int i = 0; i < st->capacity; i++) {
     if (st->states[i] > SLOT_FREE) {
       // push function
@@ -97,6 +108,10 @@ int slot_list_lua_each(lua_State *l) {
 int slot_list_lua_each_state(lua_State *l) {
   // lua args: 1 = slot_list, 2 = expected state, 3 = fn to call on each slot
   struct slot_list *st = lua_touserdata(l, 1);
+  if (!st) {
+    luaL_error(l, "cannot call each-state on null slot list");
+  }
+
   int state = lua_tointeger(l, 2);
   for (int i = 0; i < st->capacity; i++) {
     if (st->states[i] == state) {
@@ -121,6 +136,10 @@ int slot_list_lua_each_state(lua_State *l) {
 int slot_list_lua_set_state(lua_State *l) {
   // lua args: 1 = slot_list, 2 = index, 3 = new state
   struct slot_list *st = lua_touserdata(l, 1);
+  if (!st) {
+    luaL_error(l, "cannot state state of null slot list");
+  }
+
   int index = lua_tointeger(l, 2);
   int new_state = lua_tointeger(l, 3);
   if (index < 0 || index >= st->capacity) {

@@ -22,6 +22,9 @@ static struct d2d_state state;
 #define GIF_REGS_SPRITE_LEN 6
 #define GIF_REGS_RECT 0x551
 #define GIF_REGS_RECT_LEN 3
+#define GIF_REGS_TEXTRI 0x5252521
+#define GIF_REGS_TEXTRI_LEN 7
+
 
 #define BLOCK_SIZE_BYTES 4496
 
@@ -161,6 +164,55 @@ int draw2d_triangle(float x1, float y1,
   state.this_frame.tris += 1;
   return 1;
 }
+
+int draw2d_textri(float x1, float y1, float u1, float v1,
+    float x2, float y2, float u2, float v2,
+    float x3, float y3, float u3, float v3) {
+  trace("drawing textri @ %f %f %f %f -- %f %f %f %f -- %f %f %f %f",
+      x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3);
+  if (state.gif.loop_count >= GIF_MAX_LOOPS - 1) {
+    draw2d_kick();
+  }
+
+  if (state.drawbuffer_head_offset >= state.drawbuffer_len - 80) {
+    draw2d_kick();
+  }
+
+  if (state.draw_type != D2D_TEXTRI) {
+    if (state.draw_type != D2D_NONE) {
+      draw2d_update_last_tag_loops();
+    }
+
+    giftag_new(&state, 0, 5, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
+    giftag_ad_texa(&state, 0x80, 0x80);
+    giftag_ad_tex1(&state, 1, 0, 1, 0, 0);
+    giftag_ad_tex0(&state, 0,
+        state.tex_vram_addr/64,
+        state.tex_width/64,
+        state.tex_psm,
+        floorlog2(state.tex_width),
+        floorlog2(state.tex_height),
+        1, 1);
+    giftag_ad_tex2(&state, state.tex_psm, state.clut_tex,
+        0, 0, 0, 0x2);
+    giftag_ad_prim(&state, PRIM_TRIANGLE, 0, 1, 0);
+    giftag_new(&state, 0, 1, 0, GIF_REGS_TEXTRI_LEN, GIF_REGS_TEXTRI);
+    state.draw_type = D2D_TEXTRI;
+  }
+
+  push_rgbaq(&state, state.col);
+  push_st(&state, u1, v1);
+  push_xyz2(&state, to_coord(x1-320), to_coord(y1-224), 0);
+  push_st(&state, u2, v2);
+  push_xyz2(&state, to_coord(x2-320), to_coord(y2-224), 0);
+  push_st(&state, u3, v3);
+  push_xyz2(&state, to_coord(x3-320), to_coord(y3-224), 0);
+  state.gif.loop_count += 1;
+  state.this_frame.tris += 1;
+  return 1;
+}
+
+
 
 int draw2d_rect(float x1, float y1, float w, float h) {
   trace("rect @ %u %f %f %f %f", state.drawbuffer_head_offset, x1, y1, w, h);
@@ -356,7 +408,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
         state.tex_psm,
         floorlog2(state.tex_width),
         floorlog2(state.tex_height),
-        1, 0);
+        1, 1);
     giftag_ad_tex2(&state, state.tex_psm, state.clut_tex,
         0, 0, 0, 0x2);
     giftag_ad_prim(&state, PRIM_SPRITE, 0, 1, 0);

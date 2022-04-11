@@ -24,6 +24,7 @@ enum draw_type {
   D2D_GEOM,
   D2D_RECT,
   D2D_SPRITE,
+  D2D_TEXTRI,
 };
 
 struct d2d_gif {
@@ -71,6 +72,9 @@ struct d2d_state {
 int draw2d_frame_start();
 int draw2d_frame_end();
 int draw2d_triangle(float x1, float y1, float x2, float y2, float x3, float y3);
+int draw2d_textri(float x1, float y1, float u1, float v1,
+    float x2, float y2, float u2, float v2,
+    float x3, float y3, float u3, float v3);
 int draw2d_rect(float x1, float y1, float w, float h);
 
 int draw2d_screen_dimensions(int w, int h);

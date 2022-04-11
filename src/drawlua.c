@@ -24,6 +24,42 @@ int draw2d_lua_triangle(lua_State *l) {
   return 0;
 }
 
+int draw2d_lua_textri(lua_State *l) {
+  lua_pushstring(l, "width");
+  lua_gettable(l, 2);
+  int width = lua_tointeger(l, -1);
+
+  lua_pushstring(l, "height");
+  lua_gettable(l, 2);
+  int height = lua_tointeger(l, -1);
+
+  lua_pushstring(l, "format");
+  lua_gettable(l, 2);
+  int psm = lua_tointeger(l, -1);
+
+  lua_pushstring(l, "basePtr");
+  lua_gettable(l, 2);
+  int vram_addr = lua_tointeger(l, -1);
+
+  draw2d_bind_texture(vram_addr, width, height, psm);
+
+  float x1 = lua_tonumber(l, 3);
+  float y1 = lua_tonumber(l, 4);
+  float u1 = lua_tonumber(l, 5);
+  float v1 = lua_tonumber(l, 6);
+  float x2 = lua_tonumber(l, 7);
+  float y2 = lua_tonumber(l, 8);
+  float u2 = lua_tonumber(l, 9);
+  float v2 = lua_tonumber(l, 10);
+  float x3 = lua_tonumber(l, 11);
+  float y3 = lua_tonumber(l, 12);
+  float u3 = lua_tonumber(l, 13);
+  float v3 = lua_tonumber(l, 14);
+
+  draw2d_textri(x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3);
+  return 0;
+}
+
 int draw2d_lua_rect(lua_State *l) {
   float x1 = lua_tonumber(l, 2);
   float y1 = lua_tonumber(l, 3);
@@ -169,6 +205,7 @@ int draw2d_lua_init(lua_State *l) {
   pushfn(draw2d_lua_frame_start, "frameStart");
   pushfn(draw2d_lua_frame_end, "frameEnd");
   pushfn(draw2d_lua_triangle, "triangle");
+  pushfn(draw2d_lua_textri, "textri");
   pushfn(draw2d_lua_rect, "rect");
   pushfn(draw2d_lua_sprite, "sprite");
   pushfn(draw2d_lua_set_colour, "setColour");
