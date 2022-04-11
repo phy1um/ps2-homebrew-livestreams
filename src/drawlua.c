@@ -50,7 +50,7 @@ int draw2d_lua_textri(lua_State *l) {
   float x2 = lua_tonumber(l, 7);
   float y2 = lua_tonumber(l, 8);
   float u2 = lua_tonumber(l, 9);
-  float v2 = lua_tonumber(l, 10);  
+  float v2 = lua_tonumber(l, 10);
   float x3 = lua_tonumber(l, 11);
   float y3 = lua_tonumber(l, 12);
   float u3 = lua_tonumber(l, 13);
