@@ -28,7 +28,7 @@ function gif.tag(b, flg, nloop, eop, regs)
 
   -- write the registers
   for i=1,#regs,1 do
-    reg = reg + regs[i] * 2^(4*regc)
+    reg = reg | regs[i] << (4*regc)
     regc = regc + 1
     if regc >=8 then
       b:pushint(reg)

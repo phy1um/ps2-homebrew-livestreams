@@ -217,7 +217,7 @@ function draw:textri(tex, x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3)
     GIF.tex1(self.buf, true, 0, true, 0, 0)
     self.buf:settex(0, pb, pw, tex.format, math.floor(log2(tex.width)), math.floor(log2(tex.height)), 0, 1, 0, 0, 0)
     GIF.tex2(self.buf, self.clut.texPtr, tex.format)
-    GIF.primAd(self.buf, P.PRIM.TRI, false, false, false)
+    GIF.primAd(self.buf, P.PRIM.TRI, false, true, false)
 
     LOG.trace("setting fmt to textri >> " .. lts(DRAW_FMT_TEXTRI))
     self.tagLoopPtr = GIF.tag(self.buf, 0, 1, false, DRAW_FMT_TEXTRI)
