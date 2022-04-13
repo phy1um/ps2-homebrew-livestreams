@@ -131,6 +131,16 @@ int giftag_ad_tex2(struct d2d_state *s, int psm, int cbp, int cpsm,
   return 1;
 }
 
+int giftag_ad_alpha(struct d2d_state *s, int a, int b, int c, int d, int fix) {
+  gif_ad(s, GS_REG_ALPHA,
+      SHIFT(a, 0x3, 0)
+      | SHIFT(b, 0x3, 2)
+      | SHIFT(c, 0x3, 4)
+      | SHIFT(d, 0x3, 6)
+      | SHIFT(fix, 0xff, 32));
+  return 1;
+}
+
 int push_rgbaq(struct d2d_state *s, unsigned char cols[4]) {
   uint32_t *v = (uint32_t *)s->drawbuffer_head;
   v[0] = cols[0];

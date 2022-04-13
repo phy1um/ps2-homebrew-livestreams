@@ -192,7 +192,7 @@ int draw2d_textri(float x1, float y1, float u1, float v1,
         state.tex_psm,
         floorlog2(state.tex_width),
         floorlog2(state.tex_height),
-        1, 1);
+        1, 0);
     giftag_ad_tex2(&state, state.tex_psm, state.clut_tex,
         0, 0, 0, 0x2);
     giftag_ad_prim(&state, PRIM_TRIANGLE, 0, 1, 0);
@@ -408,7 +408,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
         state.tex_psm,
         floorlog2(state.tex_width),
         floorlog2(state.tex_height),
-        1, 1);
+        1, 0);
     giftag_ad_tex2(&state, state.tex_psm, state.clut_tex,
         0, 0, 0, 0x2);
     giftag_ad_prim(&state, PRIM_SPRITE, 0, 1, 0);

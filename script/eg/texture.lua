@@ -47,8 +47,9 @@ local db = 0
 function PS2PROG.frame()
   D2D:frameStart(gs)
   uploadTextures()
-  D2D:setColour(0x80,0x80,0x80,0x80)
+  D2D:setColour(0x80,0x80,0x80,0x10)
   D2D:sprite(testTex, 20, 20, 64, 64, 0, 0, 1, 1)
+  D2D:setColour(0xff, 0x30, 0x30, 0x20)
   D2D:textri(testTex, 200, 200, 0, 0, 
     200, 300, 0, 1,
     300, 300, 1, 1)

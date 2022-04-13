@@ -107,6 +107,7 @@ function gif.primAd(b, primType, shaded, textured, aa)
   if shaded then bits = bits + 0x8 end
   if textured then bits = bits + 0x10 end
   if aa then bits = bits + 0x80 end
+  bits = bits | 64
   gif.setAd(b, P.REG.PRIM, bits, 0)
 end
 

@@ -105,7 +105,7 @@ static int buffer_settex(lua_State *l) {
   *(base + 2) = v3;
   *(base + 3) = v4;
 
-  // info("write tex0 :: %08x %08x %08x %08x", v1, v2, v3, v4);
+  trace("write tex0 :: %08x %08x %08x %08x", v1, v2, v3, v4);
   // info("head -> %d", head+16);
 
   lua_pushinteger(l, head + 16);
