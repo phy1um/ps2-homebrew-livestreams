@@ -132,7 +132,7 @@ int giftag_ad_tex2(struct d2d_state *s, int psm, int cbp, int cpsm,
 }
 
 int giftag_ad_alpha(struct d2d_state *s, int a, int b, int c, int d, int fix) {
-  gif_ad(s, GS_REG_ALPHA, 
+  gif_ad(s, GS_REG_ALPHA,
       SHIFT(a, 0x3, 0)
       | SHIFT(b, 0x3, 2)
       | SHIFT(c, 0x3, 4)
