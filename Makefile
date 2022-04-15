@@ -22,9 +22,15 @@ DIST_BIN_NAME=P2G_$(VERSION).elf
 
 include .lintvars
 
+ifeq ($(IN_PIPELINE), true)
+.PHONY: dist
+dist: $(BIN) assets
+	cp $(BIN) dist/$(DIST_BIN_NAME)
+else
 .PHONY: dist
 dist: docker-elf assets
 	cp $(BIN) dist/$(DIST_BIN_NAME)
+endif
 
 .PHONY: assets
 assets: scripts
@@ -41,7 +47,7 @@ scripts:
 	cp -r script/* dist/script
 
 .PHONY: release
-release: clean-all assets docker-elf 
+release: clean-all dist
 	zip -r ps2-engine-$(VERSION).zip dist
 
 
