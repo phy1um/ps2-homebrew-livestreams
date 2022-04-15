@@ -17,9 +17,9 @@ jobs:
       - run: make assets
       - run: echo "using PS2 SDK @ $PS2SDK"
       - run: make release
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with: 
-          name: upload engine package
+          name: engine package
           path: *.zip
         if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags') }}
 
