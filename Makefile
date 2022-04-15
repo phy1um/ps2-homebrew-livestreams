@@ -42,7 +42,6 @@ scripts:
 
 .PHONY: release
 release: clean-all assets docker-elf 
-	mv $(BIN) dist/$(VERSION)-release.elf
 	zip -r ps2-engine-$(VERSION).zip dist
 
 
@@ -77,7 +76,7 @@ resetps2:
 clean-all: 
 	$(MAKE) -C src clean
 	$(MAKE) -C asset clean
-	rm $(CPPCHECK_REPORT)
+	rm -f $(CPPCHECK_REPORT)
 	rm -rf $(CPPCHECK_OUT)
 	rm -rf dist/
 
