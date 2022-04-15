@@ -20,7 +20,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with: 
           name: engine package
-          path: *.zip
+          path: ./*.zip
         if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags') }}
 
 
