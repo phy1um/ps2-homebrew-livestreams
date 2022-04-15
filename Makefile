@@ -1,5 +1,5 @@
 ISO_TGT=test.iso
-BIN=dist/test.elf
+BIN=src/test.elf
 
 PS2HOST?=192.168.20.99
 
@@ -7,20 +7,24 @@ DOCKER_IMG=ps2build
 DOCKERFLAGS=--user "$(shell id -u):$(shell id -g)"
 DOCKER?=docker
 
-LUA_BRANCH=ee-v5.4.4
-
 VERSION?=$(shell git rev-parse --short HEAD)
-ISO_FLAGS?=-l --allow-lowercase -A "game by Tom Marks" -V "LGJ21 $(VERSION)"
+ISO_FLAGS?=-l --allow-lowercase -A "P2Garage Engine by Tom Marks -- coding.tommarks.xyz" -V "P2GARAGE:$(VERSION)"
 
 LUA_FILES=$(shell find script -type f -name "*.lua")
 
+CPPCHECK_REPORT=cppcheck_report.xml
+CPPCHECK_IMG=ghcr.io/facthunder/cppcheck:latest
+CPPCHECK_OUT=html/
+
 PREFIX=src/
 
-include src/Makefile
+DIST_BIN_NAME=P2G_$(VERSION).elf
 
 include .lintvars
 
-dist: $(BIN) assets
+.PHONY: dist
+dist: docker-elf assets
+	cp $(BIN) dist/$(DIST_BIN_NAME)
 
 .PHONY: assets
 assets: scripts
@@ -31,20 +35,20 @@ assets: scripts
 	cp distfiles/* dist/
 	cp LICENSE dist/
 
-.PHONY: $(BIN)
-$(BIN): 
-	if ! [ -d dist ]; then mkdir dist; fi
-	$(MAKE) platform=PS2 src/test.elf
-	cp src/test.elf $@
-
 .PHONY: scripts
 scripts:
 	if ! [ -d dist/script ]; then mkdir -p dist/script; fi
 	cp -r script/* dist/script
 
-# TODO(Tom Marks): update ISO building to include everything in dist/
-$(ISO_TGT): $(EE_BIN)
-	mkisofs $(ISO_FLAGS) -o $(ISO_TGT) ./dist/*
+.PHONY: release
+release: clean-all assets docker-elf 
+	zip -r ps2-engine-$(VERSION).zip dist
+
+
+# Docker rules
+.PHONY: docker-image
+docker-image:
+	$(DOCKER) build -t $(DOCKER_IMG) .
 
 .PHONY: docker-elf
 docker-elf:
@@ -54,49 +58,29 @@ docker-elf:
 docker-iso:
 	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
 
-.PHONY: clean-all
-clean-all: 
-	$(MAKE) -C src clean
-	$(MAKE) -C asset clean
-	rm -rf dist/
-
+# Run the engine
 .PHONY: run
 run: scripts
-	pcsx2 --elf=$(PWD)/$(BIN) 
+	pcsx2 --elf=$(shell pwd)/dist/$(DIST_BIN_NAME)
 
-# TODO(Tom Marks): this could be improved, hard-coded ELF name is bad
 .PHONY: runps2
 runps2: scripts
-	cd dist && ps2client -h $(PS2HOST) -t 10 execee host:test.elf
+	cd dist && ps2client -h $(PS2HOST) -t 10 execee host:$(DIST_BIN_NAME)
 
 .PHONY: resetps2
 resetps2:
 	ps2client -h $(PS2HOST) -t 5 reset
 
-.PHONY: lint
-lint:
-	cpplint --filter=$(CPPLINT_FILTERS) --counting=total --linelength=$(CPPLINT_LINE_LENGTH) --extensions=c,h --recursive .
+# Cleanup etc
+.PHONY: clean-all
+clean-all: 
+	$(MAKE) -C src clean
+	$(MAKE) -C asset clean
+	rm -f $(CPPCHECK_REPORT)
+	rm -rf $(CPPCHECK_OUT)
+	rm -rf dist/
 
-.PHONY: lualint
-lualint:
-	luac5.3 -p $(LUA_FILES)
 
-.PHONY: format
-format:
-	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/workdir unibeautify/clang-format -i -sort-includes **/*.c **/*.h
-
-.PHONY: release
-release: clean assets docker-elf 
-	mv $(BIN) dist/$(VERSION)-release.elf
-	zip -r ps2-engine-$(VERSION).zip dist
-
-deps:
-	git clone https://github.com/ps2dev/lua --depth 1 --branch $(LUA_BRANCH) --single-branch src/lua
-
-lua-samples:
-	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make -C src/lua/sample
-
-docker-image:
-	$(DOCKER) build -t $(DOCKER_IMG) .
-
+include src/Makefile
+include quality.makefile
 
