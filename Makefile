@@ -24,9 +24,15 @@ DIST_BIN_NAME=P2G_$(VERSION).elf
 
 include .lintvars
 
+ifeq ($(IN_PIPELINE), true)
+.PHONY: dist
+dist: $(BIN) assets
+	cp $(BIN) dist/$(DIST_BIN_NAME)
+else
 .PHONY: dist
 dist: docker-elf assets
 	cp $(BIN) dist/$(DIST_BIN_NAME)
+endif
 
 .PHONY: assets
 assets: scripts
