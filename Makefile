@@ -12,6 +12,8 @@ ISO_FLAGS?=-l --allow-lowercase -A "P2Garage Engine by Tom Marks -- coding.tomma
 
 LUA_FILES=$(shell find script -type f -name "*.lua")
 
+LUA_LIB=src/liblua.a
+
 CPPCHECK_REPORT=cppcheck_report.xml
 CPPCHECK_IMG=ghcr.io/facthunder/cppcheck:latest
 CPPCHECK_OUT=html/
@@ -24,11 +26,11 @@ include .lintvars
 
 ifeq ($(IN_PIPELINE), true)
 .PHONY: dist
-dist: $(BIN) assets
+dist: $(LUA_LIB) $(BIN) assets
 	cp $(BIN) dist/$(DIST_BIN_NAME)
 else
 .PHONY: dist
-dist: docker-elf assets
+dist: docker-lua docker-elf assets
 	cp $(BIN) dist/$(DIST_BIN_NAME)
 endif
 
@@ -46,6 +48,14 @@ scripts:
 	if ! [ -d dist/script ]; then mkdir -p dist/script; fi
 	cp -r script/* dist/script
 
+lua:
+	git clone --depth 1 https://github.com/ps2dev/lua -b ee-v5.4.4
+	cd lua && git apply ../lua.patch
+
+$(LUA_LIB): lua
+	make -C lua -f makefile
+	cp lua/liblua.a src/
+
 .PHONY: release
 release: clean-all dist
 	zip -r ps2-engine-$(VERSION).zip dist
@@ -58,11 +68,15 @@ docker-image:
 
 .PHONY: docker-elf
 docker-elf:
-	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
 
 .PHONY: docker-iso
 docker-iso:
-	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
+
+.PHONY: docker-lua
+docker-lua: lua
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) bash -c "platform=PS2 make $(LUA_LIB)"
 
 # Run the engine
 .PHONY: run
@@ -82,6 +96,7 @@ resetps2:
 clean-all: 
 	$(MAKE) -C src clean
 	$(MAKE) -C asset clean
+	$(MAKE) -C lua -f makefile clean || true
 	rm -f $(CPPCHECK_REPORT)
 	rm -rf $(CPPCHECK_OUT)
 	rm -rf dist/

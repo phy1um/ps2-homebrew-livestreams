@@ -9,12 +9,12 @@
 int print_buffer(qword_t *b, int len) {
 #ifdef LOG_TRACE
   if (log_output_level >= LOG_LEVEL_TRACE) {
-    info("-- buffer %p\n", b);
+    trace("-- buffer %p\n", b);
     for (int i = 0; i < len; i++) {
       printf("%016llx %016llx\n", b->dw[0], b->dw[1]);
       b++;
     }
-    info("-- /buffer\n");
+    trace("-- /buffer\n");
   }
 #endif
   return 0;

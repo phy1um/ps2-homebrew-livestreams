@@ -17,7 +17,7 @@ struct slot_list {
   int head;
 };
 
-inline void slot_list_next(struct slot_list *sl) {
+static void slot_list_next(struct slot_list *sl) {
   sl->head = (sl->head + 1) % sl->capacity;
 }
 

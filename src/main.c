@@ -169,7 +169,8 @@ int main(int argc, char *argv[]) {
       fatal("base path too long!");
     }
     strncpy(base_path, argv[0], last_sep + 1);
-    base_path[last_sep + 2] = 0;
+    base_path[last_sep + 1] = 0;
+    trace("got base path = %s", base_path);
   }
 
   snprintf(init_script, FILE_NAME_MAX_LEN, "%sscript/ps2init.lua", base_path);
@@ -228,6 +229,7 @@ int main(int argc, char *argv[]) {
   int frame_count = 0;
   clock_t next_fps_report = clock() + CLOCKS_PER_SEC;
   while (is_running) {
+    trace("MAIN - BEGIN FRAME");
     pad_frame_start();
     pad_poll();
     dma_wait_fast();

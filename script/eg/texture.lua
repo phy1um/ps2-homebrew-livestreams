@@ -1,4 +1,3 @@
-
 local GIF = require("gif")
 local P = require("ps2const")
 local D2D = require("draw2d")
@@ -45,6 +44,7 @@ local dt = 1/60
 local tt = false
 local db = 0
 function PS2PROG.frame()
+  LOG.trace("ps2prog frame start")
   D2D:frameStart(gs)
   uploadTextures()
   D2D:setColour(0x80,0x80,0x80,0x10)

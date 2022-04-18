@@ -57,6 +57,7 @@ int ps2luaprog_onstart(lua_State *l) {
 }
 
 int ps2luaprog_onframe(lua_State *l) {
+  trace("PS2LUAPROG.frame called from C");
   lua_getglobal(l, "PS2PROG");
   lua_pushstring(l, "frame");
   lua_gettable(l, -2);

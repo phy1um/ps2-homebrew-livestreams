@@ -45,7 +45,7 @@ static void wait_vblank() {
 }
 
 int pad_init() {
-  btn_held = memalign(256, 12 * sizeof(int));
+  btn_held = memalign(BTN_MAX * sizeof(int), 256);
   pad_buffer = memalign(256, 256);
   if ((u32)pad_buffer & 0xf) {
     info("pad buffer was not 16byte aligned: %x", (int)pad_buffer);

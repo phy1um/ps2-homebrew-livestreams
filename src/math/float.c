@@ -1,5 +1,5 @@
-#include <math.h>
 #include <lua.h>
+#include <math.h>
 
 #include "../log.h"
 
@@ -8,7 +8,7 @@
 static int float_compare(lua_State *l) {
   float a = lua_tonumber(l, 1);
   float b = lua_tonumber(l, 2);
-  int res = fabs(a-b) < EPSILON;
+  int res = fabs(a - b) < EPSILON;
   lua_pushboolean(l, res);
   return 1;
 }

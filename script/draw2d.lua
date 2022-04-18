@@ -240,6 +240,7 @@ end
 
 -- submit the current drawbuffer for rendering
 function draw:kick()
+  LOG.trace("kick len = " .. self.buf.head)
   -- cleanup current GIFTag
   self:updateLastTagLoops()
   -- end any active CNT (does nothing if no CNT DMATag active)
