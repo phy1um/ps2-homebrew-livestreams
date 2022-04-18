@@ -26,11 +26,11 @@ include .lintvars
 
 ifeq ($(IN_PIPELINE), true)
 .PHONY: dist
-dist: $(BIN) assets
+dist: $(LUA_LIB) $(BIN) assets
 	cp $(BIN) dist/$(DIST_BIN_NAME)
 else
 .PHONY: dist
-dist: docker-elf assets
+dist: docker-lua docker-elf assets
 	cp $(BIN) dist/$(DIST_BIN_NAME)
 endif
 
@@ -57,7 +57,7 @@ $(LUA_LIB): lua
 	cp lua/liblua.a src/
 
 .PHONY: release
-release: clean-all docker-lua dist
+release: clean-all dist
 	zip -r ps2-engine-$(VERSION).zip dist
 
 
