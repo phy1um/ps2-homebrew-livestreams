@@ -75,7 +75,7 @@ docker-iso:
 	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
 
 .PHONY: docker-lua
-docker-lua:
+docker-lua: lua
 	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) bash -c "platform=PS2 make $(LUA_LIB)"
 
 # Run the engine
