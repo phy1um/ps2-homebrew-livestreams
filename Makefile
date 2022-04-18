@@ -96,7 +96,7 @@ resetps2:
 clean-all: 
 	$(MAKE) -C src clean
 	$(MAKE) -C asset clean
-	$(MAKE) -C lua -f makefile clean
+	$(MAKE) -C lua -f makefile clean || true
 	rm -f $(CPPCHECK_REPORT)
 	rm -rf $(CPPCHECK_OUT)
 	rm -rf dist/

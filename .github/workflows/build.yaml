@@ -16,8 +16,8 @@ jobs:
       - run: apk add python3 make gmp-dev mpfr-dev mpc1-dev zip git
       - run: make assets
       - run: echo "using PS2 SDK @ $PS2SDK"
-      - run: platform=PS2 make src/liblua.a
-      - run: VERSION=dev PLATFORM=ps2 IN_PIPELINE=true make release
+        # we need PLATFORM and platform defined because consistency is hard
+      - run: VERSION=dev PLATFORM=ps2 platform=PS2 IN_PIPELINE=true make release
       - uses: actions/upload-artifact@v3
         with: 
           name: engine package
