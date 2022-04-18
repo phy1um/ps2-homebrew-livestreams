@@ -20,15 +20,27 @@ EE_OBJS:=$(addprefix $(PREFIX), $(EE_OBJS))
 EE_INCS+=-I$(PS2SDK)/ports/include
 EE_LDFLAGS=-L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib -L$(PS2SDK)/ports/lib
 
+SIM_OBJS=vdma.o vkernel.o vdraw.o vgraphics.o vpad.o draw_environment.o draw_clear.o
+SIM_OBJS:=$(addprefix $(PREFIX)linux/, $(SIM_OBJS))
+
 ifeq ($(PLATFORM), ps2)
 $(info Platform=ps2 detected)
 include $(PS2SDK)/samples/Makefile.eeglobal
 include $(PS2SDK)/samples/Makefile.pref
+else
+INCS=-I $(PREFIX)linux/include
+%.o: %.c
+	$(CC) $(EE_CFLAGS) $(INCS) -c -o $@ $<
 endif
 
 # TODO(Tom Marks): update ISO building to include everything in dist/
 $(ISO_TGT): $(EE_BIN)
 	mkisofs $(ISO_FLAGS) -o $(ISO_TGT) ./dist/*
+
+
+test.exe: $(EE_OBJS) $(SIM_OBJS)
+	$(CC) $(EE_CFLAGS) -lm -o $@ liblua.a $(EE_OBJS) $(SIM_OBJS)
+
 
 .PHONY: clean
 clean:
