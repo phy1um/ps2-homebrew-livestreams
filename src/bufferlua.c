@@ -2,10 +2,10 @@
 #include <lua.h>
 
 #include <draw.h>
-#include <gs_gp.h>
-#include <gs_psm.h>
 #include <draw_tests.h>
 #include <gif_tags.h>
+#include <gs_gp.h>
+#include <gs_psm.h>
 #include <tamtypes.h>
 
 #include <stdlib.h>

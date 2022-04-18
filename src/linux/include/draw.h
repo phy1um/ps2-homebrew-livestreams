@@ -26,7 +26,7 @@ typedef union {
     u8 a;
     float q;
   };
-} __attribute__((packed,aligned(8))) color_t;
+} __attribute__((packed, aligned(8))) color_t;
 
 typedef struct {
   float x; float y; unsigned int z;
@@ -100,19 +100,23 @@ void draw_wait_finish();
 qword_t *draw_framebuffer(qword_t *q, int context, framebuffer_t *frame);
 qword_t *draw_zbuffer(qword_t *q, int context, zbuffer_t *zbuffer);
 qword_t *draw_dithering(qword_t *q, int enable);
-qword_t *draw_dither_matrix(qword_t *q,char *dm);
-qword_t *draw_fog_color(qword_t *q, unsigned char r, unsigned char g, unsigned char b);
+qword_t *draw_dither_matrix(qword_t *q, char *dm);
+qword_t *draw_fog_color(qword_t *q, unsigned char r, unsigned char g,
+    unsigned char b);
 qword_t *draw_scan_masking(qword_t *q, int mask);
 qword_t *draw_color_clamping(qword_t *q, int enable);
 qword_t *draw_alpha_correction(qword_t *q, int context, int alpha);
 qword_t *draw_primitive_xyoffset(qword_t *q, int context, float x, float y);
 qword_t *draw_primitive_override(qword_t *q, int mode);
-qword_t *draw_scissor_area(qword_t *q, int context, int x0, int x1, int y0, int y1);
+qword_t *draw_scissor_area(qword_t *q, int context, int x0, int x1, int y0,
+    int y1);
 
-qword_t *draw_setup_environment(qword_t *q, int context, framebuffer_t *frame, zbuffer_t *z);
+qword_t *draw_setup_environment(qword_t *q, int context, framebuffer_t *frame,
+    zbuffer_t *z);
 
 qword_t *draw_disable_tests(qword_t *q, int i, zbuffer_t *zb);
-qword_t *draw_clear(qword_t *q, int context, float x, float y, float width, float height, int r, int g, int b);
+qword_t *draw_clear(qword_t *q, int context, float x, float y, float width,
+    float height, int r, int g, int b);
 qword_t *draw_rect_filled_strips(qword_t *q, int context, rect_t *rect);
 
 #endif

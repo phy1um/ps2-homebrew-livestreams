@@ -1,19 +1,23 @@
 #include <lua.h>
 
-#include "../ps2math.h"
 #include "../log.h"
+#include "../ps2math.h"
 
-#define buffer_null_check(p, s) \
-  do { if (!p) { lua_pushstring(l, "got null buffer for " s); \
-                lua_error(l); return 1; } }while(0)
+#define buffer_null_check(p, s)                                                \
+  do {                                                                         \
+    if (!p) {                                                                  \
+      lua_pushstring(l, "got null buffer for " s);                             \
+      lua_error(l);                                                            \
+      return 1;                                                                \
+    }                                                                          \
+  } while (0)
 
-#define get_buf(i, to, msg) \
-  lua_pushstring(l, "ptr"); \
-  lua_gettable(l, i); \
-  float *to = lua_touserdata(l, -1); \
-  buffer_null_check(to, msg " [" #i "]"); \
+#define get_buf(i, to, msg)                                                    \
+  lua_pushstring(l, "ptr");                                                    \
+  lua_gettable(l, i);                                                          \
+  float *to = lua_touserdata(l, -1);                                           \
+  buffer_null_check(to, msg " [" #i "]");                                      \
   ((void)0)
-
 
 static int lua_add_vec3(lua_State *l) {
   get_buf(1, buf1, "copy vec3");

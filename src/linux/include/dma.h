@@ -11,7 +11,8 @@ enum dma_channels {
 int dma_channel_initialize(int chan, void *handler, int flags);
 void dma_channel_fast_waits(int chan);
 int dma_channel_send_normal(int chan, void *data, int qwc, int flags, int spr);
-int dma_channel_send_chain(int chan, void *data, int data_size, int flags, int spr);
+int dma_channel_send_chain(int chan, void *data, int data_size, int flags,
+    int spr);
 void dma_wait_fast();
 
 #endif

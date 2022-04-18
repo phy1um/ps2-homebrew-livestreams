@@ -72,4 +72,3 @@ int ps2luaprog_onframe(lua_State *l) {
 
   return 0;
 }
-
