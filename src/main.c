@@ -169,7 +169,8 @@ int main(int argc, char *argv[]) {
       fatal("base path too long!");
     }
     strncpy(base_path, argv[0], last_sep + 1);
-    base_path[last_sep + 2] = 0;
+    base_path[last_sep + 1] = 0;
+    trace("got base path = %s", base_path);
   }
 
   snprintf(init_script, FILE_NAME_MAX_LEN, "%sscript/ps2init.lua", base_path);
