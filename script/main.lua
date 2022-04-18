@@ -14,7 +14,7 @@ function run_unit_tests()
 end
 
 if pcall(run_unit_tests) ~= true then
-  return {}
+  LOG.error("failed to run unit tests")
 end
 
 LOG.info("loading entrypoint")
