@@ -131,7 +131,7 @@ int draw2d_kick() {
       buffer_size / 16,
       0,
       0);
-  // dma_wait_fast();
+  dma_wait_fast();
   // TODO(phy1um): get new memory?
   draw2d_clear_buffer();
   draw2d_start_cnt();
