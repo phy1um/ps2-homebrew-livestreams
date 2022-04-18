@@ -1,4 +1,3 @@
-
 local GIF = require("gif")
 local P = require("ps2const")
 local D2D = require("draw2d")

@@ -62,6 +62,7 @@ int draw2d_update_last_tag_loops() {
 }
 
 int draw2d_start_cnt() {
+  trace("start cnt @ %d", state.drawbuffer_head_offset);
   state.dma.in_cnt = 1;
   state.dma.head = state.drawbuffer_head;
   dma_tag((uint32_t*) state.drawbuffer_head, 0, 0x1<<28, 0);
@@ -78,8 +79,17 @@ int dmatag_raw(int qwc, int type, int addr) {
 }
 
 int draw2d_end_cnt() {
+  trace("end cnt, state=%d, head=%d", state.dma.in_cnt, state.drawbuffer_head_offset);
   if (state.dma.in_cnt) {
+    state.dma.in_cnt = 0;
     size_t dma_len = state.drawbuffer_head - state.dma.head;
+    // if there is nothing in this DMA packet, then rewind one qword..
+    if (dma_len == 16) {
+      trace("rewinding cnt header");
+      state.drawbuffer_head -= QW_SIZE;
+      state.drawbuffer_head_offset -= QW_SIZE;
+      return 1;
+    }
     trace("set dma cnt qwc=%d", dma_len/16);
     uint16_t *lh = (uint16_t*) state.dma.head;
     if (dma_len % 16 == 0) {
@@ -87,7 +97,6 @@ int draw2d_end_cnt() {
     } else {
       *lh = dma_len/16;
     }
-    state.dma.in_cnt = 0;
   }
   return 1;
 }
@@ -109,7 +118,7 @@ int draw2d_dma_ref(uint32_t addr) {
 }
 
 int draw2d_kick() {
-  trace("kick");
+  trace("kick buffer of size=%d", state.drawbuffer_head_offset);
   draw2d_update_last_tag_loops();
   draw2d_end_cnt();
   draw2d_dma_end();
@@ -142,6 +151,7 @@ int draw2d_triangle(float x1, float y1,
   }
 
   if (state.drawbuffer_head_offset >= state.drawbuffer_len - 80) {
+    trace("triangle: early kick because buffer is full");
     draw2d_kick();
   }
 
@@ -174,7 +184,9 @@ int draw2d_textri(float x1, float y1, float u1, float v1,
     draw2d_kick();
   }
 
+  trace("textri: head = %d, len = %d", state.drawbuffer_head_offset, state.drawbuffer_len);
   if (state.drawbuffer_head_offset >= state.drawbuffer_len - 80) {
+    trace("textri: early kick because buffer is full");
     draw2d_kick();
   }
 
@@ -222,6 +234,7 @@ int draw2d_rect(float x1, float y1, float w, float h) {
   }
 
   if (state.drawbuffer_head_offset >= state.drawbuffer_len - 80) {
+    trace("rect: early kick because buffer is full");
     draw2d_kick();
   }
 
@@ -344,7 +357,9 @@ int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
   int img_addr = (int) texture;
   while (packet_count > 0) {
     if (state.drawbuffer_head_offset >= state.drawbuffer_len - 5*QW_SIZE) {
+      trace("upload texture: early kick because buffer is full");
       draw2d_kick();
+      draw2d_end_cnt();
     }
     dmatag_raw(1, 0x1<<28, 0);
     giftag_new(&state, GIF_IMAGE, block_size, 0, 0, 0);
@@ -357,7 +372,9 @@ int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
   // if there is any leftover, handle that here
   if (remain > 0) {
     if (state.drawbuffer_head_offset >= state.drawbuffer_len - 5*QW_SIZE) {
+      trace("upload texture (remain): early kick because buffer is full");
       draw2d_kick();
+      draw2d_end_cnt();
     }
     dmatag_raw(1, 0x1<<28, 0);
     giftag_new(&state, GIF_IMAGE, remain, 0, 0, 0);
@@ -389,6 +406,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
   }
 
   if (state.drawbuffer_head_offset >= state.drawbuffer_len - 80) {
+    trace("sprite: early kick because buffer is full");
     draw2d_kick();
   }
 

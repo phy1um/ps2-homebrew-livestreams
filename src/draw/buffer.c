@@ -38,6 +38,7 @@ int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs,
 
 // TODO(phy1um): intline?
 int gif_ad(struct d2d_state *s, uint64_t reg, uint64_t value) {
+  s->gif.loop_count += 1;
   GIF_AD(s->drawbuffer_head, reg, value);
   s->drawbuffer_head += QW_SIZE;
   s->drawbuffer_head_offset += QW_SIZE;
