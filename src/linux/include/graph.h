@@ -24,5 +24,6 @@ void graph_disable_output();
 int graph_set_mode(int interlace, int mode, int ffmd, int flicker_filter);
 int graph_set_screen(int xo, int yo, int width, int height);
 int graph_set_bgcolor(int r, int g, int b);
-void graph_set_framebuffer_filtered(int addr, int width, enum draw_psm psm, int x, int y);
+void graph_set_framebuffer_filtered(int addr, int width, enum draw_psm psm,
+    int x, int y);
 #endif

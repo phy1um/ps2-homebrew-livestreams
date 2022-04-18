@@ -1,6 +1,7 @@
 
-#include "../log.h"
 #include <draw.h>
+
+#include "../log.h"
 
 void graph_wait_vsync() {}
 

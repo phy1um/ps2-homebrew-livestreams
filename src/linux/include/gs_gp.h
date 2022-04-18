@@ -167,24 +167,25 @@
 #define GS_DISABLE                              0x00
 #define GS_ENABLE                               0x01
 
-#define GS_SET_ALPHA(A,B,C,D,ALPHA) \
+#define GS_SET_ALPHA(A, B, C, D, ALPHA) \
         (u64)((A)     & 0x00000003) <<  0 | (u64)((B) & 0x00000003) <<  2 | \
         (u64)((C)     & 0x00000003) <<  4 | (u64)((D) & 0x00000003) <<  6 | \
         (u64)((ALPHA) & 0x000000FF) << 32
 
-#define GS_SET_BITBLTBUF(SBA,SBW,SPSM,DBA,DBW,DPSM) \
+#define GS_SET_BITBLTBUF(SBA, SBW, SPSM, DBA, DBW, DPSM) \
         (u64)((SBA)  & 0x00003FFF) <<  0 | (u64)((SBW)  & 0x0000003F) << 16 | \
         (u64)((SPSM) & 0x0000003F) << 24 | (u64)((DBA)  & 0x00003FFF) << 32 | \
         (u64)((DBW)  & 0x0000003F) << 48 | (u64)((DPSM) & 0x0000003F) << 56
 
-#define GS_SET_CLAMP(WMS,WMT,MINU,MAXU,MINV,MAXV) \
+#define GS_SET_CLAMP(WMS, WMT, MINU, MAXU, MINV, MAXV) \
         (u64)((WMS)  & 0x00000003) <<  0 | (u64)((WMT)  & 0x00000003) <<  2 | \
         (u64)((MINU) & 0x000003FF) <<  4 | (u64)((MAXU) & 0x000003FF) << 14 | \
         (u64)((MINV) & 0x000003FF) << 24 | (u64)((MAXV) & 0x000003FF) << 34
 
 #define GS_SET_COLCLAMP(CLAMP) (u64)((CLAMP) & 0x00000001)
 
-#define GS_SET_DIMX(D00,D01,D02,D03,D10,D11,D12,D13,D20,D21,D22,D23,D30,D31,D32,D33) \
+#define GS_SET_DIMX(D00, D01, D02, D03, D10, D11, D12, D13, D20, D21, D22, \
+    D23, D30, D31, D32, D33) \
         (u64)((D00) & 0x00000003) <<  0 | (u64)((D01) & 0x00000003) <<  4 | \
         (u64)((D02) & 0x00000003) <<  8 | (u64)((D03) & 0x00000003) << 12 | \
         (u64)((D10) & 0x00000003) << 16 | (u64)((D11) & 0x00000003) << 20 | \
@@ -202,30 +203,30 @@
 
 #define GS_SET_FOG(FOG) (u64)((FOG) & 0x000000FF) << 56
 
-#define GS_SET_FOGCOL(R,G,B) \
+#define GS_SET_FOGCOL(R, G, B) \
         (u64)((R) & 0x000000FF) <<  0 | (u64)((G) & 0x000000FF) <<  8 | \
         (u64)((B) & 0x000000FF) << 16
 
-#define GS_SET_FRAME(FBA,FBW,PSM,FMSK) \
+#define GS_SET_FRAME(FBA, FBW, PSM, FMSK) \
         (u64)((FBA) & 0x000001FF) <<  0 | (u64)((FBW)  & 0x0000003F) << 16 | \
         (u64)((PSM) & 0x0000003F) << 24 | (u64)((FMSK) & 0xFFFFFFFF) << 32
 
 // PSMCT16 FMSK for GS_SET_FRAME
-#define GS_SET_FMSK16(R,G,B,A) \
+#define GS_SET_FMSK16(R, G, B, A) \
         (u32)((R) & 0x0000001F) <<  3 | (u32)((G) & 0x0000001F) << 11 | \
         (u32)((G) & 0x0000001F) << 19 | (u32)((A) & 0x00000001) << 31
 
 #define GS_SET_HWREG(A) (u64)((A) & 0xFFFFFFFFFFFFFFFF)
 
-#define GS_SET_LABEL(ID,MSK) \
+#define GS_SET_LABEL(ID, MSK) \
         (u64)((ID) & 0xFFFFFFFF) <<  0 | (u64)((MSK) & 0xFFFFFFFF) << 32
 
-#define GS_SET_MIPTBP1(TBA1,TBW1,TBA2,TBW2,TBA3,TBW3) \
+#define GS_SET_MIPTBP1(TBA1, TBW1, TBA2, TBW2, TBA3, TBW3) \
         (u64)((TBA1) & 0x000003FF) <<  0 | (u64)((TBW1) & 0x0000003F) << 14 | \
         (u64)((TBA2) & 0x000003FF) << 20 | (u64)((TBW2) & 0x0000003F) << 34 | \
         (u64)((TBA3) & 0x000003FF) << 40 | (u64)((TBW3) & 0x0000003F) << 54
 
-#define GS_SET_MIPTBP2(TBA4,TBW4,TBA5,TBW5,TBA6,TBW6) \
+#define GS_SET_MIPTBP2(TBA4, TBW4, TBA5, TBW5, TBA6, TBW6) \
         (u64)((TBA4) & 0x000003FF) <<  0 | (u64)((TBW4) & 0x0000003F) << 14 | \
         (u64)((TBA5) & 0x000003FF) << 20 | (u64)((TBW5) & 0x0000003F) << 34 | \
         (u64)((TBA6) & 0x000003FF) << 40 | (u64)((TBW6) & 0x0000003F) << 54
@@ -234,14 +235,14 @@
 
 #define GS_SET_PABE(ENABLE) (u64)((ENABLE) & 0x00000001)
 
-#define GS_SET_PRIM(PRIM,IIP,TME,FGE,ABE,AA1,FST,CTXT,FIX) \
+#define GS_SET_PRIM(PRIM, IIP, TME, FGE, ABE, AA1, FST, CTXT, FIX) \
         (u64)((PRIM) & 0x00000007) <<  0 | (u64)((IIP)  & 0x00000001) <<  3 | \
         (u64)((TME)  & 0x00000001) <<  4 | (u64)((FGE)  & 0x00000001) <<  5 | \
         (u64)((ABE)  & 0x00000001) <<  6 | (u64)((AA1)  & 0x00000001) <<  7 | \
         (u64)((FST)  & 0x00000001) <<  8 | (u64)((CTXT) & 0x00000001) <<  9 | \
         (u64)((FIX)  & 0x00000001) << 10
 
-#define GS_SET_PRMODE(IIP,TME,FGE,ABE,AA1,FST,CTXT,FIX) \
+#define GS_SET_PRMODE(IIP, TME, FGE, ABE, AA1, FST, CTXT, FIX) \
         (u64)((IIP)  & 0x00000001) <<  3 | (u64)((TME) & 0x00000001) <<  4 | \
         (u64)((FGE)  & 0x00000001) <<  5 | (u64)((ABE) & 0x00000001) <<  6 | \
         (u64)((AA1)  & 0x00000001) <<  7 | (u64)((FST) & 0x00000001) <<  8 | \
@@ -249,36 +250,41 @@
 
 #define GS_SET_PRMODECONT(CTRL) (u64)((CTRL) & 0x00000001)
 
-#define GS_SET_RGBAQ(R,G,B,A,Q) \
+#define GS_SET_RGBAQ(R, G, B, A, Q) \
         (u64)((R) & 0x000000FF) <<  0 | (u64)((G) & 0x000000FF) <<  8 | \
         (u64)((B) & 0x000000FF) << 16 | (u64)((A) & 0x000000FF) << 24 | \
         (u64)((Q) & 0xFFFFFFFF) << 32
 
 #define GS_SET_SCANMSK(MSK) (u64)((MSK) & 0x00000003)
 
-#define GS_SET_SCISSOR(X0,X1,Y0,Y1) \
+#define GS_SET_SCISSOR(X0, X1, Y0, Y1) \
         (u64)((X0) & 0x000007FF) <<  0 | (u64)((X1) & 0x000007FF) << 16 | \
         (u64)((Y0) & 0x000007FF) << 32 | (u64)((Y1) & 0x000007FF) << 48
 
-#define GS_SET_SIGNAL(ID,MSK) \
+#define GS_SET_SIGNAL(ID, MSK) \
         (u64)((ID) & 0xFFFFFFFF) <<  0 | (u64)((MSK) & 0xFFFFFFFF) << 32
 
-#define GS_SET_ST(S,T) \
+#define GS_SET_ST(S, T) \
         (u64)((S) & 0xFFFFFFFF) <<  0 | (u64)((T) & 0xFFFFFFFF) << 32
 
-#define GS_SET_TEST(ATEN,ATMETH,ATREF,ATFAIL,DATEN,DATMD,ZTEN,ZTMETH) \
-        (u64)((ATEN)  & 0x00000001) <<  0 | (u64)((ATMETH) & 0x00000007) <<  1 | \
-        (u64)((ATREF) & 0x000000FF) <<  4 | (u64)((ATFAIL) & 0x00000003) << 12 | \
-        (u64)((DATEN) & 0x00000001) << 14 | (u64)((DATMD)  & 0x00000001) << 15 | \
-        (u64)((ZTEN)  & 0x00000001) << 16 | (u64)((ZTMETH) & 0x00000003) << 17
+#define GS_SET_TEST(ATEN, ATMETH, ATREF, ATFAIL, DATEN, DATMD, ZTEN, ZTMETH) \
+        (u64)((ATEN)  & 0x00000001) <<  0 | (u64)((ATMETH) & 0x00000007) \
+          <<  1 | \
+        (u64)((ATREF) & 0x000000FF) <<  4 | (u64)((ATFAIL) & 0x00000003) \
+          << 12 | \
+        (u64)((DATEN) & 0x00000001) << 14 | (u64)((DATMD)  & 0x00000001) \
+          << 15 | \
+        (u64)((ZTEN)  & 0x00000001) << 16 | (u64)((ZTMETH) & 0x00000003) \
+          << 17
 
-#define GS_SET_TEX0_SMALL(TBA,TBW,PSM,TW,TH,TCC,TFNCT) \
+#define GS_SET_TEX0_SMALL(TBA, TBW, PSM, TW, TH, TCC, TFNCT) \
         (u64)((TBA)   & 0x00003FFF) <<  0 | (u64)((TBW) & 0x0000003F) << 14 | \
         (u64)((PSM)   & 0x0000003F) << 20 | (u64)((TW)  & 0x0000000F) << 26 | \
         (u64)((TH)    & 0x0000000F) << 30 | (u64)((TCC) & 0x00000001) << 34 | \
         (u64)((TFNCT) & 0x00000003) << 35
 
-#define GS_SET_TEX0(TBA,TBW,PSM,TW,TH,TCC,TFNCT,CBA,CPSM,CSM,CSA,CLD) \
+#define GS_SET_TEX0(TBA, TBW, PSM, TW, TH, TCC, TFNCT, CBA, CPSM, CSM, CSA, \
+    CLD) \
         (u64)((TBA)   & 0x00003FFF) <<  0 | (u64)((TBW) & 0x0000003F) << 14 | \
         (u64)((PSM)   & 0x0000003F) << 20 | (u64)((TW)  & 0x0000000F) << 26 | \
         (u64)((TH)    & 0x0000000F) << 30 | (u64)((TCC) & 0x00000001) << 34 | \
@@ -286,22 +292,22 @@
         (u64)((CPSM)  & 0x0000000F) << 51 | (u64)((CSM) & 0x00000001) << 55 | \
         (u64)((CSA)   & 0x0000001F) << 56 | (u64)((CLD) & 0x00000007) << 61
 
-#define GS_SET_TEX1(LCM,MXL,MMAG,MMIN,MTBA,L,K) \
+#define GS_SET_TEX1(LCM, MXL, MMAG, MMIN, MTBA, L, K) \
         (u64)((LCM)  & 0x00000001) <<  0 | (u64)((MXL)  & 0x00000007) <<  2 | \
         (u64)((MMAG) & 0x00000001) <<  5 | (u64)((MMIN) & 0x00000007) <<  6 | \
         (u64)((MTBA) & 0x00000001) <<  9 | (u64)((L)    & 0x00000003) << 19 | \
         (u64)((K)    & 0x00000FFF) << 32
 
-#define GS_SET_TEX2(PSM,CBA,CPSM,CSM,CSA,CLD) \
+#define GS_SET_TEX2(PSM, CBA, CPSM, CSM, CSA, CLD) \
         (u64)((PSM)  & 0x0000003F) << 20 | (u64)((CBA) & 0x00003FFF) << 37 | \
         (u64)((CPSM) & 0x0000000F) << 51 | (u64)((CSM) & 0x00000001) << 55 | \
         (u64)((CSA)  & 0x0000001F) << 56 | (u64)((CLD) & 0x00000007) << 61
 
-#define GS_SET_TEXA(A0,AM,A1) \
+#define GS_SET_TEXA(A0, AM, A1) \
         (u64)((A0) & 0x000000FF) <<  0 | (u64)((AM) & 0x00000001) << 15 | \
         (u64)((A1) & 0x000000FF) << 32
 
-#define GS_SET_TEXCLUT(CBW,CU,CV) \
+#define GS_SET_TEXCLUT(CBW, CU, CV) \
         (u64)((CBW) & 0x0000003F) <<  0 | (u64)((CU) & 0x0000003F) <<  6 | \
         (u64)((CV)  & 0x00000FFF) << 12
 
@@ -309,29 +315,29 @@
 
 #define GS_SET_TEXFLUSH(A) (u64)((A) & 0xFFFFFFFF)
 
-#define GS_SET_TRXPOS(SX,SY,DX,DY,DIR) \
+#define GS_SET_TRXPOS(SX, SY, DX, DY, DIR) \
         (u64)((SX)  & 0x000007FF) <<  0 | (u64)((SY) & 0x000007FF) << 16 | \
         (u64)((DX)  & 0x000007FF) << 32 | (u64)((DY) & 0x000007FF) << 48 | \
         (u64)((DIR) & 0x00000003) << 59
 
-#define GS_SET_TRXREG(W,H) \
+#define GS_SET_TRXREG(W, H) \
         (u64)((W) & 0x00000FFF) <<  0 | (u64)((H) & 0x00000FFF) << 32
 
-#define GS_SET_UV(U,V) \
+#define GS_SET_UV(U, V) \
         (u64)((U) & 0x00003FFF) <<  0 | (u64)((V) & 0x00003FFF) << 16
 
-#define GS_SET_XYOFFSET(X,Y) \
+#define GS_SET_XYOFFSET(X, Y) \
         (u64)((X) & 0x0000FFFF) <<  0 | (u64)((Y) & 0x0000FFFF) << 32
 
-#define GS_SET_XYZ(X,Y,Z) \
+#define GS_SET_XYZ(X, Y, Z) \
         (u64)((X) & 0x0000FFFF) <<  0 | (u64)((Y) & 0x0000FFFF) << 16 | \
         (u64)((Z) & 0xFFFFFFFF) << 32
 
-#define GS_SET_XYZF(X,Y,Z,F) \
+#define GS_SET_XYZF(X, Y, Z, F) \
         (u64)((X) & 0x0000FFFF) <<  0 | (u64)((Y) & 0x0000FFFF) << 16 | \
         (u64)((Z) & 0x00FFFFFF) << 32 | (u64)((F) & 0x000000FF) << 56
 
-#define GS_SET_ZBUF(ZBA,ZSM,ZMSK) \
+#define GS_SET_ZBUF(ZBA, ZSM, ZMSK) \
         (u64)((ZBA) & 0x000001FF) <<  0 | (u64)((ZSM) & 0x0000000F) << 24 | \
         (u64)((ZMSK) & 0x00000001) << 32
 

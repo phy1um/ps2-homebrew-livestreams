@@ -79,7 +79,8 @@ qword_t *draw_mipmap2(qword_t *q, int context, mipmap_t *mipmap);
 qword_t *draw_texture_wrapping(qword_t *q, int context, texwrap_t *wrap);
 
 /** Alpha Expansion Values */
-qword_t *draw_texture_expand_alpha(qword_t *q, unsigned char zero_value, int expand, unsigned char one_value);
+qword_t *draw_texture_expand_alpha(qword_t *q, unsigned char zero_value,
+    int expand, unsigned char one_value);
 
 #ifdef __cplusplus
 }
