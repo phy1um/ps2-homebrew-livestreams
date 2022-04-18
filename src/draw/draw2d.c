@@ -2,6 +2,8 @@
 #include <dma_tags.h>
 #include <gs_gp.h>
 #include <gs_psm.h>
+#include <draw_tests.h>
+#include <gif_tags.h>
 #include <tamtypes.h>
 
 #include <string.h>
@@ -161,7 +163,7 @@ int draw2d_triangle(float x1, float y1,
     }
 
     giftag_new(&state, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
-    giftag_ad_prim(&state, PRIM_TRIANGLE, 0, 0, 0);
+    giftag_ad_prim(&state, GS_PRIM_TRIANGLE, 0, 0, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_TRIS_LEN, GIF_REGS_TRIS);
     state.draw_type = D2D_GEOM;
   }
@@ -207,7 +209,7 @@ int draw2d_textri(float x1, float y1, float u1, float v1,
         1, 0);
     giftag_ad_tex2(&state, state.tex_psm, state.clut_tex,
         0, 0, 0, 0x2);
-    giftag_ad_prim(&state, PRIM_TRIANGLE, 0, 1, 0);
+    giftag_ad_prim(&state, GS_PRIM_TRIANGLE, 0, 1, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_TEXTRI_LEN, GIF_REGS_TEXTRI);
     state.draw_type = D2D_TEXTRI;
   }
@@ -244,7 +246,7 @@ int draw2d_rect(float x1, float y1, float w, float h) {
     }
 
     giftag_new(&state, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
-    giftag_ad_prim(&state, PRIM_SPRITE, 0, 0, 0);
+    giftag_ad_prim(&state, GS_PRIM_SPRITE, 0, 0, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_RECT_LEN, GIF_REGS_RECT);
     state.draw_type = D2D_RECT;
   }
@@ -429,7 +431,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
         1, 0);
     giftag_ad_tex2(&state, state.tex_psm, state.clut_tex,
         0, 0, 0, 0x2);
-    giftag_ad_prim(&state, PRIM_SPRITE, 0, 1, 0);
+    giftag_ad_prim(&state, GS_PRIM_SPRITE, 0, 1, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_SPRITE_LEN, GIF_REGS_SPRITE);
     state.draw_type = D2D_SPRITE;
   }
