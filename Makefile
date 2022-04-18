@@ -48,7 +48,11 @@ scripts:
 	if ! [ -d dist/script ]; then mkdir -p dist/script; fi
 	cp -r script/* dist/script
 
-$(LUA_LIB):
+lua:
+	git clone --depth 1 https://github.com/ps2dev/lua -b ee-v5.4.4
+	cd lua && git apply ../lua.patch
+
+$(LUA_LIB): lua
 	make -C lua -f makefile
 	cp lua/liblua.a src/
 
