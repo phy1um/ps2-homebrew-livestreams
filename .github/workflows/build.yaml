@@ -13,7 +13,7 @@ jobs:
       image: ps2dev/ps2dev
     steps:
       - uses: actions/checkout@v2
-      - run: apk add python3 make gmp-dev mpfr-dev mpc1-dev zip
+      - run: apk add python3 make gmp-dev mpfr-dev mpc1-dev zip git
       - run: make assets
       - run: echo "using PS2 SDK @ $PS2SDK"
       - run: make src/liblua.a
