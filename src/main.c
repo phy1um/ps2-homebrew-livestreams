@@ -228,6 +228,7 @@ int main(int argc, char *argv[]) {
   int frame_count = 0;
   clock_t next_fps_report = clock() + CLOCKS_PER_SEC;
   while (is_running) {
+    trace("MAIN - BEGIN FRAME");
     pad_frame_start();
     pad_poll();
     dma_wait_fast();
