@@ -58,6 +58,16 @@ docker-elf:
 docker-iso:
 	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
 
+.PHONY: docker-lua
+docker-lua:
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) bash -c "platform=PS2 make lualib"
+
+.PHONY: lualib
+lualib:
+	make -C lua -f makefile clean
+	make -C lua -f makefile
+	cp lua/liblua.a src/
+
 # Run the engine
 .PHONY: run
 run: scripts
