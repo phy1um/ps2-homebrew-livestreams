@@ -1,10 +1,5 @@
 PS2SDK=/usr/local/ps2dev/ps2sdk
 
-.PHONY: $(PREFIX)liblua.a
-$(PREFIX)liblua.a:
-	$(info SKIP)
-
-
 MAIN_OBJ=main.o utils.o 
 LUA_OBJ=gslua.o dmalua.o bufferlua.o tga.o padlua.o drawlua.o loglua.o ps2luaprog.o slotlistlua.o
 DRAW_OBJ=draw/draw2d.o draw/buffer.o

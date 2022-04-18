@@ -12,6 +12,8 @@ ISO_FLAGS?=-l --allow-lowercase -A "P2Garage Engine by Tom Marks -- coding.tomma
 
 LUA_FILES=$(shell find script -type f -name "*.lua")
 
+LUA_LIB=src/liblua.a
+
 CPPCHECK_REPORT=cppcheck_report.xml
 CPPCHECK_IMG=ghcr.io/facthunder/cppcheck:latest
 CPPCHECK_OUT=html/
@@ -40,8 +42,12 @@ scripts:
 	if ! [ -d dist/script ]; then mkdir -p dist/script; fi
 	cp -r script/* dist/script
 
+$(LUA_LIB):
+	make -C lua -f makefile
+	cp lua/liblua.a src/
+
 .PHONY: release
-release: clean-all assets docker-elf 
+release: clean-all docker-lua dist
 	zip -r ps2-engine-$(VERSION).zip dist
 
 
@@ -60,13 +66,7 @@ docker-iso:
 
 .PHONY: docker-lua
 docker-lua:
-	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) bash -c "platform=PS2 make lualib"
-
-.PHONY: lualib
-lualib:
-	make -C lua -f makefile clean
-	make -C lua -f makefile
-	cp lua/liblua.a src/
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) bash -c "platform=PS2 make $(LUA_LIB)"
 
 # Run the engine
 .PHONY: run
@@ -86,6 +86,7 @@ resetps2:
 clean-all: 
 	$(MAKE) -C src clean
 	$(MAKE) -C asset clean
+	$(MAKE) -C lua -f makefile clean
 	rm -f $(CPPCHECK_REPORT)
 	rm -rf $(CPPCHECK_OUT)
 	rm -rf dist/
