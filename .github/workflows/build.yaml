@@ -16,7 +16,8 @@ jobs:
       - run: apk add python3 make gmp-dev mpfr-dev mpc1-dev
       - run: make assets
       - run: echo "using PS2 SDK @ $PS2SDK"
-      - run: make release
+      - run: make src/liblua.a
+      - run: VERSION=dev make release
       - uses: actions/upload-artifact@v2
         with: 
           name: upload engine package
