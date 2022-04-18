@@ -52,11 +52,11 @@ docker-image:
 
 .PHONY: docker-elf
 docker-elf:
-	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
 
 .PHONY: docker-iso
 docker-iso:
-	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
 
 # Run the engine
 .PHONY: run
