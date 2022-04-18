@@ -1,14 +1,19 @@
 PS2SDK=/usr/local/ps2dev/ps2sdk
 
+.PHONY: $(PREFIX)liblua.a
+$(PREFIX)liblua.a:
+	$(info SKIP)
+
+
 MAIN_OBJ=main.o utils.o 
 LUA_OBJ=gslua.o dmalua.o bufferlua.o tga.o padlua.o drawlua.o loglua.o ps2luaprog.o slotlistlua.o
 DRAW_OBJ=draw/draw2d.o draw/buffer.o
 MATH_OBJ=ps2math.o math/vec2lua.o math/vec3lua.o math/mat3lua.o math/float.o
 
 EE_BIN=$(PREFIX)test.elf
-EE_OBJS= $(MAIN_OBJ) $(LUA_OBJ) $(DRAW_OBJ) $(MATH_OBJ)
-EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d -lm -lpad -llua
-EE_CFLAGS+=-Wall --std=c99 -Wno-sign-compare -g -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2 -DLOG_TRACE
+EE_OBJS= $(MAIN_OBJ) $(LUA_OBJ) $(DRAW_OBJ) $(MATH_OBJ) liblua.a
+EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d -lm -lpad 
+EE_CFLAGS+=-O0 -Wall --std=c99 -Wno-sign-compare -g -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2 -DLOG_TRACE
 
 EE_OBJS:=$(addprefix $(PREFIX), $(EE_OBJS))
 
