@@ -12,4 +12,10 @@ typedef union {
   unsigned __int128 qw;
 } qword_t;
 
+typedef uint64_t u64;
+typedef uint32_t u32;
+typedef uint8_t u8;
+
+
+
 #endif

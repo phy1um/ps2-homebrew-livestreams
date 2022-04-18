@@ -6,5 +6,6 @@
 #define scr_printf(m, ...) printf(m, ##__VA_ARGS__)
 
 void FlushCache(int i);
+int SifLoadModule(const char *mod, int i, int j);
 
 #endif

@@ -17,10 +17,7 @@ enum graph_modes {
 #define GRAPH_ENABLE 1
 #define GRAPH_DISABLE 0
 
-enum ztest {
-  ZTEST_METHOD_ALLPASS,
-};
-
+void init_scr();
 void graph_wait_vsync();
 void graph_enable_output();
 void graph_disable_output();

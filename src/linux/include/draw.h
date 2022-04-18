@@ -2,7 +2,45 @@
 #ifndef P2SIM_DRAW_H
 #define P2SIM_DRAW_H
 
+
 #include <tamtypes.h>
+#include <draw_tests.h>
+#include <draw_blending.h>
+#include <draw_sampling.h>
+#include <draw_primitives.h>
+#include <gs_gp.h>
+#include <gif_tags.h>
+
+#define ftoi4(f) ((int)f)
+
+#define DRAW_XYZ_REGLIST \
+  ((u64)GIF_REG_XYZ2) << 0 | \
+  ((u64)GIF_REG_XYZ2) << 4
+
+typedef union {
+  u64 rgbaq;
+  struct {
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 a;
+    float q;
+  };
+} __attribute__((packed,aligned(8))) color_t;
+
+typedef struct {
+  float x; float y; unsigned int z;
+} vertex_t;
+
+typedef struct {
+  vertex_t v0;
+  vertex_t v1;
+  color_t color;
+} rect_t;
+
+
+#define DRAW_DISABLE 0
+#define DRAW_ENABLE 1
 
 enum draw_psm {
   GS_PSM_4,
@@ -30,6 +68,7 @@ typedef struct {
 } framebuffer_t;
 
 typedef struct {
+  int enable;
   int address;
   int width;
   int height;
@@ -37,6 +76,23 @@ typedef struct {
   int mask;
   enum draw_psm zsm;
 } zbuffer_t;
+
+typedef struct {
+  int enable;
+  int method;
+  int compval;
+  int keep;
+} atest_t;
+
+typedef struct {
+  int enable;
+  int pass;
+} dtest_t;
+
+typedef struct {
+  int enable;
+  int method;
+} ztest_t;
 
 qword_t * draw_finish(qword_t *q);
 void draw_wait_finish();
@@ -57,5 +113,6 @@ qword_t *draw_setup_environment(qword_t *q, int context, framebuffer_t *frame, z
 
 qword_t *draw_disable_tests(qword_t *q, int i, zbuffer_t *zb);
 qword_t *draw_clear(qword_t *q, int context, float x, float y, float width, float height, int r, int g, int b);
+qword_t *draw_rect_filled_strips(qword_t *q, int context, rect_t *rect);
 
 #endif

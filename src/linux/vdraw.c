@@ -1,6 +1,7 @@
 
 #include <gif_tags.h>
 #include <tamtypes.h>
+#include <gs_gp.h>
 
 void draw_wait_finish() {}
 
@@ -13,3 +14,5 @@ qword_t * draw_finish(qword_t *q) {
 
   return q;
 }
+
+

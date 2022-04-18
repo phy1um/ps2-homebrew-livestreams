@@ -5,7 +5,7 @@
 #include "../log.h"
 
 void channel_process(int chan_id, void *data, int len) {
-  info("channel: sink @ %p, size=%d", data, len);
+  info("channel %d: sink @ %p, size=%d", chan_id, data, len);
   return;
 }
 
@@ -20,11 +20,13 @@ void dma_channel_fast_waits(int chan) {
 
 int dma_channel_send_normal(int chan, void *data, int qwc, int flags, int spr) {
   channel_process(chan, data, qwc*16);
+  return 0;
 }
 
 int dma_channel_send_chain(int chan, void *data, int data_size, int flags, int spr) {
+  trace("dma send chain: %p (%d) -> channel %d", data, data_size*16, chan);
   int hb = 0;
-  while(hb < data_size) {
+  while(hb < data_size*16) {
     uint32_t t0 = *((uint32_t*) (data + hb));
     uint32_t addr = *((uint32_t*) (data + hb + 4));
     unsigned int qwc = t0 & 0xffff;
@@ -35,7 +37,7 @@ int dma_channel_send_chain(int chan, void *data, int data_size, int flags, int s
         hb += qwc*16 + 8;
         break;
       case DMA_REF:
-        channel_process(chan, addr, qwc*16);
+        channel_process(chan, ((void*)&addr), qwc*16);
         hb += 8;
         break;
       case DMA_END:
@@ -46,6 +48,8 @@ int dma_channel_send_chain(int chan, void *data, int data_size, int flags, int s
         break;
     }
   }
+  logerr("ERROR: DMA chain overrun");
+  return 1;
 }
 
 void dma_wait_fast() {
