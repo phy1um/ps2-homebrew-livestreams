@@ -22,19 +22,25 @@ return { init = function()
     if m == nil then return end
     package.loaded[p] = nil
     local newmod = H.truerequire(p)
+    
+    local pre = newmod["_reload_before"]
+    if type(pre) == "function" then
+      LOG.trace("calling reload_before on " .. p)
+      pre(m)
+    end
+
     for k, v in pairs(newmod) do
       -- do not copy keys that start with some character
       if string.byte(k, 1) ~= H.ignoreChar then
-        LOG.info("patching module " .. p .. ": " .. k)
+        LOG.trace("patching module " .. p .. ": " .. k)
         m[k] = v
-      else
-        if type(v) == "function" then
-          LOG.info("mod call: " .. k)
-          v()
-        else
-          LOG.info("skip non func: " .. type(v))
-        end
       end
+    end
+
+    local post = newmod["_reload_after"]
+    if type(post) == "function" then
+      LOG.trace("calling reload_after on " .. p)
+      post(m)
     end
   end
 
