@@ -60,6 +60,10 @@ $(LUA_LIB): lua
 release: clean-all dist
 	zip -r ps2-engine-$(VERSION).zip dist
 
+.PHONY: sim
+sim: clean-all $(LUA_LIB) $(SIM_BIN) assets
+	cp $(SIM_BIN) dist/sim
+	
 
 # Docker rules
 .PHONY: docker-image
@@ -90,6 +94,10 @@ runps2: scripts
 .PHONY: resetps2
 resetps2:
 	ps2client -h $(PS2HOST) -t 5 reset
+
+.PHONY: runsim
+runsim:
+	cd dist && ./sim
 
 # Cleanup etc
 .PHONY: clean-all
