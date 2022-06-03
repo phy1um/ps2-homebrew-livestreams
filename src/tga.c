@@ -89,6 +89,9 @@ int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
         buffer[(j * header.width + i) * bpp + 2] =
             buffer[(j * header.width + i) * bpp];
         buffer[(j * header.width + i) * bpp] = tmp;
+        if (header.bps == 32) {
+          buffer[(j * header.width + i) * bpp + 3] /= 2;
+        }
       }
     }
   }
