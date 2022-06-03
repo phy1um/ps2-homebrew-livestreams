@@ -20,7 +20,7 @@ CPPCHECK_OUT=html/
 
 PREFIX=src/
 
-DIST_BIN_NAME=P2G_$(VERSION).elf
+DIST_BIN_NAME=p2g.elf
 
 include .lintvars
 
