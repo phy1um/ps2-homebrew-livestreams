@@ -98,7 +98,9 @@ int slot_list_lua_each(lua_State *l) {
       // call func with 3 args
       if (lua_pcall(l, 3, 0, 0) != LUA_OK) {
         const char *err = lua_tostring(l, -1);
-        logerr("slot iterator error: index %d: %s", i, err);
+        luaL_traceback(l, l, err, 0);
+        const char *traceback = lua_tostring(l, -1);
+        logerr("slot iterator error: index %d: %s", i, traceback);
       }
     }
   }
@@ -126,7 +128,9 @@ int slot_list_lua_each_state(lua_State *l) {
       // call func with 3 args
       if (lua_pcall(l, 3, 0, 0) != LUA_OK) {
         const char *err = lua_tostring(l, -1);
-        logerr("slot iterator error: index %d: %s", i, err);
+        luaL_traceback(l, l, err, 0);
+        const char *traceback = lua_tostring(l, -1);
+        logerr("slot iterator error: index %d: %s", i, traceback);
       }
     }
   }
