@@ -113,7 +113,7 @@ static int runfile(lua_State *l, const char *fname) {
   if (rc) {
     const char *err = lua_tostring(l, -1);
     luaL_traceback(l, l, err, 0);
-    const char *traceback= lua_tostring(l, -1);
+    const char *traceback = lua_tostring(l, -1);
     logerr("lua execution error (runfile %s)\n%s", fname, traceback);
     return -1;
   }

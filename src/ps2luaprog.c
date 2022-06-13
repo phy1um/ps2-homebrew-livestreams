@@ -49,7 +49,7 @@ int ps2luaprog_onstart(lua_State *l) {
   if (rc) {
     const char *err = lua_tostring(l, -1);
     luaL_traceback(l, l, err, 0);
-    const char *traceback= lua_tostring(l, -1);
+    const char *traceback = lua_tostring(l, -1);
     logerr("lua execution error (start event)\n%s", traceback);
     return rc;
   }
@@ -69,7 +69,7 @@ int ps2luaprog_onframe(lua_State *l) {
   if (rc) {
     const char *err = lua_tostring(l, -1);
     luaL_traceback(l, l, err, 0);
-    const char *traceback= lua_tostring(l, -1);
+    const char *traceback = lua_tostring(l, -1);
     logerr("lua execution error (frame event)\n%s", traceback);
     return rc;
   }
