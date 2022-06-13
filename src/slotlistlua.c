@@ -100,7 +100,7 @@ int slot_list_lua_each(lua_State *l) {
         const char *err = lua_tostring(l, -1);
         luaL_traceback(l, l, err, 0);
         const char *traceback = lua_tostring(l, -1);
-        logerr("slot iterator error: index %d: %s", i, traceback);
+        logerr("slot iterator error: index %d:\n%s", i, traceback);
       }
     }
   }
@@ -130,7 +130,7 @@ int slot_list_lua_each_state(lua_State *l) {
         const char *err = lua_tostring(l, -1);
         luaL_traceback(l, l, err, 0);
         const char *traceback = lua_tostring(l, -1);
-        logerr("slot iterator error: index %d: %s", i, traceback);
+        logerr("slot iterator error: index %d:\n%s", i, traceback);
       }
     }
   }
