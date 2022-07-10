@@ -38,6 +38,6 @@ manage a repository for a game using this framework, see [this repo](https://git
 
 ## Contributors
 
- - Tom Marks: [website](coding.tommarks.xyz), [livestream](twitch.tv/phylum919)
+ - Tom Marks: [website](https://coding.tommarks.xyz), [livestream](https://twitch.tv/phylum919)
 
 
