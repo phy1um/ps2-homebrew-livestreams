@@ -19,16 +19,25 @@ This framework is built on PS2SDK, a community SDK that can be installed from [h
 The Makefiles in this project assume Docker is installed and will use a docker image to compile everything.
 Building without Docker is supported, but not supported as a first-class way of compiling the project.
 
-Running `make dist` will compile the code and assemble some key assets. The .elf file in the `/dist` folder
+Running `make dist` will compile the code and assemble some key assets. The `p2g.elf` file in the `/dist` folder
 can be executed on a PS2 using a homebrew launcher such as [wLaunchELF](https://github.com/ps2homebrew/wLaunchELF)
 or [ps2link](https://github.com/ps2dev/ps2link). It can also be run in the [PCSX2](https://pcsx2.net/) emulator.
 
-When the 
+When `p2g.elf` is run, it initializes the Playstation 2 and calls the file in `script/main.lua`. This Lua file
+should be the entrypoint to your game/app/etc. Replace the default one with something. For an example of how I
+manage a repository for a game using this framework, see [this repo](https://github.com/phy1um/playstation2-minis).
 
 ## Current Status
 
--[x] Lua Scripting
--[x] 2D Renderer
--[ ] 3D Renderer
--[ ] 
+- [x] Lua Scripting
+- [x] 2D Renderer
+- [ ] Documentation
+- [ ] Asset Pipeline
+- [ ] 3D Renderer
+- [ ] Using Vector Units :D
+
+## Contributors
+
+ - Tom Marks: [website](coding.tommarks.xyz), [livestream](twitch.tv/phylum919)
+
 
