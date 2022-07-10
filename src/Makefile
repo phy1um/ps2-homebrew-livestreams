@@ -34,7 +34,6 @@ endif
 $(ISO_TGT): $(EE_BIN)
 	mkisofs $(ISO_FLAGS) -o $(ISO_TGT) ./dist/*
 
-
 $(SIM_BIN): $(EE_OBJS) $(SIM_OBJS)
 	$(CC) $(EE_CFLAGS) -lm -o $@ liblua.a $(EE_OBJS) $(SIM_OBJS)
 

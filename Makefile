@@ -38,7 +38,6 @@ endif
 assets: scripts
 	if ! [ -d dist ]; then mkdir dist; fi
 	$(MAKE) -C asset
-	cp asset/*.bin dist/
 	cp asset/*.tga dist/
 	cp distfiles/* dist/
 	cp LICENSE dist/
@@ -64,7 +63,6 @@ release: clean-all dist
 sim: clean-all $(LUA_LIB) $(SIM_BIN) assets
 	cp $(SIM_BIN) dist/sim
 	
-
 # Docker rules
 .PHONY: docker-image
 docker-image:
