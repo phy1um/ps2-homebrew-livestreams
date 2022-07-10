@@ -30,7 +30,6 @@ dist: docker-elf assets
 assets: scripts
 	if ! [ -d dist ]; then mkdir dist; fi
 	$(MAKE) -C asset
-	cp asset/*.bin dist/
 	cp asset/*.tga dist/
 	cp distfiles/* dist/
 	cp LICENSE dist/
