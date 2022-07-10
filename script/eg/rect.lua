@@ -1,8 +1,11 @@
 
-local GIF = require("gif")
-local P = require("ps2const")
-local D2D = require("draw2d")
-local VRAM = require("vram")
+local GIF = require"gif"
+local P = require"ps2const"
+local D2D = require"draw2d"
+local VRAM = require"vram"
+local DMA = require"p2g.dma"
+local GS = require"p2g.gs"
+local RM = require"p2g.buffer"
 
 local gs = nil
 

@@ -24,7 +24,7 @@
 static int is_running = 1;
 
 #ifndef LOG_LEVEL_DEFAUT
-#define LOG_LEVEL_DEFAULT LOG_LEVEL_INFO
+#define LOG_LEVEL_DEFAULT LOG_LEVEL_TRACE
 #endif
 
 int log_output_level = LOG_LEVEL_DEFAULT;
@@ -203,7 +203,8 @@ int main(int argc, char *argv[]) {
   info("finished lua state setup");
 
   lua_pushstring(L, base_path);
-  lua_setglobal(L, "PS2_SCRIPT_PATH");
+  lua_setglobal(L, "P2G_ROOT");
+  printf("### &&& setting global P2G_ROOT: %s &&& ###\n", base_path);
 
   info("binding screen print fn");
   lua_pushcfunction(L, ps2lua_scr_print);

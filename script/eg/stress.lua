@@ -1,9 +1,10 @@
---local GIF = dofile("host:script/gif.lua")
-local GIF = require("gif")
-local P = require("ps2const")
-local D2D = require("draw2d")
-local VRAM = require("vram")
-
+local GIF = require"gif"
+local P = require"ps2const"
+local D2D = require"draw2d"
+local VRAM = require"vram"
+local LOG = require"p2g.log"
+local DMA = require"p2g.dma"
+local GS = require"p2g.gs"
 
 local gs = nil
 
