@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "log.h"
+#include "utils.h"
 
 struct __attribute__((__packed__)) tga_header {
   uint8_t idlen;
@@ -26,7 +27,7 @@ struct __attribute__((__packed__)) tga_header {
 };
 
 // PRECONDITION: buffer is large enough to hold entire texture
-int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
+int load_tga_to_raw(const char *fname, unsigned char *buffer, int buffer_len) {
   info("loading TGA %s", fname);
   FILE *f = fopen(fname, "rb");
   if (!f) {
@@ -76,7 +77,7 @@ int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
   if (header.bps == 16) {
     for (int i = 0; i < header.width; i++) {
       for (int j = 0; j < header.height; j++) {
-        char tmp = buffer[(j * header.width + i) * bpp + 1];
+        unsigned char tmp = buffer[(j * header.width + i) * bpp + 1];
         buffer[(j * header.width + i) * bpp + 1] =
             buffer[(j * header.width + i) * bpp];
         buffer[(j * header.width + i) * bpp] = tmp;
@@ -85,10 +86,13 @@ int load_tga_to_raw(const char *fname, char *buffer, int buffer_len) {
   } else if (header.bps == 24 || header.bps == 32) {
     for (int i = 0; i < header.width; i++) {
       for (int j = 0; j < header.height; j++) {
-        char tmp = buffer[(j * header.width + i) * bpp + 2];
+        unsigned char tmp = buffer[(j * header.width + i) * bpp + 2];
         buffer[(j * header.width + i) * bpp + 2] =
             buffer[(j * header.width + i) * bpp];
         buffer[(j * header.width + i) * bpp] = tmp;
+        if (header.bps == 32) {
+          buffer[(j * header.width + i) * bpp + 3] /= 2;
+        }
       }
     }
   }

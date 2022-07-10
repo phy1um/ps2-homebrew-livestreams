@@ -1,0 +1,13 @@
+diff --git a/makefile b/makefile
+index 2e7fc40..1ed2b29 100644
+--- a/makefile
++++ b/makefile
+@@ -124,8 +124,6 @@ $(LUA_T): $(LUA_O) $(CORE_T)
+ 
+ clean:
+ 	$(RM) $(ALL_T) $(ALL_O)
+-	#PS2 sample clean
+-	$(MAKE) -C sample clean
+ 
+ install: all
+ ifeq ($(platform),PS2)

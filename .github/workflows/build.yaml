@@ -13,14 +13,15 @@ jobs:
       image: ps2dev/ps2dev
     steps:
       - uses: actions/checkout@v2
-      - run: apk add python3 make gmp-dev mpfr-dev mpc1-dev
+      - run: apk add python3 make gmp-dev mpfr-dev mpc1-dev zip git
       - run: make assets
       - run: echo "using PS2 SDK @ $PS2SDK"
-      - run: make release
-      - uses: actions/upload-artifact@v2
+        # we need PLATFORM and platform defined because consistency is hard
+      - run: VERSION=dev PLATFORM=ps2 platform=PS2 IN_PIPELINE=true make release
+      - uses: actions/upload-artifact@v3
         with: 
-          name: upload engine package
-          path: *.zip
+          name: engine package
+          path: ./*.zip
         if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags') }}
 
 

@@ -12,19 +12,27 @@ ISO_FLAGS?=-l --allow-lowercase -A "P2Garage Engine by Tom Marks -- coding.tomma
 
 LUA_FILES=$(shell find script -type f -name "*.lua")
 
+LUA_LIB=src/liblua.a
+
 CPPCHECK_REPORT=cppcheck_report.xml
 CPPCHECK_IMG=ghcr.io/facthunder/cppcheck:latest
 CPPCHECK_OUT=html/
 
 PREFIX=src/
 
-DIST_BIN_NAME=P2G_$(VERSION).elf
+DIST_BIN_NAME=p2g.elf
 
 include .lintvars
 
+ifeq ($(IN_PIPELINE), true)
 .PHONY: dist
-dist: docker-elf assets
+dist: $(LUA_LIB) $(BIN) assets
 	cp $(BIN) dist/$(DIST_BIN_NAME)
+else
+.PHONY: dist
+dist: docker-lua docker-elf assets
+	cp $(BIN) dist/$(DIST_BIN_NAME)
+endif
 
 .PHONY: assets
 assets: scripts
@@ -39,11 +47,22 @@ scripts:
 	if ! [ -d dist/script ]; then mkdir -p dist/script; fi
 	cp -r script/* dist/script
 
+lua:
+	git clone --depth 1 https://github.com/ps2dev/lua -b ee-v5.4.4
+	cd lua && git apply ../lua.patch
+
+$(LUA_LIB): lua
+	make -C lua -f makefile
+	cp lua/liblua.a src/
+
 .PHONY: release
-release: clean-all assets docker-elf 
+release: clean-all dist
 	zip -r ps2-engine-$(VERSION).zip dist
 
-
+.PHONY: sim
+sim: clean-all $(LUA_LIB) $(SIM_BIN) assets
+	cp $(SIM_BIN) dist/sim
+	
 # Docker rules
 .PHONY: docker-image
 docker-image:
@@ -51,11 +70,15 @@ docker-image:
 
 .PHONY: docker-elf
 docker-elf:
-	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
 
 .PHONY: docker-iso
 docker-iso:
-	$(DOCKER) run $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
+
+.PHONY: docker-lua
+docker-lua: lua
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) bash -c "platform=PS2 make $(LUA_LIB)"
 
 # Run the engine
 .PHONY: run
@@ -70,11 +93,16 @@ runps2: scripts
 resetps2:
 	ps2client -h $(PS2HOST) -t 5 reset
 
+.PHONY: runsim
+runsim:
+	cd dist && ./sim
+
 # Cleanup etc
 .PHONY: clean-all
 clean-all: 
 	$(MAKE) -C src clean
 	$(MAKE) -C asset clean
+	$(MAKE) -C lua -f makefile clean || true
 	rm -f $(CPPCHECK_REPORT)
 	rm -rf $(CPPCHECK_OUT)
 	rm -rf dist/

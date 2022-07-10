@@ -112,8 +112,9 @@ static int runfile(lua_State *l, const char *fname) {
   rc = lua_pcall(l, 0, 0, 0);
   if (rc) {
     const char *err = lua_tostring(l, -1);
-    info("lua error: %s", err);
-    logerr("lua execution error -- %s", err);
+    luaL_traceback(l, l, err, 0);
+    const char *traceback = lua_tostring(l, -1);
+    logerr("lua execution error (runfile %s)\n%s", fname, traceback);
     return -1;
   }
   BENCH_INFO(call_time, " - pcall time %f");
@@ -169,7 +170,8 @@ int main(int argc, char *argv[]) {
       fatal("base path too long!");
     }
     strncpy(base_path, argv[0], last_sep + 1);
-    base_path[last_sep + 2] = 0;
+    base_path[last_sep + 1] = 0;
+    trace("got base path = %s", base_path);
   }
 
   snprintf(init_script, FILE_NAME_MAX_LEN, "%sscript/ps2init.lua", base_path);
@@ -228,6 +230,7 @@ int main(int argc, char *argv[]) {
   int frame_count = 0;
   clock_t next_fps_report = clock() + CLOCKS_PER_SEC;
   while (is_running) {
+    trace("MAIN - BEGIN FRAME");
     pad_frame_start();
     pad_poll();
     dma_wait_fast();
