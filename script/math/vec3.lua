@@ -1,4 +1,5 @@
 local vec3 = {}
+local RM = require"p2g.buffer"
 local M = P2GCORE.math_vec3
 local floatCmp = P2GCORE.math_misc.floatCmp
 

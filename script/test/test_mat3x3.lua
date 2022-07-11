@@ -1,6 +1,6 @@
 
-local M = require("ps2math")
-local test = require("test")
+local M = require"p2g.math"
+local test = require"p2g.test"
 
 local t = {}
 

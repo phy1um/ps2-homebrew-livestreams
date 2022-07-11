@@ -1,4 +1,6 @@
 
+local LOG = require"p2g.log"
+
 local startup_ok = true
 
 local test_files = {"test_vec2", "test_mat3x3", "test_vec3", "test_slotlist"}

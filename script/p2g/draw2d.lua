@@ -1,6 +1,11 @@
-local GIF = require("gif")
-local P = require("ps2const")
-local VRAM = require("vram")
+local GIF = require"p2g.gif"
+local P = require"p2g.const"
+local VRAM = require"p2g.vram"
+local LOG = require"p2g.log"
+local GS = require"p2g.gs"
+local DMA = require"p2g.dma"
+local TGA = require"p2g.tga"
+local RM = require"p2g.buffer"
 
 function lts(l)
   local out = ""

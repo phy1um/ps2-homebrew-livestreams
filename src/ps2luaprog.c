@@ -1,4 +1,6 @@
 #include <lua.h>
+#include <lauxlib.h>
+
 #include <math.h>
 
 #include "bench.h"

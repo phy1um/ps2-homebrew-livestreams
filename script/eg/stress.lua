@@ -1,11 +1,10 @@
---local GIF = dofile("host:script/gif.lua")
-local GIF = require("gif")
-local P = require("ps2const")
-local D2D = require("draw2d")
-local VRAM = require("vram")
-
-
-local gs = nil
+local GIF = require"gif"
+local P = require"ps2const"
+local D2D = require"draw2d"
+local VRAM = require"vram"
+local LOG = require"p2g.log"
+local DMA = require"p2g.dma"
+local GS = require"p2g.gs"
 
 local emt = {
   x=0,y=0,w=1,h=1,
@@ -54,12 +53,12 @@ local fpsr = 10
 local cc = 0
 
 function PS2PROG.frame()
-  D2D:frameStart(gs)
+  D2D:frameStart()
   D2D:setColour(r,g,0,0x80)
   for i,s in ipairs(scene) do
     s:draw()
   end
-  D2D:frameEnd(gs)
+  D2D:frameEnd()
   if r > 0 then
     g = 0xff
     r = 0xff

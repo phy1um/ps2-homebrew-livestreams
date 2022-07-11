@@ -1,3 +1,5 @@
+local LOG = require"p2g.log"
+local GS = require"p2g.gs"
 
 local vram = {}
 local basePtr = 0

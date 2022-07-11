@@ -1,4 +1,5 @@
-local P = require("ps2const")
+local P = require"p2g.const"
+local LOG = require"p2g.log"
 
 local gif = {
   PACKED = 0x0,
