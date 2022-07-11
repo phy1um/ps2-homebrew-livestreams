@@ -1,6 +1,6 @@
 
-local SL = require("slotlist")
-local test = require("test")
+local SL = require"p2g.slotlist"
+local test = require"p2g.test"
 
 local suite = {name = "Slot List"}
 

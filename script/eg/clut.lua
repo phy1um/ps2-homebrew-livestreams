@@ -6,7 +6,6 @@ local LOG = require"p2g.log"
 local DMA = require"p2g.dma"
 local GS = require"p2g.gs"
 
-local gs = nil
 local testTex = nil
 local pal = nil
 local texturesInVram = false
@@ -18,7 +17,7 @@ function PS2PROG.start()
   --testTex.data:print()
   pal = D2D.loadTexture("host:bigpal.tga")
   DMA.init(DMA.GIF)
-  gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
+  GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
   local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 2048)
   local fb2 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 2048)
   local zb = VRAM.mem:framebuffer(640, 448, GS.PSMZ24, 2048)
@@ -51,7 +50,7 @@ function drawTile(x, y, i)
 end
 
 function PS2PROG.frame()
-  D2D:frameStart(gs)
+  D2D:frameStart()
   uploadTextures()
   D2D:setColour(0x80,0x80,0x80,0x80)
   D2D:setClut(pal)
@@ -67,7 +66,7 @@ function PS2PROG.frame()
   drawTile(5, 9, 9)
   drawTile(6, 9, 9)
   drawTile(7, 9, 10)
-  D2D:frameEnd(gs)
+  D2D:frameEnd()
 end
 
 

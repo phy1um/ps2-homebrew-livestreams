@@ -7,12 +7,10 @@ local LOG = require"p2g.log"
 local DMA = require"p2g.dma"
 local GS = require"p2g.gs"
 
-local gs = nil
-
 function PS2PROG.start()
   PS2PROG.logLevel(LOG.debugLevel)
   DMA.init(DMA.GIF)
-  gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
+  GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
   local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 2048)
   local fb2 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 2048)
   local zb = VRAM.mem:framebuffer(640, 448, GS.PSMZ24, 2048)
@@ -37,10 +35,10 @@ function PS2PROG.frame()
   pp.xx = pp.xx + 5.2*dx
   pp.yy = pp.yy + 5.2*dy
 
-  D2D:frameStart(gs)
+  D2D:frameStart()
   D2D:setColour(255,0,0,0x80)
   D2D:rect(pp.xx, pp.yy, 24, 24)
-  D2D:frameEnd(gs)
+  D2D:frameEnd()
 end
 
 

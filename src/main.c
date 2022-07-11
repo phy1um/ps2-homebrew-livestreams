@@ -24,7 +24,7 @@
 static int is_running = 1;
 
 #ifndef LOG_LEVEL_DEFAUT
-#define LOG_LEVEL_DEFAULT LOG_LEVEL_DEBUG
+#define LOG_LEVEL_DEFAULT LOG_LEVEL_TRACE
 #endif
 
 int log_output_level = LOG_LEVEL_DEFAULT;
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
     trace("got base path = %s", base_path);
   }
 
-  snprintf(init_script, FILE_NAME_MAX_LEN, "%sscript/ps2init.lua", base_path);
+  snprintf(init_script, FILE_NAME_MAX_LEN, "%sscript/p2g/init.lua", base_path);
   snprintf(main_script, FILE_NAME_MAX_LEN, "%sscript/main.lua", base_path);
 
   char *startup = main_script;

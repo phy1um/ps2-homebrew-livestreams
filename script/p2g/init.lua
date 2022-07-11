@@ -1,8 +1,7 @@
 
 local LOG = P2GCORE.log
 
-LOG.trace("starting ps2 core init")
-
+dbgPrint("p2g.init begin")
 
 -- Setup search path scripts in PS2 environment 
 local SEARCH_PATH = P2G_ROOT .. "script/?.lua"
@@ -16,13 +15,12 @@ function PS2PROG.spinForever()
 end
 
 -- Setup hot-reload
-LOG.trace("setup hot reloading")
-local hr = require "hot"
-require, reload = hr.init()
+dbgPrint("setup hot reloading")
+local hotReload = require"p2g.hot"
+require, reload = hotReload.init()
 
 -- Make alias names for P2G core libs that can be required
 P2GCORE_BINDS = {
-  ["p2g.log"] = P2GCORE.log,
   ["p2g.dma"] = P2GCORE.dma,
   ["p2g.gs"] = P2GCORE.gs,
   ["p2g.tga"] = P2GCORE.tga,
@@ -30,6 +28,21 @@ P2GCORE_BINDS = {
   ["p2g.pad"] = P2GCORE.pad,
   ["p2g.draw2d"] = P2GCORE.draw2d,
 }
+
+local function coreLoad(as) 
+  dbgPrint("hard loading P2G core: " .. as)
+  package.loaded["p2g." .. as] = P2GCORE[as]
+end
+
+coreLoad("log")
+coreLoad("dma")
+coreLoad("gs")
+coreLoad("tga")
+coreLoad("buffer")
+coreLoad("pad")
+
+-- Get a reference to the Lua scripted draw2d renderer before we override require
+local d2d = require("p2g.draw2d")
 
 -- Create hacked logging require with P2G library hooks
 local trueRequire = require
@@ -43,22 +56,22 @@ end
 
 local wrappedRequire = require
 
-LOG.trace("setup hacked require")
+dbgPrint("setup hacked require")
 function require(p)
-  local boundLib = P2GCORE_BINDS[p]
-  if boundLib ~= nil then return boundLib end
+  if p == "p2g.draw2d" then
+    return P2GCORE.draw2d
+  end
   return wrappedRequire(p)
 end
 
 -- Do some initial draw2d setup
-local d2d = require("draw2d")
-LOG.trace("setup fast draw2d")
+dbgPrint("setup fast draw2d")
 P2GCORE.draw2d.loadTexture = d2d.loadTexture
 P2GCORE.draw2d.newTexture = d2d.newTexture
 P2GCORE.draw2d.vramAllocTexture = d2d.vramAllocTexture
 
 -- Initialize TGA library constants from GS constants
-LOG.trace("setup TGA constants")
+dbgPrint("setup TGA constants")
 local TGA = P2GCORE.tga
 local GS = P2GCORE.gs
 TGA.BPS_TO_PSM = {}
@@ -68,7 +81,7 @@ TGA.BPS_TO_PSM[16] = GS.PSM16
 TGA.BPS_TO_PSM[24] = GS.PSM24
 TGA.BPS_TO_PSM[32] = GS.PSM32
 
-LOG.trace("ps2init end")
+dbgPrint("p2g.init end")
 
 return function() end
 
