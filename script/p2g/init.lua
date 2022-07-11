@@ -19,16 +19,7 @@ dbgPrint("setup hot reloading")
 local hotReload = require"p2g.hot"
 require, reload = hotReload.init()
 
--- Make alias names for P2G core libs that can be required
-P2GCORE_BINDS = {
-  ["p2g.dma"] = P2GCORE.dma,
-  ["p2g.gs"] = P2GCORE.gs,
-  ["p2g.tga"] = P2GCORE.tga,
-  ["p2g.buffer"] = P2GCORE.buffer,
-  ["p2g.pad"] = P2GCORE.pad,
-  ["p2g.draw2d"] = P2GCORE.draw2d,
-}
-
+-- Allow for requiring core C code
 local function coreLoad(as) 
   dbgPrint("hard loading P2G core: " .. as)
   package.loaded["p2g." .. as] = P2GCORE[as]
@@ -58,8 +49,9 @@ local wrappedRequire = require
 
 dbgPrint("setup hacked require")
 function require(p)
-  if p == "p2g.draw2d" then
-    return P2GCORE.draw2d
+  -- Return scripted draw2d if the flag is set
+  if p == "p2g.draw2d" and PS2PROG.slow2d == true then 
+    return d2d
   end
   return wrappedRequire(p)
 end
