@@ -50,8 +50,12 @@ local wrappedRequire = require
 dbgPrint("setup hacked require")
 function require(p)
   -- Return scripted draw2d if the flag is set
-  if p == "p2g.draw2d" and PS2PROG.slow2d == true then 
-    return d2d
+  if p == "p2g.draw2d" then
+    if PS2PROG.slow2d == true then 
+      return d2d
+    else
+      return P2GCORE.draw2d
+    end
   end
   return wrappedRequire(p)
 end
