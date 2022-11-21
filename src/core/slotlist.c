@@ -206,7 +206,7 @@ static const struct luaL_Reg methods[] = {
     {0, 0},
 };
 
-int slot_list_lua_init(lua_State *l) {
+int slotlist_lua_init(lua_State *l) {
   luaL_newmetatable(l, libname);
   lua_pushvalue(l, -1);
   lua_setfield(l, -2, "__index");

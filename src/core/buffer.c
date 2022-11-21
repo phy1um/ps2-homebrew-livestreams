@@ -11,8 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "log.h"
-#include "script.h"
+#include <p2g/log.h>
+#include <p2g/script.h>
 
 static int buffer_alloc(lua_State *l);
 static int buffer_gcalloc(lua_State *l);
@@ -257,7 +257,7 @@ int buffer_on_gc(lua_State *l) {
 }
 #endif
 
-int drawlua_init(lua_State *l) {
+int draw_lua_init(lua_State *l) {
   luaL_newmetatable(l, "ps2.buffer");
 
 #ifdef TRACE_LUA_BUFFER_GC

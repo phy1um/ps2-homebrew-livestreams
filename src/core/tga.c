@@ -172,7 +172,7 @@ ERR:
   return 1;
 }
 
-int lua_tga_init(lua_State *l) {
+int tga_lua_init(lua_State *l) {
   lua_createtable(l, 0, 1);
   lua_pushcfunction(l, load_tga_lua);
   lua_setfield(l, -2, "load");

@@ -80,7 +80,7 @@ docker-lua: lua
 # Run the engine
 .PHONY: run
 run: scripts
-	pcsx2 --elf=$(shell pwd)/dist/$(DIST_BIN_NAME)
+	pcsx2-qt -nogui -elf $(shell pwd)/dist/$(DIST_BIN_NAME)
 
 .PHONY: runps2
 runps2: scripts

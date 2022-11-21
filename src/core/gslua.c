@@ -14,6 +14,8 @@
 
 #include "../gs_state.h"
 
+struct gs_state *GS_STATE;
+
 static int gslua_set_buffers(lua_State *l) {
   struct gs_state *st = GS_STATE;
   if (!st) {

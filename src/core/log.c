@@ -42,7 +42,7 @@ static int lua_log_error(lua_State *l) {
   return 0;
 }
 
-int loglua_init(lua_State *l) {
+int log_lua_init(lua_State *l) {
   lua_createtable(l, 0, 10);
   lua_pushcfunction(l, lua_log_error);
   lua_setfield(l, -2, "error");
