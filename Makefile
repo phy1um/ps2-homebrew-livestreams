@@ -21,6 +21,7 @@ CPPCHECK_OUT=html/
 PREFIX=src/
 
 DIST_BIN_NAME=p2g.elf
+PCSX2=$(HOME)/workspace/playstation2/pcsx2/build/pcsx2/pcsx2 --elf=
 
 include .lintvars
 
@@ -80,7 +81,7 @@ docker-lua: lua
 # Run the engine
 .PHONY: run
 run: scripts
-	pcsx2-qt -nogui -elf $(shell pwd)/dist/$(DIST_BIN_NAME)
+	$(PCSX2) $(shell pwd)/dist/$(DIST_BIN_NAME)
 
 .PHONY: runps2
 runps2: scripts
