@@ -1,7 +1,7 @@
 #include <lua.h>
 
-#include "../log.h"
-#include "../ps2math.h"
+#include <p2g/log.h>
+#include <p2g/ps2math.h>
 
 #define buffer_null_check(p, s)                                                \
   do {                                                                         \

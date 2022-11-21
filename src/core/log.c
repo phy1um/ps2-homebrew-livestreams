@@ -1,8 +1,8 @@
 #include <lua.h>
 #include <stdio.h>
 
-#include "log.h"
-#include "utils.h"
+#include <p2g/log.h>
+#include <p2g/utils.h>
 
 static inline void lua_log_message(lua_State *l, int level, const char *pre) {
   if (log_output_level >= level) {

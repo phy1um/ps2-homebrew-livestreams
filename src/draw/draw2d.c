@@ -10,9 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../log.h"
-#include "buffer.h"
+#include <p2g/log.h>
 #include "draw.h"
+#include "buffer.h"
 
 static struct d2d_state state;
 

@@ -10,45 +10,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "log.h"
-#include "script.h"
+#include <p2g/log.h>
 
-struct gs_state {
-  framebuffer_t fb[2];
-  zbuffer_t zb;
-  int ctx;
-};
-
-static struct gs_state *st;
-static qword_t *flip_buffer;
-
-int gs_init() {
-  info("init GS -- no framebuffer");
-  st = calloc(1, sizeof(struct gs_state));
-  flip_buffer = memalign(64, 10 * 16);
-  return 0;
-}
-
-int gs_flip() {
-  trace("GS FLIP START");
-  memset(flip_buffer, 0, 10 * 16);
-  framebuffer_t *fb = &st->fb[st->ctx];
-  graph_set_framebuffer_filtered(fb->address, fb->width, fb->psm, 0, 0);
-  st->ctx ^= 1;
-  trace("GS BUILD FLIP BUFFER");
-  qword_t *q = flip_buffer;
-  q = draw_framebuffer(q, 0, &st->fb[st->ctx]);
-  q = draw_finish(q);
-  dma_wait_fast();
-  trace("GS SEND FLIP BUFFER");
-  dma_channel_send_normal(DMA_CHANNEL_GIF, flip_buffer, q - flip_buffer, 0, 0);
-  trace("GS WAIT FLIP BUFFER DRAW FINISH");
-  draw_wait_finish();
-  trace("GS FLIP DONE");
-  return 0;
-}
+#include "../gs_state.h"
 
 static int gslua_set_buffers(lua_State *l) {
+  struct gs_state *st = GS_STATE;
   if (!st) {
     lua_pushstring(l, "GS state was NULL");
     lua_error(l);

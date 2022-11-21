@@ -1,7 +1,7 @@
 #include <math.h>
 
-#include "log.h"
-#include "ps2math.h"
+#include <p2g/log.h>
+#include <p2g/ps2math.h>
 
 float p2m_vec2_length(float *v2) {
   float xs = v2[0] * v2[0];

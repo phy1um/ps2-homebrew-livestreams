@@ -3,7 +3,7 @@
 #include "buffer.h"
 #include "draw.h"
 
-#include "../log.h"
+#include <p2g/log.h>
 
 int giftag_new(struct d2d_state *s, int flag, int nloop, int eop, int nregs,
                uint64_t regs) {

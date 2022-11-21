@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "log.h"
-#include "utils.h"
+#include <p2g/log.h>
+#include <p2g/utils.h>
 
 /**
  * print a QWORD buffer as trace level log

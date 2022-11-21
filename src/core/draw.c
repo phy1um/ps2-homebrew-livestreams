@@ -1,7 +1,7 @@
 #include <lua.h>
 
-#include "draw/draw.h"
-#include "log.h"
+#include "../draw/draw.h"
+#include <p2g/log.h>
 
 int draw2d_lua_frame_start(lua_State *l) {
   draw2d_frame_start();

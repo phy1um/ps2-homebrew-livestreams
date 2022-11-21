@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "log.h"
-#include "utils.h"
+#include <p2g/log.h>
+#include <p2g/utils.h>
 
 struct __attribute__((__packed__)) tga_header {
   uint8_t idlen;

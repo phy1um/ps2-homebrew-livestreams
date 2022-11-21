@@ -7,8 +7,8 @@
 
 #include <malloc.h>
 
-#include "log.h"
-#include "pad.h"
+#include <p2g/log.h>
+#include <p2g/pad.h>
 
 #define DEADZONE 0.2
 

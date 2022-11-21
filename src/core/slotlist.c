@@ -3,10 +3,10 @@
 
 #include <stdlib.h>
 
-#include "log.h"
-#include "script.h"
+#include <p2g/log.h>
+#include <p2g/script.h>
 
-static const char libname[] = MAKE_LUA_LIB_NAME("slotlist");
+static const char libname[] = "P2G.slotlist";
 
 #define SLOT_FREE 0
 
