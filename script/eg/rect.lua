@@ -6,9 +6,10 @@ local VRAM = require"p2g.vram"
 local DMA = require"p2g.dma"
 local GS = require"p2g.gs"
 local RM = require"p2g.buffer"
+local LOG = require"p2g.log"
 
 function PS2PROG.start()
-  PS2PROG.logLevel(5)
+  PS2PROG.logLevel(LOG.traceLevel)
   DMA.init(DMA.GIF)
   GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
   local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 2048)

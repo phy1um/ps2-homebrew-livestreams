@@ -110,6 +110,6 @@ include src/Makefile
 include quality.makefile
 
 .PHONY: sim
-sim: clean-all $(LUA_LIB) $(SIM_BIN) assets
+sim: clean-all $(SIM_BIN) assets
 	cp $(SIM_BIN) dist/sim
 	

@@ -166,7 +166,9 @@ int lua_tga_get_header(lua_State *l) {
   setint("imageType", header.imgType);
   return 1;
 ERR:
-  fclose(f);
+  if (f) {
+    fclose(f);
+  }
   lua_pushstring(l, "failed to load TGA header");
   lua_error(l);
   return 1;

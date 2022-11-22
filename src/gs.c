@@ -18,7 +18,7 @@ static qword_t *flip_buffer;
 
 int gs_init() {
   info("init GS -- no framebuffer");
-  GS_STATE = calloc(1, sizeof(GS_STATE));
+  GS_STATE = calloc(1, sizeof(struct gs_state));
   flip_buffer = memalign(64, 10 * 16);
   return 0;
 }

@@ -6,7 +6,7 @@ DRAW_OBJ=draw/draw2d.o draw/buffer.o
 MATH_OBJ=ps2math.o math/vec2lua.o math/vec3lua.o math/mat3lua.o math/float.o
 
 EE_BIN=$(PREFIX)test.elf
-EE_OBJS=$(MAIN_OBJ) $(CORE_OBJ) $(DRAW_OBJ) $(MATH_OBJ) liblua.a
+EE_OBJS=$(MAIN_OBJ) $(CORE_OBJ) $(DRAW_OBJ) $(MATH_OBJ)
 EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d -lm -lpad 
 EE_CFLAGS+=-O0 -Wall --std=c99 -Wno-sign-compare -g -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2 -DLOG_TRACE
 
@@ -35,12 +35,12 @@ $(ISO_TGT): $(EE_BIN)
 	mkisofs $(ISO_FLAGS) -o $(ISO_TGT) ./dist/*
 
 $(SIM_BIN): $(EE_OBJS) $(SIM_OBJS)
-	$(CC) $(EE_CFLAGS) -lm -o $@ $(PREFIX)liblua.a $(EE_OBJS) $(SIM_OBJS)
+	$(CC) $(EE_CFLAGS) -llua -lm -o $@ $(EE_OBJS) $(SIM_OBJS)
 
 
 .PHONY: clean
 clean:
-	rm -rf $(EE_BIN) $(EE_OBJS)
+	rm -rf $(EE_BIN) $(EE_OBJS) $(SIM_BIN) $(SIM_OBJS)
 
 
 

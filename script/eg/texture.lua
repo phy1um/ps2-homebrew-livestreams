@@ -6,6 +6,7 @@ local LOG = require"p2g.log"
 local DMA = require"p2g.dma"
 local GS = require"p2g.gs"
 local TGA = require"p2g.tga"
+local PAD = require"p2g.pad"
 local RM = require"p2g.buffer"
 
 local testTex1 = nil
