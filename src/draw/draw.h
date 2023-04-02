@@ -100,7 +100,7 @@ struct render_state {
   int active_tex;
   int clut_tex;
 
-  struct draw_dma dma; 
+  struct draw_dma dma;
   struct draw_gif gif;
   struct draw_stats this_frame;
   struct draw_stats last_frame;
@@ -121,7 +121,7 @@ int draw_upload_texture(void *texture, size_t bytes, int width, int height,
 
 int draw_bind_buffer(void *buf, size_t buf_len);
 
-// 2d renderer API 
+// 2d renderer API
 int draw2d_clear_colour(char r, char g, char b);
 
 int draw2d_triangle(float x1, float y1, float x2, float y2, float x3, float y3);
@@ -143,6 +143,7 @@ int draw2d_set_clut_state(int texture_base);
 
 // 3d renderer API
 // int draw3d_set_property(int property_id, float value);
-// int draw3d_mesh(float *verts, size_t vert_len, uint32_t gif_fmt, int gif_fmt_len, int floats_per_vert);
+// int draw3d_mesh(float *verts, size_t vert_len, uint32_t gif_fmt,
+//       int gif_fmt_len, int floats_per_vert);
 
 #endif

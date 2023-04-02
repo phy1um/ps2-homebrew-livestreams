@@ -20,7 +20,8 @@ int giftag_ad_tex1(struct render_state *s, int lcm, int mxl, int mtba,
     int l, int k);
 int giftag_ad_tex2(struct render_state *s, int psm, int cbp, int cpsm,
     int csm, int csa, int cld);
-int giftag_ad_alpha(struct render_state *s, int a, int b, int c, int d, int fix);
+int giftag_ad_alpha(struct render_state *s, int a, int b, int c, int d,
+    int fix);
 
 
 int push_rgbaq(struct render_state *s, unsigned char cols[4]);

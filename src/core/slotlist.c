@@ -168,7 +168,8 @@ int slot_list_lua_new(lua_State *l) {
     // noreturn
   }
 
-  st->slots = (int *)calloc(capacity, sizeof(int)); st->states = (int *)calloc(capacity, sizeof(int));
+  st->slots = (int *)calloc(capacity, sizeof(int));
+  st->states = (int *)calloc(capacity, sizeof(int));
   st->capacity = capacity;
   st->head = 0;
 
