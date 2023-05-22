@@ -14,6 +14,7 @@
 
 #include "../gs_state.h"
 
+// extern var GS_STATE defined here
 struct gs_state *GS_STATE;
 
 static int gslua_set_buffers(lua_State *l) {
