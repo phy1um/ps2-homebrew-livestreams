@@ -32,7 +32,6 @@ int load_tga_to_raw(const char *fname, unsigned char *buffer, int buffer_len) {
   FILE *f = fopen(fname, "rb");
   if (!f) {
     logerr("failed to read file %s", fname);
-    fclose(f);
     return 0;
   }
   struct tga_header header = {0};
