@@ -129,7 +129,7 @@ int draw2d_lua_upload_texture(lua_State *l) {
     return 1;
   }
 
-  info("calling upload texture with: w=%d, h=%d, psm=%d, vram=%d, ee_addr=%p",
+  trace("calling upload texture with: w=%d, h=%d, psm=%d, vram=%d, ee_addr=%p",
        width, height, psm, vram_addr, ptr);
   int rc = draw_upload_texture(ptr, width * height * 4, width, height, psm,
                                  vram_addr);
