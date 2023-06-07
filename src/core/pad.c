@@ -128,6 +128,7 @@ void pad_poll() {
     pad_test(PAD_R1, BUTTON_R1);
     pad_test(PAD_R2, BUTTON_R2);
     pad_test(PAD_SELECT, BUTTON_SELECT);
+    pad_test(PAD_START, BUTTON_START);
     joysticks[AXIS_LEFT_X] = (int)pad_read_space->ljoy_h;
     joysticks[AXIS_LEFT_Y] = (int)pad_read_space->ljoy_v;
     joysticks[AXIS_RIGHT_X] = (int)pad_read_space->rjoy_h;
@@ -178,14 +179,15 @@ int pad_lua_init(lua_State *l) {
   lua_pushcfunction(l, pad_lua_joy_value);
   lua_setfield(l, -2, "axis");
   bind_int(BUTTON_X, "X");
-  bind_int(BUTTON_SQUARE, "TRIANGLE");
-  bind_int(BUTTON_TRIANGLE, "SQUARE");
+  bind_int(BUTTON_SQUARE, "SQUARE");
+  bind_int(BUTTON_TRIANGLE, "TRIANGLE");
   bind_int(BUTTON_CIRCLE, "CIRCLE");
   bind_int(DPAD_LEFT, "LEFT");
   bind_int(DPAD_RIGHT, "RIGHT");
   bind_int(DPAD_UP, "UP");
   bind_int(DPAD_DOWN, "DOWN");
   bind_int(BUTTON_SELECT, "SELECT");
+  bind_int(BUTTON_START, "START");
   bind_int(BUTTON_L1, "L1");
   bind_int(BUTTON_L2, "L2");
   bind_int(BUTTON_R1, "R1");

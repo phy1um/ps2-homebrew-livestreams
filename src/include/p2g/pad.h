@@ -17,7 +17,8 @@
 #define DPAD_RIGHT 10
 #define DPAD_UP 11
 #define BUTTON_SELECT 12
-#define BTN_MAX 13
+#define BUTTON_START 13
+#define BTN_MAX 14
 
 #define AXIS_LEFT_X 0
 #define AXIS_LEFT_Y 1
