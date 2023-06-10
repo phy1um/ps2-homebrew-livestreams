@@ -21,7 +21,7 @@ CPPCHECK_OUT=html/
 PREFIX=src/
 
 DIST_BIN_NAME=p2g.elf
-PCSX2=$(HOME)/workspace/playstation2/pcsx2/build/pcsx2/pcsx2 --elf 
+PCSX2=pcsx2-qt 
  
 include .lintvars
 
