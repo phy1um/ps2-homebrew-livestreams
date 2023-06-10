@@ -1,4 +1,6 @@
 
+local LOG = require"p2g.log"
+
 local test = {}
 
 function test.handler(testName)

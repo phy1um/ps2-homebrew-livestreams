@@ -3,10 +3,10 @@
 
 #include <stdlib.h>
 
-#include "log.h"
-#include "script.h"
+#include <p2g/log.h>
+#include <p2g/script.h>
 
-static const char libname[] = MAKE_LUA_LIB_NAME("slotlist");
+static const char libname[] = "P2G.slotlist";
 
 #define SLOT_FREE 0
 
@@ -206,7 +206,7 @@ static const struct luaL_Reg methods[] = {
     {0, 0},
 };
 
-int slot_list_lua_init(lua_State *l) {
+int slotlist_lua_init(lua_State *l) {
   luaL_newmetatable(l, libname);
   lua_pushvalue(l, -1);
   lua_setfield(l, -2, "__index");

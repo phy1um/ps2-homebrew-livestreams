@@ -1,15 +1,15 @@
 #include <lua.h>
 
-#include "draw/draw.h"
-#include "log.h"
+#include "../draw/draw.h"
+#include <p2g/log.h>
 
 int draw2d_lua_frame_start(lua_State *l) {
-  draw2d_frame_start();
+  draw_frame_start();
   return 0;
 }
 
 int draw2d_lua_frame_end(lua_State *l) {
-  draw2d_frame_end();
+  draw_frame_end();
   return 0;
 }
 
@@ -129,9 +129,9 @@ int draw2d_lua_upload_texture(lua_State *l) {
     return 1;
   }
 
-  info("calling upload texture with: w=%d, h=%d, psm=%d, vram=%d, ee_addr=%p",
+  trace("calling upload texture with: w=%d, h=%d, psm=%d, vram=%d, ee_addr=%p",
        width, height, psm, vram_addr, ptr);
-  int rc = draw2d_upload_texture(ptr, width * height * 4, width, height, psm,
+  int rc = draw_upload_texture(ptr, width * height * 4, width, height, psm,
                                  vram_addr);
   lua_pushboolean(l, rc);
   return 1;
@@ -192,7 +192,7 @@ static int draw2d_lua_bind_buffer(lua_State *l) {
   lua_gettable(l, 2);
   int len = lua_tointeger(l, -1);
 
-  draw2d_bind_buffer(ptr, len);
+  draw_bind_buffer(ptr, len);
   return 0;
 }
 

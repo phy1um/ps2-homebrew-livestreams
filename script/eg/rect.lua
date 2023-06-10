@@ -1,15 +1,17 @@
 
-local GIF = require("gif")
-local P = require("ps2const")
-local D2D = require("draw2d")
-local VRAM = require("vram")
-
-local gs = nil
+local GIF = require"p2g.gif"
+local P = require"p2g.const"
+local D2D = require"p2g.draw2d"
+local VRAM = require"p2g.vram"
+local DMA = require"p2g.dma"
+local GS = require"p2g.gs"
+local RM = require"p2g.buffer"
+local LOG = require"p2g.log"
 
 function PS2PROG.start()
-  PS2PROG.logLevel(5)
+  PS2PROG.logLevel(LOG.traceLevel)
   DMA.init(DMA.GIF)
-  gs = GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
+  GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
   local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 2048)
   local fb2 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 2048)
   local zb = VRAM.mem:framebuffer(640, 448, GS.PSMZ24, 2048)
@@ -22,10 +24,10 @@ function PS2PROG.start()
 end
 
 function PS2PROG.frame()
-  D2D:frameStart(gs)
+  D2D:frameStart()
   D2D:setColour(255,0,0,0x80)
   D2D:rect(20, 20, 220, 220)
-  D2D:frameEnd(gs)
+  D2D:frameEnd()
 end
 
 

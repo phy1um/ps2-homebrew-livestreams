@@ -10,11 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../log.h"
-#include "buffer.h"
+#include <p2g/log.h>
 #include "draw.h"
-
-static struct d2d_state state;
+#include "buffer.h"
+#include "internal.h"
 
 #define GIF_REGS_AD 0xe
 #define GIF_REGS_AD_LEN 1
@@ -35,135 +34,36 @@ static struct d2d_state state;
 
 #define floorlog2(x) (int)(log2(x))
 
-// easy :D
-static int draw2d_clear_buffer() {
-  trace("D2D clear buffer");
-  state.drawbuffer_head = state.drawbuffer;
-  state.drawbuffer_head_offset = 0;
-  state.gif.head = 0;
-  state.dma.head = 0;
-  state.dma.in_cnt = 0;
-  state.draw_type = D2D_NONE;
-  return 1;
-}
-
-int draw2d_update_last_tag_loops() {
-  trace("D2D update last tag @ %p", state.gif.head);
-  if (state.gif.head) {
-    trace("D2D update last tag loop: %d", state.gif.loop_count);
-    if (state.gif.loop_count <= GIF_MAX_LOOPS) {
-      uint32_t eop = *state.gif.head & 0x8000;
-      *state.gif.head = state.gif.loop_count | eop;
-    } else {
-      error("too many loops in GIFTag");
-    }
-  }
-  return 1;
-}
-
-int draw2d_start_cnt() {
-  trace("start cnt @ %d", state.drawbuffer_head_offset);
-  state.dma.in_cnt = 1;
-  state.dma.head = state.drawbuffer_head;
-  dma_tag((uint32_t *)state.drawbuffer_head, 0, 0x1 << 28, 0);
-  state.drawbuffer_head += QW_SIZE;
-  state.drawbuffer_head_offset += QW_SIZE;
-  return 1;
-}
-
-int dmatag_raw(int qwc, int type, int addr) {
-  dma_tag((uint32_t *)state.drawbuffer_head, qwc, type, addr);
-  state.drawbuffer_head += QW_SIZE;
-  state.drawbuffer_head_offset += QW_SIZE;
-  return 1;
-}
-
-int draw2d_end_cnt() {
-  trace("end cnt, state=%d, head=%d", state.dma.in_cnt,
-        state.drawbuffer_head_offset);
-  if (state.dma.in_cnt) {
-    state.dma.in_cnt = 0;
-    size_t dma_len = state.drawbuffer_head - state.dma.head;
-    // if there is nothing in this DMA packet, then rewind one qword..
-    if (dma_len == 16) {
-      trace("rewinding cnt header");
-      state.drawbuffer_head -= QW_SIZE;
-      state.drawbuffer_head_offset -= QW_SIZE;
-      return 1;
-    }
-    trace("set dma cnt qwc=%d", dma_len / 16);
-    uint16_t *lh = (uint16_t *)state.dma.head;
-    if (dma_len % 16 == 0) {
-      *lh = (dma_len / 16) - 1;
-    } else {
-      *lh = dma_len / 16;
-    }
-  }
-  return 1;
-}
-
-int draw2d_dma_end() {
-  draw2d_end_cnt();
-  dma_tag((uint32_t *)state.drawbuffer_head, 0, 0x7 << 28, 0);
-  state.drawbuffer_head += QW_SIZE;
-  state.drawbuffer_head_offset += QW_SIZE;
-  return 1;
-}
-
-int draw2d_dma_ref(uint32_t addr) {
-  draw2d_end_cnt();
-  dma_tag((uint32_t *)state.drawbuffer_head, 0, 0x3 << 28, addr);
-  state.drawbuffer_head += QW_SIZE;
-  state.drawbuffer_head_offset += QW_SIZE;
-  return 1;
-}
-
-int draw2d_kick() {
-  trace("kick buffer of size=%d", state.drawbuffer_head_offset);
-  draw2d_update_last_tag_loops();
-  draw2d_end_cnt();
-  draw2d_dma_end();
-  size_t buffer_size = state.drawbuffer_head - state.drawbuffer;
-  trace("dma send");
-  print_buffer((qword_t *)state.drawbuffer, buffer_size / 16);
-  dma_channel_send_chain(DMA_CHANNEL_GIF, state.drawbuffer, buffer_size / 16, 0,
-                         0);
-  dma_wait_fast();
-  // TODO(phy1um): get new memory?
-  draw2d_clear_buffer();
-  draw2d_start_cnt();
-  state.this_frame.kick_count += 1;
-  return 1;
-}
+extern struct render_state state;
 
 #define to_coord(f)                                                            \
   0x8000 + (0xfff0 & (((int)(f) << 4) | (int)((f) - ((int)(f))) * 0xf))
 
 int draw2d_triangle(float x1, float y1, float x2, float y2, float x3,
                     float y3) {
-  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.drawbuffer_head_offset, x1, y1,
+  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.cmdbuffer_head_offset, x1, y1,
         x2, y2, x3, y3);
   if (state.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw2d_kick();
+    draw_kick();
   }
 
-  if (state.drawbuffer_head_offset >= state.drawbuffer_len - 80) {
+  if (state.cmdbuffer_head_offset >= state.cmdbuffer_len - 80) {
     trace("triangle: early kick because buffer is full");
-    draw2d_kick();
+    draw_kick();
   }
 
-  if (state.draw_type != D2D_GEOM) {
-    if (state.draw_type != D2D_NONE) {
-      draw2d_update_last_tag_loops();
+  if (state.d2d.draw_type != D2D_GEOM) {
+    if (state.d2d.draw_type != D2D_NONE) {
+      draw_update_last_tag_loops();
     }
 
     giftag_new(&state, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_prim(&state, GS_PRIM_TRIANGLE, 0, 0, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_TRIS_LEN, GIF_REGS_TRIS);
-    state.draw_type = D2D_GEOM;
+    state.d2d.draw_type = D2D_GEOM;
   }
 
-  push_rgbaq(&state, state.col);
+  push_rgbaq(&state, state.d2d.col);
   push_xyz2(&state, to_coord(x1 - 320), to_coord(y1 - 224), 0);
   push_xyz2(&state, to_coord(x2 - 320), to_coord(y2 - 224), 0);
   push_xyz2(&state, to_coord(x3 - 320), to_coord(y3 - 224), 0);
@@ -177,19 +77,19 @@ int draw2d_textri(float x1, float y1, float u1, float v1, float x2, float y2,
   trace("drawing textri @ %f %f %f %f -- %f %f %f %f -- %f %f %f %f", x1, y1,
         u1, v1, x2, y2, u2, v2, x3, y3, u3, v3);
   if (state.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw2d_kick();
+    draw_kick();
   }
 
-  trace("textri: head = %d, len = %d", state.drawbuffer_head_offset,
-        state.drawbuffer_len);
-  if (state.drawbuffer_head_offset >= state.drawbuffer_len - 80) {
+  trace("textri: head = %d, len = %d", state.cmdbuffer_head_offset,
+        state.cmdbuffer_len);
+  if (state.cmdbuffer_head_offset >= state.cmdbuffer_len - 80) {
     trace("textri: early kick because buffer is full");
-    draw2d_kick();
+    draw_kick();
   }
 
-  if (state.draw_type != D2D_TEXTRI) {
-    if (state.draw_type != D2D_NONE) {
-      draw2d_update_last_tag_loops();
+  if (state.d2d.draw_type != D2D_TEXTRI) {
+    if (state.d2d.draw_type != D2D_NONE) {
+      draw_update_last_tag_loops();
     }
 
     giftag_new(&state, 0, 5, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
@@ -201,10 +101,10 @@ int draw2d_textri(float x1, float y1, float u1, float v1, float x2, float y2,
     giftag_ad_tex2(&state, state.tex_psm, state.clut_tex, 0, 0, 0, 0x2);
     giftag_ad_prim(&state, GS_PRIM_TRIANGLE, 0, 1, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_TEXTRI_LEN, GIF_REGS_TEXTRI);
-    state.draw_type = D2D_TEXTRI;
+    state.d2d.draw_type = D2D_TEXTRI;
   }
 
-  push_rgbaq(&state, state.col);
+  push_rgbaq(&state, state.d2d.col);
   push_st(&state, u1, v1);
   push_xyz2(&state, to_coord(x1 - 320), to_coord(y1 - 224), 0);
   push_st(&state, u2, v2);
@@ -217,29 +117,29 @@ int draw2d_textri(float x1, float y1, float u1, float v1, float x2, float y2,
 }
 
 int draw2d_rect(float x1, float y1, float w, float h) {
-  trace("rect @ %u %f %f %f %f", state.drawbuffer_head_offset, x1, y1, w, h);
+  trace("rect @ %u %f %f %f %f", state.cmdbuffer_head_offset, x1, y1, w, h);
 
   if (state.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw2d_kick();
+    draw_kick();
   }
 
-  if (state.drawbuffer_head_offset >= state.drawbuffer_len - 80) {
+  if (state.cmdbuffer_head_offset >= state.cmdbuffer_len - 80) {
     trace("rect: early kick because buffer is full");
-    draw2d_kick();
+    draw_kick();
   }
 
-  if (state.draw_type != D2D_RECT) {
-    if (state.draw_type != D2D_NONE) {
-      draw2d_update_last_tag_loops();
+  if (state.d2d.draw_type != D2D_RECT) {
+    if (state.d2d.draw_type != D2D_NONE) {
+      draw_update_last_tag_loops();
     }
 
     giftag_new(&state, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_prim(&state, GS_PRIM_SPRITE, 0, 0, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_RECT_LEN, GIF_REGS_RECT);
-    state.draw_type = D2D_RECT;
+    state.d2d.draw_type = D2D_RECT;
   }
 
-  push_rgbaq(&state, state.col);
+  push_rgbaq(&state, state.d2d.col);
   push_xyz2(&state, to_coord(x1 - 320), to_coord(y1 - 224), 0);
   push_xyz2(&state, to_coord(x1 + w - 320), to_coord(y1 + h - 224), 0);
   state.gif.loop_count += 1;
@@ -247,52 +147,12 @@ int draw2d_rect(float x1, float y1, float w, float h) {
   return 1;
 }
 
-static zbuffer_t zb = {0};
-int draw2d_frame_start() {
-  trace("frame start");
-  memset(&state.this_frame, 0, sizeof(struct d2d_stats));
-  draw2d_clear_buffer();
-  draw2d_start_cnt();
-
-  // Clear the screen using PS2SDK functions
-  float halfw = (state.screen_w * 1.0f) / 2.0f;
-  float halfh = (state.screen_h * 1.0f) / 2.0f;
-  qword_t *q = (qword_t *)state.drawbuffer_head;
-  q = draw_disable_tests(q, 0, &zb);
-  PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
-  q++;
-  PACK_GIFTAG(q,
-              GS_SET_TEST(DRAW_ENABLE, ATEST_METHOD_NOTEQUAL, 0x00,
-                          ATEST_KEEP_FRAMEBUFFER, DRAW_DISABLE, DRAW_DISABLE,
-                          DRAW_ENABLE, ZTEST_METHOD_ALLPASS),
-              GS_REG_TEST);
-  q++;
-  q = draw_clear(q, 0, 2048.0f - halfw, 2048.0f - halfh, state.screen_w,
-                 state.screen_h, state.clear[0], state.clear[1],
-                 state.clear[2]);
-  trace("clear screen: %d, %d, %f, %f, %p -> %p", state.screen_w,
-        state.screen_h, 2048.0f - halfw, 2048.0f - halfh, state.drawbuffer_head,
-        q);
-  state.drawbuffer_head = (char *)q;
-  state.drawbuffer_head_offset = ((char *)q - state.drawbuffer);
-  return 1;
-}
-
-int draw2d_frame_end() {
-  trace("frame end");
-  qword_t *q = draw_finish((qword_t *)state.drawbuffer_head);
-  state.drawbuffer_head = (char *)q;
-  draw2d_kick();
-  memcpy(&state.last_frame, &state.this_frame, sizeof(struct d2d_stats));
-  return 1;
-}
-
 int draw2d_set_colour(unsigned char r, unsigned char g, unsigned char b,
                       unsigned char a) {
-  state.col[0] = r;
-  state.col[1] = g;
-  state.col[2] = b;
-  state.col[3] = a;
+  state.d2d.col[0] = r;
+  state.d2d.col[1] = g;
+  state.d2d.col[2] = b;
+  state.d2d.col[3] = a;
   return 1;
 }
 
@@ -309,11 +169,11 @@ int draw2d_screen_dimensions(int w, int h) {
   return 1;
 }
 
-int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
+int draw_upload_texture(void *texture, size_t bytes, int width, int height,
                           int format, int vram_addr) {
   trace("uploading tex %p -> %d", texture, vram_addr);
 
-  draw2d_update_last_tag_loops();
+  draw_update_last_tag_loops();
   // setup
   giftag_new(&state, 0, 4, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
   giftag_ad_bitbltbuf(&state, vram_addr / 64, width / 64, format);
@@ -322,7 +182,7 @@ int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
   giftag_ad_trxdir(&state, 0);
 
   // end current drawing
-  draw2d_end_cnt();
+  draw_end_cnt();
 
   // assume format == PSM32
   int ee_vram_size = width * height * 4;
@@ -346,10 +206,10 @@ int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
   // split upload into reasonably sized blocks
   int img_addr = (int)texture;
   while (packet_count > 0) {
-    if (state.drawbuffer_head_offset >= state.drawbuffer_len - 5 * QW_SIZE) {
+    if (state.cmdbuffer_head_offset >= state.cmdbuffer_len - 5 * QW_SIZE) {
       trace("upload texture: early kick because buffer is full");
-      draw2d_kick();
-      draw2d_end_cnt();
+      draw_kick();
+      draw_end_cnt();
     }
     dmatag_raw(1, 0x1 << 28, 0);
     giftag_new(&state, GIF_IMAGE, block_size, 0, 0, 0);
@@ -361,17 +221,17 @@ int draw2d_upload_texture(void *texture, size_t bytes, int width, int height,
 
   // if there is any leftover, handle that here
   if (remain > 0) {
-    if (state.drawbuffer_head_offset >= state.drawbuffer_len - 5 * QW_SIZE) {
+    if (state.cmdbuffer_head_offset >= state.cmdbuffer_len - 5 * QW_SIZE) {
       trace("upload texture (remain): early kick because buffer is full");
-      draw2d_kick();
-      draw2d_end_cnt();
+      draw_kick();
+      draw_end_cnt();
     }
     dmatag_raw(1, 0x1 << 28, 0);
     giftag_new(&state, GIF_IMAGE, remain, 0, 0, 0);
     dmatag_raw(remain, 0x3 << 28, img_addr);
   }
 
-  draw2d_start_cnt();
+  draw_start_cnt();
 
   giftag_new(&state, GIF_PACKED, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
   giftag_ad_texflush(&state);
@@ -392,18 +252,18 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
                   float u2, float v2) {
   trace("drawing sprite @ %f,%f", x, y);
   if (state.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw2d_kick();
+    draw_kick();
   }
 
-  if (state.drawbuffer_head_offset >= state.drawbuffer_len - 80) {
+  if (state.cmdbuffer_head_offset >= state.cmdbuffer_len - 80) {
     trace("sprite: early kick because buffer is full");
-    draw2d_kick();
+    draw_kick();
   }
 
-  if (state.draw_type != D2D_SPRITE ||
+  if (state.d2d.draw_type != D2D_SPRITE ||
       state.active_tex != state.tex_vram_addr) {
-    if (state.draw_type != D2D_NONE) {
-      draw2d_update_last_tag_loops();
+    if (state.d2d.draw_type != D2D_NONE) {
+      draw_update_last_tag_loops();
     }
 
     state.active_tex = state.tex_vram_addr;
@@ -416,14 +276,14 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
     giftag_ad_tex2(&state, state.tex_psm, state.clut_tex, 0, 0, 0, 0x2);
     giftag_ad_prim(&state, GS_PRIM_SPRITE, 0, 1, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_SPRITE_LEN, GIF_REGS_SPRITE);
-    state.draw_type = D2D_SPRITE;
+    state.d2d.draw_type = D2D_SPRITE;
   }
 
   push_st(&state, u1, v1);
-  push_rgbaq(&state, state.col);
+  push_rgbaq(&state, state.d2d.col);
   push_xyz2(&state, to_coord(x - 320), to_coord(y - 224), 0);
   push_st(&state, u2, v2);
-  push_rgbaq(&state, state.col);
+  push_rgbaq(&state, state.d2d.col);
   push_xyz2(&state, to_coord(x + w - 320), to_coord(y + h - 224), 0);
   state.gif.loop_count += 1;
   state.this_frame.tris += 1;
@@ -435,9 +295,9 @@ int draw2d_set_clut_state(int texture_base) {
   return 1;
 }
 
-int draw2d_bind_buffer(void *buf, size_t buf_len) {
+int draw_bind_buffer(void *buf, size_t buf_len) {
   logdbg("bind buffer %p", buf);
-  state.drawbuffer = buf;
-  state.drawbuffer_len = buf_len;
-  return draw2d_clear_buffer();
+  state.cmdbuffer = buf;
+  state.cmdbuffer_len = buf_len;
+  return draw_clear_buffer();
 }

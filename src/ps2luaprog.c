@@ -1,9 +1,11 @@
 #include <lua.h>
+#include <lauxlib.h>
+
 #include <math.h>
 
-#include "bench.h"
-#include "log.h"
-#include "ps2luaprog.h"
+#include <p2g/bench.h>
+#include <p2g/log.h>
+#include <p2g/ps2luaprog.h>
 
 static int ps2luaprog_start_nil(lua_State *l) {
   info("default start...");

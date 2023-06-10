@@ -6,7 +6,7 @@
 
 #include <kernel.h>
 
-#include "log.h"
+#include <p2g/log.h>
 
 static int dma_init(lua_State *l) {
   int channel = lua_tointeger(l, 1);

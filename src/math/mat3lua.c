@@ -1,7 +1,9 @@
 #include <lua.h>
 
-#include "../log.h"
-#include "../ps2math.h"
+#include <p2g/log.h>
+#include <p2g/ps2math.h>
+
+
 
 #define buffer_null_check(p, s)                                                \
   do {                                                                         \
@@ -58,7 +60,7 @@ static int lua_apply_mat3(lua_State *l) {
   return 0;
 }
 
-int mat3lua_init(lua_State *l) {
+int mat3_lua_init(lua_State *l) {
   trace("init core lib math.mat3");
   lua_createtable(l, 0, 8);
   lua_pushcfunction(l, lua_add_mat3);

@@ -51,4 +51,7 @@
 /** Signal ID Value Read */
 #define GS_REG_SIGLBLID (volatile u64 *)0x12001080
 
+
+#define GS_SET_CSR(a, b, c, d, e, f, g, h, i, j, k, l) 0
+
 #endif /* __GS_PRIVILEGED_H__ */

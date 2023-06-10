@@ -12,19 +12,18 @@
 #include <kernel.h>
 #include <sifrpc.h>
 
-#include "log.h"
-
-#include "bench.h"
-#include "gs.h"
-#include "pad.h"
-#include "ps2luaprog.h"
-#include "script.h"
-#include "utils.h"
+#include <p2g/log.h>
+#include <p2g/bench.h>
+#include <p2g/gs.h>
+#include <p2g/pad.h>
+#include <p2g/ps2luaprog.h>
+#include <p2g/script.h>
+#include <p2g/utils.h>
 
 static int is_running = 1;
 
 #ifndef LOG_LEVEL_DEFAUT
-#define LOG_LEVEL_DEFAULT LOG_LEVEL_INFO
+#define LOG_LEVEL_DEFAULT LOG_LEVEL_TRACE
 #endif
 
 int log_output_level = LOG_LEVEL_DEFAULT;
@@ -50,21 +49,6 @@ char main_script[FILE_NAME_MAX_LEN];
     while (1) {                                                                \
     }                                                                          \
   } while (0)
-
-static script_binding SCRIPT_CORE_LIBS[] = {
-    {"gs", gs_lua_init},
-    {"dma", dma_lua_init},
-    {"pad", pad_lua_init},
-    {"buffer", drawlua_init},
-    {"log", loglua_init},
-    {"tga", lua_tga_init},
-    {"slotlist", slot_list_lua_init},
-    {"draw2d", draw2d_lua_init},
-    {"math_vec2", vec2lua_init},
-    {"math_vec3", vec3lua_init},
-    {"math_mat3", mat3lua_init},
-    {"math_misc", floatmath_init},
-};
 
 void core_error(const char *msg) {
   is_running = 0;
@@ -124,23 +108,6 @@ static int runfile(lua_State *l, const char *fname) {
   return 0;
 }
 
-int bind_core_libs(lua_State *l) {
-  int num_libs = sizeof(SCRIPT_CORE_LIBS) / sizeof(script_binding);
-  info("initializing %d core libraries", num_libs);
-  lua_createtable(l, 0, num_libs);
-  for (int i = 0; i < num_libs; i++) {
-    script_binding *b = &SCRIPT_CORE_LIBS[i];
-    trace("init core lib %s", b->name);
-    if (b->open(l) != 1) {
-      logerr("failed to open library: %s", b->name);
-      return 0;
-    }
-    lua_setfield(l, -2, b->name);
-    trace("core set field: %s", b->name);
-  }
-  return 1;
-}
-
 int main(int argc, char *argv[]) {
 
 #ifndef NO_SCREEN_PRINT
@@ -174,7 +141,7 @@ int main(int argc, char *argv[]) {
     trace("got base path = %s", base_path);
   }
 
-  snprintf(init_script, FILE_NAME_MAX_LEN, "%sscript/ps2init.lua", base_path);
+  snprintf(init_script, FILE_NAME_MAX_LEN, "%sscript/p2g/init.lua", base_path);
   snprintf(main_script, FILE_NAME_MAX_LEN, "%sscript/main.lua", base_path);
 
   char *startup = main_script;
@@ -203,7 +170,7 @@ int main(int argc, char *argv[]) {
   info("finished lua state setup");
 
   lua_pushstring(L, base_path);
-  lua_setglobal(L, "PS2_SCRIPT_PATH");
+  lua_setglobal(L, "P2G_ROOT");
 
   info("binding screen print fn");
   lua_pushcfunction(L, ps2lua_scr_print);

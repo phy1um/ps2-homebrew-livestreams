@@ -1,7 +1,7 @@
 
 #include <draw.h>
 
-#include "../log.h"
+#include <p2g/log.h>
 
 void graph_wait_vsync() {}
 

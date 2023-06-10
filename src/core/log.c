@@ -1,15 +1,16 @@
 #include <lua.h>
 #include <stdio.h>
 
-#include "log.h"
-#include "utils.h"
+#include <p2g/log.h>
+#include <p2g/utils.h>
 
-static inline void lua_log_message(lua_State *l, int level, const char *pre) {
+void lua_log_message(lua_State *l, int level, const char *pre) {
   if (log_output_level >= level) {
     lua_Debug ar;
     lua_getstack(l, 1, &ar);
     lua_getinfo(l, "Sl", &ar);
-    int last_sep = last_index_of(ar.short_src, LUA_IDSIZE, '/');
+    size_t srclen = strlen(ar.short_src);
+    int last_sep = last_index_of(ar.short_src, srclen, '/');
     const char *lua_msg = lua_tostring(l, 1);
     printf("%s (%s:%d) %s\n", pre, (ar.short_src + last_sep + 1),
            ar.currentline, lua_msg);
@@ -42,7 +43,7 @@ static int lua_log_error(lua_State *l) {
   return 0;
 }
 
-int loglua_init(lua_State *l) {
+int log_lua_init(lua_State *l) {
   lua_createtable(l, 0, 10);
   lua_pushcfunction(l, lua_log_error);
   lua_setfield(l, -2, "error");

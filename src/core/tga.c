@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "log.h"
-#include "utils.h"
+#include <p2g/log.h>
+#include <p2g/utils.h>
 
 struct __attribute__((__packed__)) tga_header {
   uint8_t idlen;
@@ -32,7 +32,6 @@ int load_tga_to_raw(const char *fname, unsigned char *buffer, int buffer_len) {
   FILE *f = fopen(fname, "rb");
   if (!f) {
     logerr("failed to read file %s", fname);
-    fclose(f);
     return 0;
   }
   struct tga_header header = {0};
@@ -166,13 +165,15 @@ int lua_tga_get_header(lua_State *l) {
   setint("imageType", header.imgType);
   return 1;
 ERR:
-  fclose(f);
+  if (f) {
+    fclose(f);
+  }
   lua_pushstring(l, "failed to load TGA header");
   lua_error(l);
   return 1;
 }
 
-int lua_tga_init(lua_State *l) {
+int tga_lua_init(lua_State *l) {
   lua_createtable(l, 0, 1);
   lua_pushcfunction(l, load_tga_lua);
   lua_setfield(l, -2, "load");
