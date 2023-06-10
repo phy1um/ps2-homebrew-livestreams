@@ -1,10 +1,11 @@
-local GIF = require"gif"
-local P = require"ps2const"
-local D2D = require"draw2d"
-local VRAM = require"vram"
+local GIF = require"p2g.gif"
+local P = require"p2g.const"
+local D2D = require"p2g.draw2d"
+local VRAM = require"p2g.vram"
 local LOG = require"p2g.log"
 local DMA = require"p2g.dma"
 local GS = require"p2g.gs"
+local RM = require"p2g.buffer"
 
 local testTex = nil
 local pal = nil

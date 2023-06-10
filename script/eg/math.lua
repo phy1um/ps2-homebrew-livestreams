@@ -1,12 +1,14 @@
 
-local GIF = require"gif"
-local P = require"ps2const"
-local D2D = require"draw2d"
-local VRAM = require"vram"
-local M = require"ps2math"
+local GIF = require"p2g.gif"
+local P = require"p2g.const"
+local D2D = require"p2g.draw2d"
+local VRAM = require"p2g.vram"
+local M = require"p2g.math"
 local LOG = require"p2g.log"
 local DMA = require"p2g.dma"
 local GS = require"p2g.gs"
+local RM = require"p2g.buffer"
+local PAD = require"p2g.pad"
 
 function PS2PROG.start()
   PS2PROG.logLevel(LOG.debugLevel)
