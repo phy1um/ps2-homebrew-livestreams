@@ -47,6 +47,14 @@ function vramslice:texture(tex)
   return tex
 end
 
+function vramslice:reset()
+  self.head = self.start
+end
+
+function vramslice:copy()
+  return vram.slice(self.start, self.tail)
+end
+
 function vram.slice(start, tail)
   if tail == nil then tail = max end
   return setmetatable({
