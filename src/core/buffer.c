@@ -174,6 +174,36 @@ static int buffer_copy(lua_State *l) {
   return 0;
 }
 
+static int buffer_slice(lua_State *l) {
+  // buf:slice(offset, len) where buffer.size <= offset+len
+  int offset = lua_tointeger(l, 2);
+  int slice_length = lua_tointeger(l, 3);
+  lua_getfield(l, 1, "size");
+  int buffer_length = lua_tointeger(l, -1);
+  if (offset+slice_length > buffer_length) {
+    lua_pushstring(l, "slice longer than buffer");
+    lua_error(l);
+    return 1;
+  }
+  lua_getfield(l, 1, "ptr");
+  char *buf = lua_touserdata(l, -1);
+  char *slice_start = buf+offset;
+
+  lua_createtable(l, 0, 2);
+  lua_pushinteger(l, slice_length);
+  lua_setfield(l, -2, "size"); lua_pushinteger(l, 0);
+  lua_setfield(l, -2, "head");
+  lua_pushlightuserdata(l, slice_start);
+  lua_setfield(l, -2, "ptr");
+  lua_pushinteger(l, (int)slice_start);
+  lua_setfield(l, -2, "addr");
+  lua_pushvalue(l, 1);
+  lua_setfield(l, -2, "_owner");
+  luaL_getmetatable(l, "ps2.buffer");
+  lua_setmetatable(l, -2);
+  return 1;
+}
+
 static int buffer_read(lua_State *l) {
   int index = lua_tointeger(l, 2);
   if (index % 4 != 0) {
@@ -287,6 +317,8 @@ int draw_lua_init(lua_State *l) {
 
   lua_pushcfunction(l, buffer_copy);
   lua_setfield(l, -2, "copy");
+  lua_pushcfunction(l, buffer_slice);
+  lua_setfield(l, -2, "slice");
 
   lua_pushcfunction(l, buffer_print);
   lua_setfield(l, -2, "print");
@@ -402,6 +434,7 @@ static int buffer_gcalloc(lua_State *l) {
   trace("allocating GC buffer for lua, size = %d", size);
 
   lua_createtable(l, 0, 2);
+  // returns a pointer to the memory block and pushes to the stack.
   void *buf = lua_newuserdata(l, size);
   lua_setfield(l, -2, "_gc_ref");
   lua_pushinteger(l, size);
