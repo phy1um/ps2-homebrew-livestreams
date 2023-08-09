@@ -2,7 +2,7 @@
 local M = require"p2g.math"
 local test = require"p2g.test"
 
-local t = {}
+local t = {name = "Matrix 3x3"}
 
 function t.mat3_init()
   local a = M.mat3()
@@ -53,6 +53,6 @@ function t.test_mat3_apply_rotate()
   test.equal(ra, rx)
 end
 
-return function() return test.run_suite("3x3 Matrix", t) end
+return t
 
 

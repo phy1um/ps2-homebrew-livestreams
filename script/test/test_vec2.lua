@@ -56,4 +56,4 @@ function suite.vec2_normalize()
   test.equal(v, M.vec2(0.819232, 0.5734623))
 end
 
-return function() return test.run_suite(suite.name, suite) end
+return suite
