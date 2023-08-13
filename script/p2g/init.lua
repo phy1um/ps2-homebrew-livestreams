@@ -28,6 +28,7 @@ end
 coreLoad("log")
 coreLoad("dma")
 coreLoad("gs")
+coreLoad("io")
 coreLoad("tga")
 coreLoad("buffer")
 coreLoad("pad")
