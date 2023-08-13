@@ -20,6 +20,7 @@ local function getCharacterIndex(i)
 end
 
 function font:drawString(line, x, y)
+  if line == nil then return end
   for i=1,#line,1 do
     local ci = getCharacterIndex(string.byte(line, i))
     local ts = (ci % self.charsPerLine) * self.charS
