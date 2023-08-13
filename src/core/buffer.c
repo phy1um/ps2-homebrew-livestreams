@@ -208,9 +208,7 @@ static int buffer_read(lua_State *l) {
   // buf:read(index)
   int index = lua_tointeger(l, 2);
   if (index % 4 != 0) {
-    lua_pushstring(l, "invalid read index, not ==0 %%4");
-    lua_error(l);
-    return 1;
+    return luaL_error(l, "read %d not /4", index);
   }
   lua_pushstring(l, "ptr");
   lua_gettable(l, 1);
