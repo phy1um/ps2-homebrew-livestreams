@@ -20,7 +20,7 @@
 #include <p2g/script.h>
 #include <p2g/utils.h>
 
-static int is_running = 1;
+extern int ps2luaprog_is_running;
 
 #ifndef LOG_LEVEL_DEFAUT
 #define LOG_LEVEL_DEFAULT LOG_LEVEL_TRACE
@@ -51,7 +51,7 @@ char main_script[FILE_NAME_MAX_LEN];
   } while (0)
 
 void core_error(const char *msg) {
-  is_running = 0;
+  ps2luaprog_is_running = 0;
   logerr("FATAL ERROR: %s", msg);
 }
 
@@ -196,12 +196,18 @@ int main(int argc, char *argv[]) {
 
   int frame_count = 0;
   clock_t next_fps_report = clock() + CLOCKS_PER_SEC;
-  while (is_running) {
+
+  ps2luaprog_is_running = 1;
+
+  while (ps2luaprog_is_running) {
     trace("MAIN - BEGIN FRAME");
     pad_frame_start();
     pad_poll();
     dma_wait_fast();
-    ps2luaprog_onframe(L);
+    if(ps2luaprog_onframe(L)) {
+      info("halting program - lua frame exception");
+      ps2luaprog_is_running = 0;
+    };
     // may be required? -- dma_wait_fast();
     trace("WAIT DRAW");
     // TODO(tommarks): draw2d flag to know if draw was submitted
