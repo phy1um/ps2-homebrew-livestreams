@@ -8,17 +8,48 @@ local GS = require"p2g.gs"
 local TGA = require"p2g.tga"
 local PAD = require"p2g.pad"
 local RM = require"p2g.buffer"
+local IO = require"p2g.io"
 
 local testTex1 = nil
 local testTex2 = nil
 local texturesInVram = false
 local vr = nil
 
+local function load_texture(fname, alloc)
+  LOG.trace("loading texture " .. fname)
+  local tga_header = alloc(TGA.HEADER_SIZE)
+  IO.read_file(fname, 0, TGA.HEADER_SIZE, tga_header)
+  local w = TGA.get_header_field(tga_header, "width")
+  local h = TGA.get_header_field(tga_header, "height")
+  local bps = TGA.get_header_field(tga_header, "bps")
+  local bpp = math.floor(bps/8)
+  local size = w*h*bpp
+  if bps == 4 then size = w*h*0.5 end
+  LOG.debug(string.format("TGA header: %d x %d @ %d (%d bytes)", w, h, bps, size))
+  local tga_body = alloc(size)
+  IO.read_file(fname, TGA.HEADER_SIZE, size, tga_body)
+  local texture = {
+    width = w,
+    height = h,
+    data = tga_body,
+    format = TGA.BPS_TO_PSM[bps],
+    fname = fname,
+  }
+  if bps == 32 then
+    TGA.swizzle32(texture)
+  elseif bps == 24 then
+    TGA.swizzle24(texture)
+  elseif bps == 16 then
+    TGA.swizzle16(texture)
+  end
+  return texture
+end
+
 
 function PS2PROG.start()
-  PS2PROG.logLevel(LOG.traceLevel)
-  testTex1 = D2D.loadTexture("test.tga", 64, 64)
-  testTex2 = D2D.loadTexture("half.tga", 64, 64)
+  PS2PROG.logLevel(LOG.debugLevel)
+  testTex1 = load_texture("test.tga", RM.alloc)
+  testTex2 = load_texture("half.tga", RM.alloc)
   DMA.init(DMA.GIF)
   GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
   local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 256)

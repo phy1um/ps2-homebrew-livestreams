@@ -55,7 +55,7 @@ release: clean-all dist
 # Run the engine
 .PHONY: run
 run: scripts
-	$(PCSX2) $(shell pwd)/dist/$(DIST_BIN_NAME)
+	$(PCSX2) $(shell pwd)/dist/$(DIST_BIN_NAME) 
 
 .PHONY: runps2
 runps2: scripts

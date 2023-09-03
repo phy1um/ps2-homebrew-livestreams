@@ -47,7 +47,7 @@ end
 
 LOG.info("loading entrypoint")
 
-require("eg.tests")
+require("eg.texture")
 return {}
 
 -- default entrypoint - do nothing and hang!
