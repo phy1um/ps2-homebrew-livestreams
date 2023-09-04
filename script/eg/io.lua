@@ -10,6 +10,7 @@ local RM = require"p2g.buffer"
 local LOG = require"p2g.log"
 local FONT = require"p2g.font"
 local IO = require"p2g.io"
+local TGA = require"p2g.tga"
 
 -- https://stackoverflow.com/questions/1426954/split-string-in-lua
 local function mysplit (inputstr, sep)
@@ -58,7 +59,7 @@ function PS2PROG.start()
   local db = RM.alloc(200 * 1024)
   D2D:bindBuffer(db)
 
-  local fontTexture = D2D.loadTexture("bigfont.tga", 256, 64)
+  local fontTexture = TGA.from_file("bigfont.tga", RM.alloc)
   font = FONT.new(fontTexture, 8, 16)
 
   vram = VRAM.slice(VRAM.mem.head)

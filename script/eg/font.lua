@@ -8,6 +8,7 @@ local GS = require"p2g.gs"
 local RM = require"p2g.buffer"
 local LOG = require"p2g.log"
 local FONT = require"p2g.font"
+local TGA = require"p2g.tga"
 
 function PS2PROG.start()
   PS2PROG.logLevel(LOG.traceLevel)
@@ -18,12 +19,13 @@ function PS2PROG.start()
   local zb = VRAM.mem:framebuffer(640, 448, GS.PSMZ24, 2048)
   vram = VRAM.slice(VRAM.mem.head)
   GS.setBuffers(fb1, fb2, zb)
-  D2D:screenDimensions(640, 448)
+  D2D:screenDfontimensions(640, 448)
+
   D2D:clearColour(0x2b, 0x2b, 0x2b)
   local db = RM.alloc(200 * 1024)
   D2D:bindBuffer(db)
 
-  local fontTexture = D2D.loadTexture("bigfont.tga", 256, 64)
+  local fontTexture = TGA.from_file("bigfont.tga", RM.alloc)
   font = FONT.new(fontTexture, 8, 16)
 end
 

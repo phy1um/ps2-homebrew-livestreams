@@ -8,6 +8,7 @@ local RM = require"p2g.buffer"
 local LOG = require"p2g.log"
 local FONT = require"p2g.font"
 local PAD = require"p2g.pad"
+local TGA = require"p2g.tga"
 
 local camera = {
   x = 0,
@@ -28,7 +29,7 @@ function PS2PROG.start()
   local db = RM.alloc(200 * 1024)
   D2D:bindBuffer(db)
 
-  local fontTexture = D2D.loadTexture("bigfont.tga", 256, 64)
+  local fontTexture = TGA.from_file("bigfont.tga", RM.alloc)
   font = FONT.new(fontTexture, 8, 16)
 end
 
