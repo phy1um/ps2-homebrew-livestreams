@@ -2,8 +2,8 @@ PS2SDK=/usr/local/ps2dev/ps2sdk
 
 MAIN_OBJ=main.o utils.o gs.o ps2luaprog.o
 CORE_OBJ=core/bindings.o core/buffer.o core/dma.o core/draw.o core/gslua.o core/log.o core/pad.o core/slotlist.o core/tga.o core/io.o
-DRAW_OBJ=draw/draw2d.o draw/common.o draw/buffer.o
-MATH_OBJ=ps2math.o math/vec2lua.o math/vec3lua.o math/mat3lua.o math/float.o
+DRAW_OBJ=draw/draw2d.o draw/common.o draw/buffer.o draw/draw3d.o
+MATH_OBJ=ps2math.o math/vec2lua.o math/vec3lua.o math/mat3lua.o math/float.o math/mat4lua.o math/vec4lua.o
 
 EE_BIN=$(PREFIX)test.elf
 EE_OBJS=$(MAIN_OBJ) $(CORE_OBJ) $(DRAW_OBJ) $(MATH_OBJ) liblua.a

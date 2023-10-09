@@ -22,6 +22,7 @@ void core_error(const char *);
 enum d2d_type {
   DRAW_FMT_NONE,
   DRAW_FMT_GEOM,
+  DRAW_FMT_GEOM3D,
   DRAW_FMT_RECT,
   DRAW_FMT_SPRITE,
   DRAW_FMT_TEXTRI,

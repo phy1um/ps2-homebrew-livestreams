@@ -2,9 +2,17 @@
 local LOG = require"p2g.log"
 local TEST = require"p2g.test"
 
+local entrypoint = "eg.tests"
+
 test_record = {}
 
-local test_files = {"test_vec2", "test_mat3x3", "test_vec3", "test_slotlist"}
+local test_files = {
+  "test_vec2", 
+  "test_vec3", 
+  "test_mat3x3", 
+  "test_mat4x4", 
+  "test_slotlist",
+}
 function run_unit_tests()
   local ok = true
   local any_fail = false
@@ -37,17 +45,21 @@ function run_unit_tests()
     end
   end
   if any_fail then
-    error("test failures")
+    -- error("test failures")
+    -- currently having segfault issues with pcall?
+    -- so do this instead
+    return true
   end
 end
 
-if pcall(run_unit_tests) ~= true then
+if run_unit_tests() == true then
   LOG.error("invalid startup: unit tests failed")
+  entrypoint = "eg.tests"
 end
 
 LOG.info("loading entrypoint")
 
-require("eg.tests")
+require(entrypoint)
 return {}
 
 -- default entrypoint - do nothing and hang!

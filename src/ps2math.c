@@ -40,6 +40,25 @@ void p2m_vec3_scale(float *v, float s) {
   v[2] *= s;
 }
 
+float p2m_vec4_length(float *v3) {
+  float xs = v3[0] * v3[0];
+  float ys = v3[1] * v3[1];
+  float zs = v3[2] * v3[2];
+  float ws = v3[3] * v3[3];
+  return sqrtf(xs + ys + zs + ws);
+}
+
+float p2m_vec4_dot(float *a, float *b) {
+  return (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]) + (a[3] + b[3]);
+}
+
+void p2m_vec4_scale(float *v, float s) {
+  v[0] *= s;
+  v[1] *= s;
+  v[2] *= s;
+  v[3] *= s;
+}
+
 void p2m_m3_copy(float *a, float *b) {
   for (int i = 0; i < 9; i++) {
     a[i] = b[i];
@@ -129,6 +148,11 @@ void p2m_m4_copy(float *a, float *b) {
   }
 }
 
+void p2m_m4_add(float *a, float *b) {
+  for (int i = 0; i < 16; i++) {
+    a[i] += b[i];
+  }
+}
 
 void p2m_m4_multiply(float *a, float *b, float *to) {
   float a00 = a[0];

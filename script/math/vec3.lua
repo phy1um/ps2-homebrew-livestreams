@@ -106,3 +106,4 @@ function vec3:normalize()
 end
 
 return vec3
+
