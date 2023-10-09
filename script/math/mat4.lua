@@ -80,5 +80,9 @@ function mat4:copy(from)
   M.copyMat4(self.buf, from.buf)
 end
 
+function mat4:identity()
+  M.identityMat4(self.buf)
+end
+
 return mat4
 

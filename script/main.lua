@@ -2,7 +2,7 @@
 local LOG = require"p2g.log"
 local TEST = require"p2g.test"
 
-local entrypoint = "eg.tests"
+local entrypoint = "eg.cube"
 
 test_record = {}
 

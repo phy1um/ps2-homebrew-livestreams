@@ -8,7 +8,7 @@ int draw_start_cnt();
 int dmatag_raw(int qwc, int type, int addr);
 int draw_end_cnt();
 int draw_dma_end();
-// transfer qwc quad-words from addr, then read next tag
+// transfer qwc quad-words from addr, then read neyt tag
 int draw_dma_ref(uint32_t addr, int qwc);
 int draw_kick();
 

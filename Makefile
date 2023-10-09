@@ -31,6 +31,7 @@ assets: scripts
 	if ! [ -d dist ]; then mkdir dist; fi
 	$(MAKE) -C asset
 	cp asset/*.tga dist/
+	cp asset/*.bin dist/
 	cp distfiles/* dist/
 	cp LICENSE dist/
 
