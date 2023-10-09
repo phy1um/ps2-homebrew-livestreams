@@ -20,11 +20,11 @@ void core_error(const char *);
  * DRAW 2D
  */
 enum d2d_type {
-  D2D_NONE,
-  D2D_GEOM,
-  D2D_RECT,
-  D2D_SPRITE,
-  D2D_TEXTRI,
+  DRAW_FMT_NONE,
+  DRAW_FMT_GEOM,
+  DRAW_FMT_RECT,
+  DRAW_FMT_SPRITE,
+  DRAW_FMT_TEXTRI,
 };
 
 struct draw_gif {

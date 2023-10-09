@@ -25,7 +25,7 @@ int draw_clear_buffer() {
   state.gif.head = 0;
   state.dma.head = 0;
   state.dma.in_cnt = 0;
-  state.d2d.draw_type = D2D_NONE;
+  state.d2d.draw_type = DRAW_FMT_NONE;
   return 1;
 }
 
@@ -92,9 +92,9 @@ int draw_dma_end() {
   return 1;
 }
 
-int draw_dma_ref(uint32_t addr) {
+int draw_dma_ref(uint32_t addr, int qwc) {
   draw_end_cnt();
-  dma_tag((uint32_t *)state.cmdbuffer_head, 0, 0x3 << 28, addr);
+  dma_tag((uint32_t *)state.cmdbuffer_head, qwc, 0x3 << 28, addr);
   state.cmdbuffer_head += QW_SIZE;
   state.cmdbuffer_head_offset += QW_SIZE;
   return 1;
