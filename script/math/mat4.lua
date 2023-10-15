@@ -60,6 +60,10 @@ function mat4.new(x)
   return setmetatable({buf = buf}, mat4)
 end
 
+function mat4:set(x,y,v)
+  self.buf:setFloat(x + (4*y), v)
+end
+
 function mat4:add(other)
   M.addMat4(self.buf, other.buf)
 end
