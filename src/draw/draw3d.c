@@ -24,8 +24,10 @@
 
 extern struct render_state state;
 
+#define fp_just_decimal(x) ((x) - ((int)(x)))
+
 #define to_coord(f)                                                            \
-  0x8000 + (0xfff0 & (((int)(f) << 4) | (int)((f) - ((int)(f))) * 0xf))
+  0x8000 + (0xfff0 & (((int)(f) << 4))) + (fp_just_decimal(f)*0xf)
 
 // prepend instance data for batch drawing
 int draw3d_instance_xyz(float x, float y, float z) {
@@ -96,6 +98,7 @@ int draw3d_ee_transform_verts(float *mvp, size_t offset_start, int vertex_count,
   for(int i = 0; i < vertex_count; i++) {
     float *vertex = (float*) (state.cmdbuffer + vertex_base);
     float *position = vertex + pos_offset;
+    position[3] = 1.f;
     trace(" read verts @ %p [+%d => %p]", vertex, pos_offset, position);
     trace(" @ {%f, %f, %f, %f}", position[0],position[1],position[2],position[3]);
     p2m_m4_apply(mvp, position);
@@ -103,9 +106,9 @@ int draw3d_ee_transform_verts(float *mvp, size_t offset_start, int vertex_count,
 
     // convert to fixed point from float
     int *position_fp = (int*)position;
-    position_fp[0] = to_coord(position[0]);
-    position_fp[1] = to_coord(position[1]);
-    position_fp[2] = (int)(position[2]);
+    position_fp[0] = to_coord((position[0]/position[3]));
+    position_fp[1] = to_coord((position[1]/position[3]));
+    position_fp[2] = (2<<15) - (int)((-2000*position[2]/position[3]));
     position_fp[3] = 0;
     trace(" => {%x, %x, %x, %x}", position_fp[0],position_fp[1],position_fp[2],position_fp[3]);
 
