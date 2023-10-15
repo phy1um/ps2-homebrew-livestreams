@@ -67,10 +67,11 @@ static int gslua_set_buffers(lua_State *l) {
   st->fb[1].psm = fb_fmt;
   st->fb[1].mask = 0;
 
+  st->zb.enable = 1;
   st->zb.address = zb_addr;
   st->zb.zsm = zb_fmt;
-  // st->zb.method = ZTEST_METHOD_GREATER_EQUAL;
-  st->zb.method = ZTEST_METHOD_ALLPASS;
+  st->zb.method = ZTEST_METHOD_GREATER_EQUAL;
+  // st->zb.method = ZTEST_METHOD_ALLPASS;
   st->zb.mask = 0;
   graph_set_framebuffer_filtered(fb2_addr, fb_width, fb_fmt, 0, 0);
   graph_enable_output();
