@@ -414,7 +414,7 @@ static int drawbuffer_free(lua_State *l) { return 0; }
 static int buffer_alloc(lua_State *l) {
   int size = lua_tointeger(l, 1);
   trace("allocating buffer for lua, size = %d", size);
-  void *buf = malloc(size);
+  void *buf = calloc(size, 1);
 
   lua_createtable(l, 0, 2);
   lua_pushinteger(l, size);
