@@ -15,9 +15,6 @@ log.addHandler(ch)
 def LE(s):
     return f"<{s}"
 
-def BE(s):
-    return f">{s}"
-
 def random_col():
     return (math.floor(random()*100) + 155, math.floor(random()*100) + 155, math.floor(random()*100) + 155)
 
