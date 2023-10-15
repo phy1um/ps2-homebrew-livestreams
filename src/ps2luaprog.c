@@ -25,8 +25,13 @@ static int ps2lua_log2(lua_State *l) {
 
 int ps2luaprog_set_log_level(lua_State *l) {
   log_output_level = lua_tointeger(l, 1);
-  info("updated log level = %d", log_output_level);
+  logdbg("updated log level = %d", log_output_level);
   return 0;
+}
+
+int ps2luaprog_get_log_level(lua_State *l) {
+  lua_pushinteger(l, log_output_level);
+  return 1;
 }
 
 int ps2luaprog_init(lua_State *l) {
@@ -37,6 +42,8 @@ int ps2luaprog_init(lua_State *l) {
   lua_setfield(l, -2, "frame");
   lua_pushcfunction(l, ps2luaprog_set_log_level);
   lua_setfield(l, -2, "logLevel");
+  lua_pushcfunction(l, ps2luaprog_get_log_level);
+  lua_setfield(l, -2, "get_log_level");
   lua_setglobal(l, "PS2PROG");
   lua_pushcfunction(l, ps2lua_log2);
   lua_setglobal(l, "log2");
