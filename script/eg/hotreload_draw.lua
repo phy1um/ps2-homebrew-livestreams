@@ -1,5 +1,5 @@
 
-local D2D = require "draw2d"
+local D2D = require "p2g.draw2d"
 
 local hld = {
   x = 0,
@@ -16,7 +16,7 @@ function hld.new(x, y)
 end
 
 function hld:draw()
-  D2D:setColour(0xff, 0xff, 0, 0x80)
+  D2D:setColour(0xff, 0xff, 0xff, 0x80)
   D2D:rect(self.x, self.y, self.w, self.h)
 end
 
