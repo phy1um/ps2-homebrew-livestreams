@@ -15,3 +15,7 @@ format:
 cppcheck:
 	$(DOCKER) run $(DOCKERFLAGS) --rm -v $(shell pwd):/src $(CPPCHECK_IMG) cppcheck -v --xml --enable=all . 2> $(CPPCHECK_REPORT)
 	$(DOCKER) run $(DOCKERFLAGS) --rm -v $(shell pwd):/src $(CPPCHECK_IMG) cppcheck-htmlreport --source-dir=. --title="Engine Quality - $(VERSION)" --file=$(CPPCHECK_REPORT) --report-dir=$(CPPCHECK_OUT)
+
+.PHONY: memcheck
+memcheck:
+	cd dist && valgrind --log-file="./vg-log" ./sim
