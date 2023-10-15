@@ -10,47 +10,28 @@ local LOG = require"p2g.log"
 local M = require"p2g.math"
 local IO = require"p2g.io"
 local PAD = require"p2g.pad"
-
-local geom_buffer = RM.alloc(1024)
-local mvp = M.mat4()
-local working_m4 = {M.mat4(), M.mat4(), M.mat4()}
+local CAMERA = require"p2g.camera"
+local I = require"eg.cube_instance"
 
 local rx = 0
 local ry = 0
+local cam = CAMERA.new(0,0,18, {
+  fov = math.pi/4,
+  aspect = 3/4,
+  near = 0.1,
+  far = 10,
+})
 
-local function scale(m, n) 
-  m[0] = n
-  m[5] = n
-  m[10] = n
-  m[15] = n
-end
+local instances = {}
 
-local function translate(m, ox, oy)
-  m[3] = ox
-  m[7] = oy
-end
-
-local function rotate_x(m, rx)
-  m[5] = math.cos(-rx)
-  m[6] = -math.sin(-rx)
-  m[9] = math.sin(-rx)
-  m[10]= math.cos(-rx)
-end
-
-local function rotate_y(m, ry)
-  m[0] = math.cos(-ry)
-  m[2] = math.sin(-ry)
-  m[8] = -math.sin(-ry)
-  m[10] = math.cos(-ry)
-end
 
 function PS2PROG.start()
   PS2PROG.logLevel(LOG.infoLevel)
   DMA.init(DMA.GIF)
   GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
-  local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 2048)
-  local fb2 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 2048)
-  local zb = VRAM.mem:framebuffer(640, 448, GS.PSMZ24, 2048)
+  local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 2048)
+  local fb2 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 2048)
+  local zb = VRAM.mem:framebuffer(640, 448, GS.PSMZ16, 2048)
   GS.setBuffers(fb1, fb2, zb)
   DRAW:screenDimensions(640, 448)
   DRAW:clearColour(0x2b, 0x2b, 0x2b)
@@ -61,37 +42,70 @@ function PS2PROG.start()
   cube_model = RM.alloc(sz)
   IO.read_file("cube.bin", 0, sz, cube_model)
 
+  local putcube = function(x,y,z,s,rx,ry)
+    local i = I.new(cube_model, 12*3, 8*4)
+    i:move_to(x,y,z)
+    i:rotate(rx, ry)
+    i:set_scale(s)
+    table.insert(instances, i)
+  end
+
+  putcube(0, 0, -15, 30, 0, 0)
+  --[[
+  putcube(0, 0, -3, 20, 0.1, 0.2)
+  putcube(-14, 0, -15, 3, 0, 0)
+  putcube(0, 20, -13, 18, 0.4, 0.4)
+  ]]
+
 end
 
+local reload_debounce = 0
+
 function PS2PROG.frame()
-  working_m4[1]:identity()
-  working_m4[2]:identity()
-  working_m4[3]:identity()
-  rotate_x(working_m4[1], rx)
-  rotate_y(working_m4[2], ry)
-  scale(working_m4[3], 100)
-  mvp:identity()
-  mvp:mul(working_m4[1])
-  mvp:mul(working_m4[2])
-  mvp:mul(working_m4[3])
+  local dt = 1/30
+  local cam_dx = PAD.axis(PAD.axisLeftX)
+  local cam_dy = PAD.axis(PAD.axisLeftY)
+  if PAD.held(PAD.L1) then
+    instances[1]:step(cam_dx*30*dt, cam_dy*30*dt, 0)
+  else
+    cam:step(cam_dx*10*dt, 0, cam_dy*10*dt)
+  end
 
-  if PAD.held(PAD.LEFT) then 
-    ry = ry+0.01
+  if reload_debounce > 0 then reload_debounce = reload_debounce - 1 end
+
+  if PAD.held(PAD.SELECT) and reload_debounce <= 0 then
+    local lv = PS2PROG.get_log_level()
+    PS2PROG.logLevel(LOG.traceLevel)
+    reload("p2g.camera")
+    reload("eg.cube_instance")
+    reload_debounce = 6
+    PS2PROG.logLevel(lv)
+  end
+
+  if PAD.held(PAD.X) and reload_debounce <= 0 then
+    LOG.info(string.format("camera @ {%f, %f, %f}", cam.pos.x, cam.pos.y, cam.pos.z))
+    LOG.info(string.format("cube R {%f, %f, 0}", instances[1].rot_x, instances[1].rot_y))
+    PS2PROG.logLevel(LOG.traceLevel)
+    reload_rebounce = 6
+  end
+
+  local drot_x = 0
+  local drot_y = 0
+  if PAD.held(PAD.LEFT) then
+    drot_y = 0.09
   elseif PAD.held(PAD.RIGHT) then
-    ry = ry-0.01
+    drot_y = -0.09
   end
-
-  if PAD.held(PAD.UP) then 
-    rx = rx+0.01
+  if PAD.held(PAD.UP) then
+    drot_x = 0.09
   elseif PAD.held(PAD.DOWN) then
-    rx = rx-0.01
+    drot_x = -0.09
   end
 
-  LOG.trace("matrix: " .. tostring(mvp))
-  LOG.trace("matrix buf: " .. tostring(mvp.buf))
+  instances[1]:rotate(drot_x, drot_y)
+
   DRAW:frameStart()
-  local mo = DRAW:mesh_cnt(cube_model, 12*3, 8*4)
-  DRAW:ee_transform(mvp.buf, mo, 12*3, 8*4, 4)
+  I.draw_all(instances, cam)
   DRAW:frameEnd()
 end
 
