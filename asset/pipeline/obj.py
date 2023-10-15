@@ -11,12 +11,20 @@ def get_vert_index(e):
     return int(p[0]) - 1
 
 def face_from_line(parts):
-    if len(parts) != 3:
-        raise Exception("faces must be triangles")
-    a = get_vert_index(parts[0])
-    b = get_vert_index(parts[1])
-    c = get_vert_index(parts[2])
-    return Face(a,b,c)
+    if len(parts) == 3:
+        a = get_vert_index(parts[0])
+        b = get_vert_index(parts[1])
+        c = get_vert_index(parts[2])
+        return [Face(a,b,c)]
+    elif len(parts) == 4:
+        a = get_vert_index(parts[0])
+        b = get_vert_index(parts[1])
+        c = get_vert_index(parts[2])
+        d = get_vert_index(parts[3])
+        return [Face(a,b,c), Face(d,b,c)]
+    else:
+        raise Exception(f"face must be tri or quad, got {len(parts)}")
+        
 
 class Face(object):
     def __init__(self, a, b, c):
@@ -53,8 +61,8 @@ class ParsedObj(object):
         self._f = []
     def add_vert(self, v):
         self._v.append(v)
-    def add_face(self, f):
-        self._f.append(f)
+    def add_faces(self, f):
+        self._f += f
     def faces(self):
         return self._f.__iter__()
     def face_coords(self):
@@ -72,7 +80,7 @@ def parse(f):
         if parts[0] == "v":
             res.add_vert( vert_from_line(parts[1:]) )
         elif parts[0] == "f":
-            res.add_face( face_from_line(parts[1:]) )
+            res.add_faces( face_from_line(parts[1:]) )
         else:
             log.info(f"unsupported line type: {parts[0]}")
     return res
