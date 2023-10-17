@@ -1,6 +1,8 @@
+
 import struct
 import sys
 import logging
+import argparse
 
 import obj
 
@@ -12,33 +14,38 @@ log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 log.addHandler(ch)
 
-def LE(s):
-    return f"<{s}"
+def get_colour(s):
+    if s == None:
+        return get_colour("0x70707080")
+    n = int(s, 16)
+    return ((n>>24)&0xff, (n>>16)&0xff, (n>>8)&0xff, n&0xff)
 
-def random_col():
-    return (math.floor(random()*100) + 155, math.floor(random()*100) + 155, math.floor(random()*100) + 155)
+parse = argparse.ArgumentParser(prog="obj2gif", description="converts a .obj to a PS2 GIF-ready binary file")
+parse.add_argument("file")
+parse.add_argument("-o", "--output")
+parse.add_argument("-c", "--colour")
 
-obj_file = open(sys.argv[1], "r")
-o = obj.parse(obj_file)
-obj_file.close()
+args = parse.parse_args()
+
+with open (args.file, "r") as f:
+    o = obj.parse(f)
 count = 0
 rows = []
+(r, g, blu, alpha) = get_colour(args.colour)
 for f in o.face_coords():
     [a, b, c] = f
-    (r, g, blu) = random_col()
-    rows.append(struct.pack(LE("iiii"), r, g, blu, 128))
-    rows.append(struct.pack(LE("ffff"), a.x, a.y, a.z, 1.0))
-    rows.append(struct.pack(LE("iiii"), r, g, blu, 128))
-    rows.append(struct.pack(LE("ffff"), b.x, b.y, b.z, 1.0))
-    rows.append(struct.pack(LE("iiii"), r, g, blu, 128))
-    rows.append(struct.pack(LE("ffff"), c.x, c.y, c.z, 1.0))
+    rows.append(struct.pack("<iiii", r, g, blu, alpha))
+    rows.append(struct.pack("<ffff", a.x, a.y, a.z, 1.0))
+    rows.append(struct.pack("<iiii", r, g, blu, alpha))
+    rows.append(struct.pack("<ffff", b.x, b.y, b.z, 1.0))
+    rows.append(struct.pack("<iiii", r, g, blu, alpha))
+    rows.append(struct.pack("<ffff", c.x, c.y, c.z, 1.0))
     count += 1
 log.info(f"found {count} faces")
-obj_file.close()
 
 out_file = None
-if len(sys.argv) > 2:
-    out_file = open(sys.argv[2], "wb")
+if args.output:
+    out_file = open(args.output, "wb")
 else:
     out_file = sys.stdout.buffer
 
