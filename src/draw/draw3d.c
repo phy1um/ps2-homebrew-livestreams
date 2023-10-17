@@ -99,7 +99,7 @@ int draw3d_ee_transform_verts(float *mvp, size_t offset_start, int vertex_count,
     float *vertex = (float*) (state.cmdbuffer + vertex_base);
     float *position = vertex + pos_offset;
     position[3] = 1.f;
-    trace(" read verts @ %p [+%d => %p]", vertex, pos_offset, position);
+    trace(" read verts @ %p(%d) [+%d => %p]", vertex, i, pos_offset, position);
     trace(" @ {%f, %f, %f, %f}", position[0],position[1],position[2],position[3]);
     p2m_m4_apply(mvp, position);
     trace(" => {%f, %f, %f, %f}", position[0],position[1],position[2],position[3]);
