@@ -2,10 +2,7 @@ ISO_TGT=test.iso
 BIN=src/test.elf
 
 PS2HOST?=192.168.20.99
-
-DOCKER_IMG=ps2build
-DOCKERFLAGS=--user "$(shell id -u):$(shell id -g)"
-DOCKER?=docker
+PLATFORM=ps2
 
 VERSION?=$(shell git rev-parse --short HEAD)
 ISO_FLAGS?=-l --allow-lowercase -A "P2Garage Engine by Tom Marks -- coding.tommarks.xyz" -V "P2GARAGE:$(VERSION)"
@@ -25,15 +22,9 @@ PCSX2=pcsx2-qt
  
 include .lintvars
 
-ifeq ($(IN_PIPELINE), true)
 .PHONY: dist
 dist: $(LUA_LIB) $(BIN) assets
 	cp $(BIN) dist/$(DIST_BIN_NAME)
-else
-.PHONY: dist
-dist: docker-lua docker-elf assets
-	cp $(BIN) dist/$(DIST_BIN_NAME)
-endif
 
 .PHONY: assets
 assets: scripts
@@ -60,23 +51,6 @@ $(LUA_LIB): lua
 release: clean-all dist
 	zip -r ps2-engine-$(VERSION).zip dist
 
-
-# Docker rules
-.PHONY: docker-image
-docker-image:
-	$(DOCKER) build -t $(DOCKER_IMG) .
-
-.PHONY: docker-elf
-docker-elf:
-	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
-
-.PHONY: docker-iso
-docker-iso:
-	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
-
-.PHONY: docker-lua
-docker-lua: lua
-	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) bash -c "platform=PS2 make $(LUA_LIB)"
 
 # Run the engine
 .PHONY: run
