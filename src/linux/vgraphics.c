@@ -1,6 +1,5 @@
 
 #include <draw.h>
-
 #include <p2g/log.h>
 
 void graph_wait_vsync() {}

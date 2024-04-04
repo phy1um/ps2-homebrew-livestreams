@@ -3,6 +3,7 @@
 #define DMA_END 0x7
 
 #include <p2g/log.h>
+#include <stdint.h>
 
 void channel_process(int chan_id, void *data, int len) {
   info("channel %d: sink @ %p, size=%d", chan_id, data, len);

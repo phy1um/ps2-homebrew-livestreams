@@ -2,7 +2,6 @@
 
 #include <gif_tags.h>
 #include <gs_gp.h>
-
 #include <draw.h>
 
 qword_t *draw_setup_environment(qword_t *q, int context, framebuffer_t *frame,

@@ -2,7 +2,6 @@
 #ifndef P2SIM_DRAW_H
 #define P2SIM_DRAW_H
 
-
 #include <tamtypes.h>
 #include <draw_tests.h>
 #include <draw_blending.h>
