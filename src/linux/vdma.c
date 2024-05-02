@@ -38,11 +38,12 @@ int dma_channel_send_chain(int chan, void *data, int data_size, int flags,
     uint32_t t0 = *((uint32_t *)(data + hb));
     uint32_t addr = *((uint32_t *)(data + hb + 4));
     unsigned int qwc = t0 & 0xffff;
-    unsigned int type = (t0 >> 28) & 0xf;
+    unsigned int type = (t0 >> 28) & 0x7;
+    trace("parse dma tag: %08X (addr = %04X qwc = %04X type = %02X", t0, addr, qwc, type);
     switch (type) {
     case DMA_CNT:
       channel_process(chan, data + hb + 8, qwc * 16);
-      hb += qwc * 16 + 8;
+      hb += (qwc+1) * 16;
       break;
     case DMA_REF:
       channel_process(chan, ((void *)&addr), qwc * 16);
