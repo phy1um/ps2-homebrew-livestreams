@@ -203,7 +203,6 @@ int main(int argc, char *argv[]) {
     trace("MAIN - BEGIN FRAME");
     pad_frame_start();
     pad_poll();
-    //dma_wait_fast();
     if(ps2luaprog_onframe(L)) {
       info("halting program - lua frame exception");
       ps2luaprog_is_running = 0;
