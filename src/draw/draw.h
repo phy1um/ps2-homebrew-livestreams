@@ -15,6 +15,7 @@
 
 // TODO: move to some other folder
 #define VIF_CODE_DIRECT 0x50
+#define VIF_CODE_NOP 0x0
 #define VIF_CODE_NO_STALL 0x0
 #define VIF_CODE_STALL 0x1
 

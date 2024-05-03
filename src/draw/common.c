@@ -67,6 +67,12 @@ int draw_update_last_tag_loops() {
 
 int draw_vifcode_direct_start(struct commandbuffer *c) {
   trace("start vifcode @ %d", c->offset);
+  command_buffer_align_head(c, 16);
+  vifcode((uint32_t*) c->head, VIF_CODE_NOP, VIF_CODE_NO_STALL, 0, 0);
+  vifcode((uint32_t*) c->head+4, VIF_CODE_NOP, VIF_CODE_NO_STALL, 0, 0);
+  vifcode((uint32_t*) c->head+8, VIF_CODE_NOP, VIF_CODE_NO_STALL, 0, 0);
+  c->head += 12;
+  c->offset += 12;
   c->vif.head = c->head;
   c->vif.is_direct_gif = 1;
   c->vif.is_active = 1;
@@ -120,7 +126,7 @@ int draw_vifcode_end(struct commandbuffer *c) {
       return 1;
     } 
     trace("vifcode update imm = %d (size in bytes = %d)", qwc-2, packet_len);
-    vifcode_update_imm(c->vif.head, qwc-1);
+    vifcode_update_imm(c->vif.head, qwc);
   } else {
     logerr("unsupported VIF transfer");
   }
