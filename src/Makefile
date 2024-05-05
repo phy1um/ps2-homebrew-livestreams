@@ -1,4 +1,5 @@
 PS2SDK=/usr/local/ps2dev/ps2sdk
+DVP-AS:=dvp-as
 
 HOST_OBJS=$(CORE_OBJ) main.o ps2luaprog.o liblua.a
 MAIN_OBJ=utils.o gs.o pad.o
@@ -32,6 +33,9 @@ INCS=-I $(PREFIX)linux/include -I./$(PREFIX)include
 %.o: %.c
 	$(CC) $(EE_CFLAGS) $(INCS) -c -o $@ $<
 endif
+
+vu1prog/%.vuobj: vu1prog/%.asm
+	$(DVP-AS) $(DVP_FLAGS) -o $@ $<
 
 # TODO(Tom Marks): update ISO building to include everything in dist/
 $(ISO_TGT): $(EE_BIN)
