@@ -233,6 +233,17 @@ static int draw_lua_ee_transform(lua_State *l) {
   return 1;
 }
 
+static int draw_vu_unpack_inline(lua_State *l) {
+  int addr = lua_tointeger(l, 1);
+  int rc = draw_vu_begin_unpack_inline(addr);
+  if (rc != 0) {
+    luaL_error(l, "inline upload to %d", addr);
+    return 1;
+  }
+  return 0;
+}
+
+
 #define pushfn(f, n)                                                           \
   lua_pushcfunction(l, f);                                                     \
   lua_setfield(l, -2, n)
@@ -254,5 +265,6 @@ int draw2d_lua_init(lua_State *l) {
   pushfn(draw_lua_mesh_cnt, "mesh_cnt");
   pushfn(draw_lua_mesh_ref, "mesh_ref");
   pushfn(draw_lua_ee_transform, "ee_transform");
+  pushfn(draw_vu_unpack_inline, "vu_begin_unpack_inline");
   return 1;
 }

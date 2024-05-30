@@ -128,12 +128,15 @@ int draw_vifcode_end(struct commandbuffer *c) {
       return 1;
     } 
     trace("vifcode update imm = %d (size in bytes = %d)", qwc-2, packet_len);
-    vifcode_update_imm(c->vif.head, qwc);
+    vifcode_update_imm((uint16_t*) c->vif.head, qwc);
     c->vif.is_direct_gif = 0;
+  } else if (c->vif.is_inline_unpack) {
+    draw_vu_end_unpack_inline(c, packet_len);
   } else {
     logerr("unsupported VIF transfer");
   }
   c->vif.is_active = 0;
+  return 1;
 }
 
 
@@ -264,6 +267,15 @@ int draw_frame_end() {
   state.buffer.head = (char *)q;
   draw_kick_vif();
   memcpy(&state.last_frame, &state.this_frame, sizeof(struct draw_stats));
+  return 1;
+}
+
+int draw_vu_end_unpack_inline(struct commandbuffer *c, size_t packet_size) {
+  commandbuffer_update_last_tag_loop(c);
+  trace("inline unpack end: update num");
+  size_t qword_size = packet_size / 16;
+  vifcode_update_num((uint8_t*) c->vif.head, qword_size);
+  c->vif.is_inline_unpack = 0;
   return 1;
 }
 

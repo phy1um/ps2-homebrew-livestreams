@@ -191,3 +191,9 @@ int vifcode_update_imm(uint16_t *t, uint16_t imm) {
   return 1;
 }
 
+
+int vifcode_update_num(uint8_t *t, uint8_t num) {
+    t[2] = num&0xff; 
+    return 1;
+}
+

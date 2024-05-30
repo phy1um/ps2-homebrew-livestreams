@@ -62,3 +62,38 @@ int draw_vu_call_program(int vu_uprog_addr) {
   return 0;
 }
 
+// TODO: support extra flags
+int draw_vu_unpack_v4_32(void *buffer, size_t buffer_size, int vu_addr) {
+  struct commandbuffer *c = &state.buffer;
+  draw_vifcode_end(c);
+  size_t qword_size = buffer_size/16; 
+  vifcode((uint32_t*) c->head, VIF_CODE_UNPACK_V432, VIF_CODE_NO_STALL, qword_size, vu_addr);
+
+  size_t n_bytes = (qword_size)*16;
+  memcpy(c->head, buffer, n_bytes);
+  c->head += n_bytes;
+  c->offset += n_bytes;
+
+  // TODO: hack
+  draw_vifcode_direct_start(&state.buffer);
+  return 0;
+}
+
+int draw_vu_begin_unpack_inline(uint32_t target_addr) {
+  draw_vifcode_end();
+  struct commandbuffer *c = &state.buffer;
+  trace("start vifcode inline unpack @ %d", c->offset);
+  while (c->offset % 12 != 0) {
+    c->head += 1;
+    c->offset += 1;
+  }
+  vifcode((uint32_t*) c->head, VIF_CODE_UNPACK_V432, VIF_CODE_NO_STALL, 0, target_addr);
+  c->vif.head = c->head;
+  c->vif.is_direct_gif = 0;
+  c->vif.is_inline_unpack = 1;
+  c->vif.is_active = 1;
+  c->head += sizeof(uint32_t);
+  c->offset += sizeof(uint32_t);
+  return 0;
+}
+

@@ -31,5 +31,6 @@ int push_st(struct commandbuffer *state, float s, float t);
 int dma_tag(uint32_t *t, int qwc, int type, uint32_t addr);
 int vifcode(uint32_t *t, int op, int stall, int num, uint16_t imm);
 int vifcode_update_imm(uint16_t *t, uint16_t imm);
+int vifcode_update_num(uint8_t *t, uint8_t num);
 
 #endif

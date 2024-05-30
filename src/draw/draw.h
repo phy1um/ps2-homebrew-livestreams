@@ -42,6 +42,7 @@ struct draw_dma {
 struct draw_vif {
   char *head;
   int is_direct_gif;
+  int is_inline_unpack;
   int is_active;
 };
 
@@ -169,5 +170,7 @@ int draw3d_mesh_triangles_ref(void *buffer, int vertex_count,
 // TODO: circulare dependency thing
 int draw_vifcode_end(struct commandbuffer *c);
 int draw_vifcode_direct_start(struct commandbuffer *c);
+int draw_vu_end_unpack_inline(struct commandbuffer *c, size_t packet_size);
+
 
 #endif
