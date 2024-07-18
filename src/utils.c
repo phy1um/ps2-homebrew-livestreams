@@ -12,10 +12,16 @@ int print_buffer(qword_t *b, int len) {
     trace("-- buffer %p\n", b);
     for (int i = 0; i < len; i++) {
       printf("%02X%02X%02X%02X %02X%02X%02X%02X %02X%02X%02X%02X %02X%02X%02X%02X\n",
+          /*
           b->b[0], b->b[1], b->b[2], b->b[3],
           b->b[4], b->b[5], b->b[6], b->b[7],
           b->b[8], b->b[9], b->b[10], b->b[11],
           b->b[12], b->b[13], b->b[14], b->b[15]
+          */
+          b->b[15], b->b[14], b->b[13], b->b[12],
+          b->b[11], b->b[10], b->b[9], b->b[8],
+          b->b[7], b->b[6], b->b[5], b->b[4],
+          b->b[3], b->b[2], b->b[1], b->b[0]
         );
       //printf("%08X %08X %08X %08X")
       //printf("%016llx %016llx\n", b->dw[0], b->dw[1]);
