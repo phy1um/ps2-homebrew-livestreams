@@ -115,10 +115,10 @@ function PS2PROG.frame()
   if first_frame then
     LOG.debug("try upload")
     print(vuprog.buffer)
-    vuprog:upload(VU.VU1)
+    vuprog:upload_to(VU.VU1, 0xe00)
     first_frame = false
   end
-  DRAW:vu_begin_unpack_inline(0)
+  DRAW:vu_begin_unpack_inline(0x100)
   I.draw_all(instances, cam)
   LOG.debug("try call")
   vuprog:call()
