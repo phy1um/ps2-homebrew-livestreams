@@ -57,6 +57,47 @@ static int vu_upload(lua_State *l) {
   return 0;
 }
 
+static int vu_upload_to(lua_State *l) {
+  int target = lua_tointeger(l, 2);
+  if (target != TARGET_VU1) {
+    luaL_error(l, "only VU1 supported");
+    return 1;
+  }
+  if (!lua_istable(l, 1)) {
+    logerr("vu upload: first argument must be table");
+    luaL_error(l, "first argument must be table");
+    return 1;
+  }
+  lua_getfield(l, 1, "buffer");
+  if (!lua_istable(l, -1)) {
+    int type = lua_type(l, -1);
+    const char *type_name = lua_typename(l, type);
+    logerr("vu upload: first argument must be a buffer obj");
+    luaL_error(l, "first argument must be a buffer object, got: %s", type_name);
+    return 1;
+  }
+
+  int addr = lua_tointeger(l, 3);
+  trace("lua upload to: vu addr=%d", addr);
+
+  lua_getfield(l, -1, "size");
+  int size = lua_tointeger(l, -1);
+  lua_pop(l, 1);
+  lua_getfield(l, -1, "ptr");
+  void *ptr = lua_touserdata(l, -1);
+  lua_pop(l, 1);
+  int rc = draw_vu_upload_program(ptr, size, addr, target);
+  if (rc != 0) {
+    luaL_error(l, "vu program upload failed");
+    return 1;
+  }
+  lua_pushinteger(l, addr);
+  lua_setfield(l, 1, "address");
+  lua_pushinteger(l, PROG_STATE_BOUND_VU1);
+  lua_setfield(l, 1, "_state");
+  return 0;
+}
+
 static int vu_call(lua_State *l) {
   trace("get state of VU prog");
   lua_getfield(l, 1, "_state");
@@ -121,6 +162,8 @@ int vu_lua_init(lua_State *l) {
   lua_setfield(l, -2, "state");
   lua_pushcfunction(l, vu_upload);
   lua_setfield(l, -2, "upload");
+  lua_pushcfunction(l, vu_upload_to);
+  lua_setfield(l, -2, "upload_to");
   lua_pushcfunction(l, vu_call);
   lua_setfield(l, -2, "call");
   lua_pushcfunction(l, vu_free);

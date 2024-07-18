@@ -19,10 +19,12 @@
 struct render_state state = {0};
 
 static int command_buffer_align_head(struct commandbuffer *c, size_t b) {
+  int old_offset = c->offset;
   while(c->offset % b != 0) {
     c->head += 1;
     c->offset += 1;
   }
+  trace("align buffer head to %d bytes, %d -> %d", b, old_offset, c->offset);
   return 0;
 }
 
@@ -66,7 +68,7 @@ int draw_update_last_tag_loops() {
 */
 
 int draw_vifcode_direct_start(struct commandbuffer *c) {
-  trace("start vifcode @ %d", c->offset);
+  trace("start direct vifcode @ %d", c->offset);
   command_buffer_align_head(c, 16);
   vifcode((uint32_t*) c->head, VIF_CODE_NOP, VIF_CODE_NO_STALL, 0, 0);
   vifcode((uint32_t*) c->head+4, VIF_CODE_NOP, VIF_CODE_NO_STALL, 0, 0);
@@ -102,8 +104,29 @@ int dmatag_raw(struct commandbuffer *c, int qwc, int type, int addr) {
   return 1;
 }
 
+int draw_giftags_begin(struct commandbuffer *c) {
+  trace("begin giftags buffer@=%d", c->offset);
+  if (c->target_vif) {
+    if (c->vif.is_active && c->vif.is_inline_unpack) {
+      trace("giftags in an inline unpack..");
+      command_buffer_align_head(c, 16);
+      return 1;
+    }
+    if (c->vif.is_active && !c->vif.is_direct_gif) {
+      trace("end previous vifcode before starting giftags buffer@=%d", c->offset);
+      // end previous vifcode
+      draw_vifcode_end(c);
+    }
+    // start next direct tag
+    draw_vifcode_direct_start(&state.buffer);
+  }
+  return 1;
+}
+
 int draw_vifcode_end(struct commandbuffer *c) {
-  trace("end vifcode, direct=%d, buffer@=%d", c->vif.is_direct_gif,
+  trace("end vifcode, direct=%d, unpack_inline=%d, buffer@=%d", 
+      c->vif.is_direct_gif,
+      c->vif.is_inline_unpack,
       c->offset);
   if (!c->vif.is_active) {
     return 0; 
@@ -117,7 +140,6 @@ int draw_vifcode_end(struct commandbuffer *c) {
   }
   if (c->vif.is_direct_gif) {
     commandbuffer_update_last_tag_loop(c);
-    trace("set vifcode direct immediate");
     int qwc = (packet_len)/(QW_SIZE);
     if (packet_len % QW_SIZE != 0) {
       qwc += 1;
@@ -127,7 +149,8 @@ int draw_vifcode_end(struct commandbuffer *c) {
       logerr("vifcode is too big!!!");
       return 1;
     } 
-    trace("vifcode update imm = %d (size in bytes = %d)", qwc-2, packet_len);
+    int tag_offset = (int) (c->vif.head - c->ptr);
+    trace("vifcode set imm = %d, buffer@=%d (size in bytes = %d)", qwc-2, tag_offset, packet_len);
     vifcode_update_imm((uint16_t*) c->vif.head, qwc);
     c->vif.is_direct_gif = 0;
   } else if (c->vif.is_inline_unpack) {
@@ -183,7 +206,7 @@ int draw_dma_ref(struct commandbuffer *c, uint32_t addr, int qwc) {
 int draw_kick_gif() {
   trace("kick gif buffer of size=%d", state.buffer.offset);
   commandbuffer_update_last_tag_loop(&state.buffer);
-  draw_end_cnt(&state.buffer);
+  // draw_end_cnt(&state.buffer);
   draw_dma_end(&state.buffer);
   size_t buffer_size = state.buffer.head - state.buffer.ptr;
   trace("dma send");
@@ -204,7 +227,7 @@ int draw_kick_vif() {
   commandbuffer_update_last_tag_loop(&state.buffer);
   // TODO: this naming is inconsistent
   draw_vifcode_end(&state.buffer);
-  draw_end_cnt(&state.buffer);
+  // draw_end_cnt(&state.buffer);
   draw_dma_end(&state.buffer);
   // ---
   size_t buffer_size = state.buffer.head - state.buffer.ptr;
@@ -224,6 +247,7 @@ int draw_kick_vif() {
 int draw_frame_start() {
   trace("frame start");
   memset(&state.this_frame, 0, sizeof(struct draw_stats));
+  state.buffer.target_vif = 1;
   draw_clear_buffer();
   draw_start_cnt(&state.buffer);
   draw_vifcode_direct_start(&state.buffer);
@@ -272,8 +296,9 @@ int draw_frame_end() {
 
 int draw_vu_end_unpack_inline(struct commandbuffer *c, size_t packet_size) {
   commandbuffer_update_last_tag_loop(c);
-  trace("inline unpack end: update num");
   size_t qword_size = packet_size / 16;
+  int buffer_position = (int)(c->vif.head - c->ptr);
+  trace("vu inline unpack end: update num = %d @buffer pos=%d", qword_size, buffer_position);
   vifcode_update_num((uint8_t*) c->vif.head, qword_size);
   c->vif.is_inline_unpack = 0;
   return 1;

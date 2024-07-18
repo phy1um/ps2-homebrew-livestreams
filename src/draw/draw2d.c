@@ -58,6 +58,7 @@ int draw2d_triangle(float x1, float y1, float x2, float y2, float x3,
       commandbuffer_update_last_tag_loop(&state.buffer);
     }
 
+    draw_giftags_begin(&state.buffer);
     giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_prim(&state.buffer, GS_PRIM_TRIANGLE, 0, 0, 0);
     giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_TRIS_LEN, GIF_REGS_TRIS);
@@ -93,6 +94,7 @@ int draw2d_textri(float x1, float y1, float u1, float v1, float x2, float y2,
       commandbuffer_update_last_tag_loop(&state.buffer);
     }
 
+    draw_giftags_begin(&state.buffer);
     giftag_new(&state.buffer, 0, 5, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_texa(&state.buffer, 0x80, 0x80);
     giftag_ad_tex1(&state.buffer, 1, 0, 1, 0, 0);
@@ -134,6 +136,7 @@ int draw2d_rect(float x1, float y1, float w, float h) {
       commandbuffer_update_last_tag_loop(&state.buffer);
     }
 
+    draw_giftags_begin(&state.buffer);
     giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_prim(&state.buffer, GS_PRIM_SPRITE, 0, 0, 0);
     giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_RECT_LEN, GIF_REGS_RECT);
@@ -176,6 +179,8 @@ int draw_upload_texture(void *texture, size_t bytes, int width, int height,
 
   commandbuffer_update_last_tag_loop(&state.buffer);
   // setup
+  //
+  draw_giftags_begin(&state.buffer);
   giftag_new(&state.buffer, 0, 4, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
   giftag_ad_bitbltbuf(&state.buffer, vram_addr / 64, width / 64, format);
   giftag_ad_trxpos(&state.buffer, 0, 0, 0, 0, 0);
@@ -213,6 +218,7 @@ int draw_upload_texture(void *texture, size_t bytes, int width, int height,
       draw_end_cnt(&state.buffer);
     }
     dmatag_raw(&state.buffer, 1, 0x1 << 28, 0);
+    draw_giftags_begin(&state.buffer);
     giftag_new(&state.buffer, GIF_IMAGE, block_size, 0, 0, 0);
     dmatag_raw(&state.buffer, block_size, 0x3 << 28, img_addr);
 
@@ -228,12 +234,14 @@ int draw_upload_texture(void *texture, size_t bytes, int width, int height,
       draw_end_cnt(&state.buffer);
     }
     dmatag_raw(&state.buffer, 1, 0x1 << 28, 0);
+    draw_giftags_begin(&state.buffer);
     giftag_new(&state.buffer, GIF_IMAGE, remain, 0, 0, 0);
     dmatag_raw(&state.buffer, remain, 0x3 << 28, img_addr);
   }
 
   draw_start_cnt(&state.buffer);
 
+  draw_giftags_begin(&state.buffer);
   giftag_new(&state.buffer, GIF_PACKED, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
   giftag_ad_texflush(&state.buffer);
 
@@ -268,6 +276,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
     }
 
     state.active_tex = state.tex_vram_addr;
+    draw_giftags_begin(&state.buffer);
     giftag_new(&state.buffer, 0, 5, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_texa(&state.buffer, 0x80, 0x80);
     giftag_ad_tex1(&state.buffer, 1, 0, 1, 0, 0);

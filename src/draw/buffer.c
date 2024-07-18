@@ -21,7 +21,7 @@ int giftag_new(struct commandbuffer *s, int flag, int nloop, int eop, int nregs,
   // update giftag tracking state
   s->gif.loop_count = 0;
   s->gif.head = (uint32_t *)s->head;
-  trace("GIFTag %d @ %p", flag, s->gif.head);
+  trace("GIFTag %d @ %d", flag, s->offset);
 
   // write giftag
   uint64_t *ld = (uint64_t *)s->head;

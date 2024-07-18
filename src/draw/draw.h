@@ -92,6 +92,7 @@ struct d2d_state {
 };
 
 struct commandbuffer {
+  int target_vif;
   char *ptr;
   char *head;
   size_t offset;
@@ -120,6 +121,8 @@ struct render_state {
   struct draw_stats last_frame;
 
   struct d2d_state d2d;
+
+  int target_vif;
 };
 
 // shared draw functions
@@ -129,6 +132,8 @@ int draw_frame_end();
 
 int draw_get_context(int ctx);
 int draw_end_context();
+
+int draw_giftags_begin(struct commandbuffer *c);
 
 int draw_upload_texture(void *texture, size_t bytes, int width, int height,
     int format, int vram_addr);

@@ -16,12 +16,10 @@ static int command_buffer_align_head(struct commandbuffer *c, size_t b) {
 }
 
 int draw_vu_upload_program(void *buf, size_t buf_size, int vu_uprog_addr, int vu_target) {
+  trace("vu program upload begin (uprog addr=%d), buffer@=%d", vu_uprog_addr, state.buffer.offset);
   struct commandbuffer *c = &state.buffer;
   if (c->vif.is_active) {
-    // TODO: add more general vidcode_end function
-    if (c->vif.is_direct_gif) {
-      draw_vifcode_end(c);
-    }
+    draw_vifcode_end(c);
   }
   size_t dwc = buf_size / 8;
   if (dwc > 256) {
@@ -42,23 +40,20 @@ int draw_vu_upload_program(void *buf, size_t buf_size, int vu_uprog_addr, int vu
   memcpy(c->head, buf, n_bytes);
   c->head += n_bytes;
   c->offset += n_bytes;
-  // TODO: hack
-  draw_vifcode_direct_start(&state.buffer);
+  trace("vu program upload end, buffer@=%d", state.buffer.offset);
   return 0;
 }
 
 
 int draw_vu_call_program(int vu_uprog_addr) {
+  trace("vu program call (uprog addr=%d), buffer@=%d", vu_uprog_addr, state.buffer.offset);
   struct commandbuffer *c = &state.buffer;
   if (c->vif.is_active) {
-    // TODO: add more general vidcode_end function
-    if (c->vif.is_direct_gif) {
-      draw_vifcode_end(c);
-    }
+    draw_vifcode_end(c);
   }
   vifcode((uint32_t*) c->head, VIF_CODE_MSCAL, VIF_CODE_NO_STALL, 0, vu_uprog_addr/8);
   // TODO: hack
-  draw_vifcode_direct_start(&state.buffer);
+  // draw_vifcode_direct_start(&state.buffer);
   return 0;
 }
 
@@ -75,14 +70,16 @@ int draw_vu_unpack_v4_32(void *buffer, size_t buffer_size, int vu_addr) {
   c->offset += n_bytes;
 
   // TODO: hack
-  draw_vifcode_direct_start(&state.buffer);
+  // draw_vifcode_direct_start(&state.buffer);
   return 0;
 }
 
 int draw_vu_begin_unpack_inline(uint32_t target_addr) {
-  draw_vifcode_end();
   struct commandbuffer *c = &state.buffer;
-  trace("start vifcode inline unpack @ %d", c->offset);
+  // TODO: this puts a garbage empty DIRECT tag in i think
+  // and also alignment is off by 4bytes :)
+  draw_vifcode_end(c);
+  trace("vu begin inline unpack (vu addr=%d) @buffer=%d", target_addr, c->offset);
   while (c->offset % 12 != 0) {
     c->head += 1;
     c->offset += 1;
