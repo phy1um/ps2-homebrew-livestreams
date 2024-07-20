@@ -188,6 +188,8 @@ int draw_end_cnt(struct commandbuffer *c) {
 }
 
 int draw_dma_end(struct commandbuffer *c) {
+  trace("dma end tag buffer@=%d", c->offset);
+  command_buffer_align_head(&state.buffer, 16);
   draw_end_cnt(c);
   dma_tag((uint32_t *)c->head, 0, 0x7 << 28, 0);
   c->head += QW_SIZE;
@@ -287,8 +289,9 @@ int draw_frame_start() {
 
 int draw_frame_end() {
   trace("frame end");
-  qword_t *q = draw_finish((qword_t *)state.buffer.head);
-  state.buffer.head = (char *)q;
+  draw_giftags_begin(&state.buffer);
+  giftag_new(&state.buffer, 0, 1, 1, 0x1, 0xe);
+  gif_ad(&state.buffer, 0x61, 1);
   draw_kick_vif();
   memcpy(&state.last_frame, &state.this_frame, sizeof(struct draw_stats));
   return 1;

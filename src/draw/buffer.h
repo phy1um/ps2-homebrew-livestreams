@@ -11,6 +11,8 @@ int giftag_ad_texflush(struct commandbuffer *s);
 int giftag_ad_bitbltbuf(struct commandbuffer *s, int dba, int dbw, uint64_t psm);
 int giftag_ad_trxpos(struct commandbuffer *s, int sx, uint64_t sy, uint64_t dx,
     uint64_t dy, uint64_t dir);
+
+int gif_ad(struct commandbuffer *s, uint64_t reg, uint64_t value);
 int giftag_ad_trxdir(struct commandbuffer *s, int dir);
 int giftag_ad_trxreg(struct commandbuffer *s, int rrw, int rrh);
 int giftag_ad_texa(struct commandbuffer *s, int ta0, int ta1);
