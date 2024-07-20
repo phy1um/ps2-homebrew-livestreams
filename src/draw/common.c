@@ -290,6 +290,7 @@ int draw_frame_start() {
 int draw_frame_end() {
   trace("frame end");
   draw_giftags_begin(&state.buffer);
+  trace("AD draw finish buffer@=%d", state.buffer.offset);
   giftag_new(&state.buffer, 0, 1, 1, 0x1, 0xe);
   gif_ad(&state.buffer, 0x61, 1);
   draw_kick_vif();

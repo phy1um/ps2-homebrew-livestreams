@@ -76,14 +76,17 @@ int draw_vu_unpack_v4_32(void *buffer, size_t buffer_size, int vu_addr) {
 
 int draw_vu_begin_unpack_inline(uint32_t target_addr) {
   struct commandbuffer *c = &state.buffer;
-  // TODO: this puts a garbage empty DIRECT tag in i think
-  // and also alignment is off by 4bytes :)
   draw_vifcode_end(c);
-  trace("vu begin inline unpack (vu addr=%d) @buffer=%d", target_addr, c->offset);
-  while (c->offset % 12 != 0) {
-    c->head += 1;
-    c->offset += 1;
+  int qw_base = (c->offset/16)*16;
+  if (c->offset > 96) {
+    trace("TODO");
+    return 0;
   }
+  while (c->offset - qw_base != 96) {
+    c->head += 1;
+    c->offset+= 1;
+  }
+  trace("vu begin inline unpack (vu addr=%lu) @buffer=%d", target_addr, c->offset);
   vifcode((uint32_t*) c->head, VIF_CODE_UNPACK_V432, VIF_CODE_NO_STALL, 0, target_addr);
   c->vif.head = c->head;
   c->vif.is_direct_gif = 0;
