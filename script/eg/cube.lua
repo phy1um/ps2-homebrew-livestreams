@@ -9,6 +9,7 @@ local RM = require"p2g.buffer"
 local LOG = require"p2g.log"
 local M = require"p2g.math"
 local IO = require"p2g.io"
+local VU = require"p2g.vu"
 local PAD = require"p2g.pad"
 local CAMERA = require"p2g.camera"
 local I = require"eg.cube_instance"
@@ -23,10 +24,10 @@ local cam = CAMERA.new(0,0,18, {
 })
 
 local instances = {}
-
+local vuprog = {}
 
 function PS2PROG.start()
-  PS2PROG.logLevel(LOG.debugLevel)
+  PS2PROG.logLevel(LOG.traceLevel)
   DMA.init(DMA.GIF)
   DMA.init(DMA.VIF1)
   GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
@@ -45,6 +46,13 @@ function PS2PROG.start()
   cube_model = RM.alloc(sz)
   IO.read_file(file_target, 0, sz, cube_model)
 
+  local vuprog_size = IO.file_size("identity.vuprog")
+  LOG.debug("try load thing " .. vuprog_size)
+  local vuprog_bytes = RM.alloc(vuprog_size)
+  IO.read_file("identity.vuprog", 0, vuprog_size, vuprog_bytes)
+  LOG.debug("trying to create VU program")
+  vuprog = VU.new_program("identity", vuprog_bytes)
+  
   local putcube = function(x,y,z,s,rx,ry)
     local i = I.new(cube_model, verts, 8*4)
     i:move_to(x,y,z)
@@ -58,6 +66,7 @@ function PS2PROG.start()
 end
 
 local reload_debounce = 0
+local first_frame = true
 
 function PS2PROG.frame()
   local dt = 1/30
@@ -103,7 +112,15 @@ function PS2PROG.frame()
   instances[1]:rotate(drot_x, drot_y)
 
   DRAW:frameStart()
+  if first_frame then
+    LOG.debug("try upload")
+    print(vuprog.buffer)
+    vuprog:upload(VU.VU1)
+    first_frame = false
+  end
   I.draw_all(instances, cam)
+  LOG.debug("try call")
+  vuprog:call()
   DRAW:frameEnd()
 
 end

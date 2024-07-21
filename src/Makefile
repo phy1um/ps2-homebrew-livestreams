@@ -3,8 +3,8 @@ DVP-AS:=dvp-as
 
 HOST_OBJS=$(CORE_OBJ) main.o ps2luaprog.o liblua.a
 MAIN_OBJ=utils.o gs.o pad.o
-CORE_OBJ=core/bindings.o core/buffer.o core/dma.o core/draw.o core/gslua.o core/log.o core/pad.o core/slotlist.o core/tga.o core/io.o
-DRAW_OBJ=draw/draw2d.o draw/common.o draw/buffer.o draw/draw3d.o
+CORE_OBJ=core/bindings.o core/buffer.o core/dma.o core/draw.o core/gslua.o core/log.o core/pad.o core/slotlist.o core/tga.o core/io.o core/vu.o
+DRAW_OBJ=draw/draw2d.o draw/common.o draw/buffer.o draw/draw3d.o draw/vu.o
 MATH_OBJ=ps2math.o math/vec2lua.o math/vec3lua.o math/mat3lua.o math/float.o math/mat4lua.o math/vec4lua.o
 
 EE_BIN=$(PREFIX)test.elf

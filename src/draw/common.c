@@ -71,6 +71,7 @@ int draw_vifcode_direct_start(struct commandbuffer *c) {
   vifcode((uint32_t*) c->head, VIF_CODE_NOP, VIF_CODE_NO_STALL, 0, 0);
   vifcode((uint32_t*) c->head+4, VIF_CODE_NOP, VIF_CODE_NO_STALL, 0, 0);
   vifcode((uint32_t*) c->head+8, VIF_CODE_NOP, VIF_CODE_NO_STALL, 0, 0);
+  // TODO: check if we are the first vifcode in a dma transfer first?
   c->head += 12;
   c->offset += 12;
   c->vif.head = c->head;
@@ -115,6 +116,7 @@ int draw_vifcode_end(struct commandbuffer *c) {
     return 1;
   }
   if (c->vif.is_direct_gif) {
+    commandbuffer_update_last_tag_loop(c);
     trace("set vifcode direct immediate");
     int qwc = (packet_len)/(QW_SIZE);
     if (packet_len % QW_SIZE != 0) {
@@ -127,9 +129,11 @@ int draw_vifcode_end(struct commandbuffer *c) {
     } 
     trace("vifcode update imm = %d (size in bytes = %d)", qwc-2, packet_len);
     vifcode_update_imm(c->vif.head, qwc);
+    c->vif.is_direct_gif = 0;
   } else {
     logerr("unsupported VIF transfer");
   }
+  c->vif.is_active = 0;
 }
 
 

@@ -29,6 +29,7 @@ coreLoad("log")
 coreLoad("dma")
 coreLoad("gs")
 coreLoad("io")
+coreLoad("vu")
 coreLoad("buffer")
 coreLoad("pad")
 

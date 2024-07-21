@@ -43,6 +43,7 @@ assets: scripts
 	$(MAKE) -C asset
 	cp asset/*.tga dist/
 	cp asset/*.bin dist/
+	cp asset/*.vuprog dist/
 	cp distfiles/* dist/
 	cp LICENSE dist/
 

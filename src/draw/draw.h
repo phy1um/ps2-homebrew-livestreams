@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <draw.h>
+#include "vu.h"
 
 /**
  * CONSTANTS
@@ -12,12 +13,6 @@
 
 #define GIF_MAX_LOOPS 0x7fff
 #define QW_SIZE 4*sizeof(uint32_t)
-
-// TODO: move to some other folder
-#define VIF_CODE_DIRECT 0x50
-#define VIF_CODE_NOP 0x0
-#define VIF_CODE_NO_STALL 0x0
-#define VIF_CODE_STALL 0x1
 
 void core_error(const char *);
 #define error(msg) core_error(msg)
@@ -170,5 +165,9 @@ size_t draw3d_mesh_triangles_cnt(void *buffer, int vertex_count,
     size_t vertex_size);
 int draw3d_mesh_triangles_ref(void *buffer, int vertex_count,
     size_t vertex_size);
+
+// TODO: circulare dependency thing
+int draw_vifcode_end(struct commandbuffer *c);
+int draw_vifcode_direct_start(struct commandbuffer *c);
 
 #endif
