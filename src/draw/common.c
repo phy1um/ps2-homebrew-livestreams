@@ -18,6 +18,14 @@
 
 struct render_state state = {0};
 
+static int command_buffer_align_head(struct commandbuffer *c, size_t b) {
+  while(c->offset % b != 0) {
+    c->head += 1;
+    c->offset += 1;
+  }
+  return 0;
+}
+
 static int clear_command_buffer(struct commandbuffer *c) {
   c->head = c->ptr;
   c->offset = 0;
@@ -63,25 +71,27 @@ int draw_vifcode_direct_start(struct commandbuffer *c) {
   c->vif.is_direct_gif = 1;
   c->vif.is_active = 1;
   vifcode((uint32_t*) c->vif.head, VIF_CODE_DIRECT, VIF_CODE_NO_STALL, 0, 0);
-  c->head += QW_SIZE;
-  c->offset += QW_SIZE;
+  c->head += sizeof(uint32_t);
+  c->offset += sizeof(uint32_t); 
   return 1;
 }
 
 int draw_start_cnt(struct commandbuffer *c) {
+  command_buffer_align_head(c, 16);
   trace("start cnt @ %d", c->offset);
   c->dma.in_cnt = 1;
   c->dma.head = c->head;
   dma_tag((uint32_t *)c->head, 0, 0x1 << 28, 0);
-  c->head += QW_SIZE;
-  c->offset += QW_SIZE;
+  c->head += sizeof(uint64_t);
+  c->offset += sizeof(uint64_t);
   return 1;
 }
 
 int dmatag_raw(struct commandbuffer *c, int qwc, int type, int addr) {
+  command_buffer_align_head(c, 16);
   dma_tag((uint32_t *)c->head, qwc, type, addr);
-  c->head += QW_SIZE;
-  c->offset += QW_SIZE;
+  c->head += sizeof(uint64_t);
+  c->offset += sizeof(uint64_t);
   return 1;
 }
 
@@ -92,15 +102,15 @@ int draw_vifcode_end(struct commandbuffer *c) {
     return 0; 
   }
   size_t packet_len = c->head - c->vif.head;
-  if (packet_len == QW_SIZE) {
+  if (packet_len == sizeof(uint32_t)) {
     trace("rewinding vifcode of empty packet");
-    c->head -= QW_SIZE;
-    c->offset -= QW_SIZE;
+    c->head -= sizeof(uint32_t);
+    c->offset -= sizeof(uint32_t);
     return 1;
   }
   if (c->vif.is_direct_gif) {
     trace("set vifcode direct immediate");
-    int qwc = packet_len/QW_SIZE;
+    int qwc = (packet_len)/(QW_SIZE);
     if (packet_len % QW_SIZE != 0) {
       qwc += 1;
     }
@@ -109,6 +119,7 @@ int draw_vifcode_end(struct commandbuffer *c) {
       logerr("vifcode is too big!!!");
       return 1;
     } 
+    trace("vifcode update imm = %d (size in bytes = %d)", qwc-2, packet_len);
     vifcode_update_imm(c->vif.head, qwc-1);
   } else {
     logerr("unsupported VIF transfer");
@@ -184,9 +195,9 @@ int draw_kick_vif() {
   draw_dma_end(&state.buffer);
   // ---
   size_t buffer_size = state.buffer.head - state.buffer.ptr;
-  trace("dma send");
+  trace("dma send TO VIF AND NOT GIF!!!!");
   print_buffer((qword_t *)state.buffer.ptr, buffer_size / 16);
-  dma_channel_send_chain(DMA_CHANNEL_VIF1, state.buffer.ptr, buffer_size / 16, 0,
+  dma_channel_send_chain(0x1, state.buffer.ptr, buffer_size / 16, 0,
                          0);
   dma_wait_fast();
   // TODO(phy1um): get new memory?
@@ -207,6 +218,7 @@ int draw_frame_start() {
   // Clear the screen using PS2SDK functions
   float halfw = (state.screen_w * 1.0f) / 2.0f;
   float halfh = (state.screen_h * 1.0f) / 2.0f;
+  command_buffer_align_head(&state.buffer, 16);
   qword_t *q = (qword_t *)state.buffer.head;
   PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
   q++;

@@ -5,8 +5,19 @@
 #include "buffer.h"
 #include "draw.h"
 
+static int command_buffer_align_head(struct commandbuffer *c, size_t b) {
+  while(c->offset % b != 0) {
+    c->head += 1;
+    c->offset += 1;
+  }
+  return 0;
+}
+
 int giftag_new(struct commandbuffer *s, int flag, int nloop, int eop, int nregs,
                uint64_t regs) {
+  if (!s->vif.is_active) {
+    command_buffer_align_head(s, 16);
+  }
   // update giftag tracking state
   s->gif.loop_count = 0;
   s->gif.head = (uint32_t *)s->head;
