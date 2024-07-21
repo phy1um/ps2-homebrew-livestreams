@@ -11,8 +11,9 @@
 #include <string.h>
 
 #include <p2g/log.h>
-#include "draw.h"
+
 #include "buffer.h"
+#include "draw.h"
 #include "internal.h"
 
 #define GIF_REGS_AD 0xe
@@ -41,8 +42,8 @@ extern struct render_state state;
 
 int draw2d_triangle(float x1, float y1, float x2, float y2, float x3,
                     float y3) {
-  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.cmdbuffer_head_offset, x1, y1,
-        x2, y2, x3, y3);
+  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.cmdbuffer_head_offset, x1, y1, x2,
+        y2, x3, y3);
   if (state.gif.loop_count >= GIF_MAX_LOOPS - 1) {
     draw_kick();
   }
@@ -170,7 +171,7 @@ int draw2d_screen_dimensions(int w, int h) {
 }
 
 int draw_upload_texture(void *texture, size_t bytes, int width, int height,
-                          int format, int vram_addr) {
+                        int format, int vram_addr) {
   trace("uploading tex %p -> %d", texture, vram_addr);
 
   draw_update_last_tag_loops();

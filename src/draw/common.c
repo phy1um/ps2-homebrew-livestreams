@@ -11,9 +11,10 @@
 #include <string.h>
 
 #include <p2g/log.h>
-#include "draw.h"
-#include "buffer.h"
+
 #include "../gs_state.h"
+#include "buffer.h"
+#include "draw.h"
 
 struct render_state state = {0};
 
@@ -118,8 +119,6 @@ int draw_kick() {
   return 1;
 }
 
-
-
 int draw_frame_start() {
   trace("frame start");
   memset(&state.this_frame, 0, sizeof(struct draw_stats));
@@ -166,5 +165,3 @@ int draw_frame_end() {
   memcpy(&state.last_frame, &state.this_frame, sizeof(struct draw_stats));
   return 1;
 }
-
-

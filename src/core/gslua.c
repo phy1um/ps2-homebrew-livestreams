@@ -10,8 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <p2g/log.h>
 #include <p2g/gs.h>
+#include <p2g/log.h>
 
 #include "../gs_state.h"
 
@@ -54,7 +54,8 @@ static int gslua_set_buffers(lua_State *l) {
   int zb_fmt = lua_tointeger(l, -1);
   lua_pop(l, 1);
 
-  gs_set_fields(fb_width, fb_height, fb_fmt, zb_fmt, fb1_addr, fb2_addr, zb_addr);
+  gs_set_fields(fb_width, fb_height, fb_fmt, zb_fmt, fb1_addr, fb2_addr,
+                zb_addr);
   return 0;
 }
 
@@ -63,7 +64,8 @@ static int gslua_set_output(lua_State *l) {
   int height = lua_tointeger(l, 2);
   int interlace = lua_tointeger(l, 3);
   int mode = lua_tointeger(l, 4);
-  gs_set_output(width, height, interlace, mode, GRAPH_MODE_FIELD, GRAPH_DISABLE);
+  gs_set_output(width, height, interlace, mode, GRAPH_MODE_FIELD,
+                GRAPH_DISABLE);
   return 0;
 }
 

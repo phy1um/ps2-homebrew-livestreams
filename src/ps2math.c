@@ -124,7 +124,9 @@ void p2m_m3_multiply(float *a, float *b, float *to) {
 }
 
 void p2m_m4_identity(float *m) {
-  for(int i = 1; i < 16; i++) m[i] = 0;
+  for (int i = 1; i < 16; i++) {
+    m[i] = 0;
+  }
   m[0] = 1;
   m[5] = 1;
   m[10] = 1;
@@ -166,7 +168,7 @@ void p2m_m4_multiply(float *a, float *b, float *to) {
   float a02 = a[8];
   float a12 = a[9];
   float a22 = a[10];
-  float a32 = a[11];  
+  float a32 = a[11];
   float a03 = a[12];
   float a13 = a[13];
   float a23 = a[14];
@@ -183,7 +185,7 @@ void p2m_m4_multiply(float *a, float *b, float *to) {
   float b02 = b[8];
   float b12 = b[9];
   float b22 = b[10];
-  float b32 = b[11];  
+  float b32 = b[11];
   float b03 = b[12];
   float b13 = b[13];
   float b23 = b[14];

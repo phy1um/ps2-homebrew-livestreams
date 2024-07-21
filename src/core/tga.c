@@ -30,7 +30,7 @@ struct __attribute__((__packed__)) tga_header {
 // TGA.header_get(buf, field_name)
 static int get_tga_header_from_buffer(lua_State *l) {
   lua_getfield(l, 1, "ptr");
-  struct tga_header *header = (struct tga_header*)lua_touserdata(l, -1);
+  struct tga_header *header = (struct tga_header *)lua_touserdata(l, -1);
   const char *field = lua_tostring(l, 2);
   if (strcmp(field, "id_length") == 0) {
     lua_pushnumber(l, header->idlen);
@@ -68,8 +68,7 @@ static int swizzle16(lua_State *l) {
   for (int i = 0; i < width; i++) {
     for (int j = 0; j < height; j++) {
       unsigned char tmp = buffer[(j * width + i) * bpp + 1];
-      buffer[(j * width + i) * bpp + 1] =
-          buffer[(j * width + i) * bpp];
+      buffer[(j * width + i) * bpp + 1] = buffer[(j * width + i) * bpp];
       buffer[(j * width + i) * bpp] = tmp;
     }
   }
@@ -88,8 +87,7 @@ static int swizzle24(lua_State *l) {
   for (int i = 0; i < width; i++) {
     for (int j = 0; j < height; j++) {
       unsigned char tmp = buffer[(j * width + i) * bpp + 2];
-      buffer[(j * width + i) * bpp + 2] =
-          buffer[(j * width + i) * bpp];
+      buffer[(j * width + i) * bpp + 2] = buffer[(j * width + i) * bpp];
       buffer[(j * width + i) * bpp] = tmp;
     }
   }
@@ -108,8 +106,7 @@ static int swizzle32(lua_State *l) {
   for (int i = 0; i < width; i++) {
     for (int j = 0; j < height; j++) {
       unsigned char tmp = buffer[(j * width + i) * bpp + 2];
-      buffer[((j * width + i) * bpp) + 2] =
-          buffer[(j * width + i) * bpp];
+      buffer[((j * width + i) * bpp) + 2] = buffer[(j * width + i) * bpp];
       buffer[(j * width + i) * bpp] = tmp;
       // PS2 alpha maps [0,0x80] to TGA's [0,0xFF]
       buffer[((j * width + i) * bpp) + 3] /= 2;

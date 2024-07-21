@@ -5,7 +5,6 @@
 #include "buffer.h"
 #include "draw.h"
 
-
 int giftag_new(struct render_state *s, int flag, int nloop, int eop, int nregs,
                uint64_t regs) {
   // update giftag tracking state
@@ -62,7 +61,7 @@ int giftag_ad_prim(struct render_state *s, int type, int shaded, int textured,
 }
 
 int giftag_ad_bitbltbuf(struct render_state *s, int dba, int dbw,
-    uint64_t psm) {
+                        uint64_t psm) {
   gif_ad(s, GS_REG_BITBLTBUF,
          SHIFT(dba, 0x3fff, 32) | SHIFT(dbw, 0x3f, 48) | SHIFT(psm, 0x3f, 56));
   return 1;
@@ -118,7 +117,7 @@ int giftag_ad_tex2(struct render_state *s, int psm, int cbp, int cpsm, int csm,
 }
 
 int giftag_ad_alpha(struct render_state *s, int a, int b, int c, int d,
-    int fix) {
+                    int fix) {
   gif_ad(s, GS_REG_ALPHA,
          SHIFT(a, 0x3, 0) | SHIFT(b, 0x3, 2) | SHIFT(c, 0x3, 4) |
              SHIFT(d, 0x3, 6) | SHIFT(fix, 0xff, 32));

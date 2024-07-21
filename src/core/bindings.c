@@ -23,7 +23,6 @@ int mat3_lua_init(lua_State *l);
 int mat4_lua_init(lua_State *l);
 int floatmath_lua_init(lua_State *l);
 
-
 static script_binding SCRIPT_CORE_LIBS[] = {
     {"gs", gs_lua_init},
     {"dma", dma_lua_init},
@@ -58,5 +57,3 @@ int bind_core_libs(lua_State *l) {
   }
   return 1;
 }
-
-

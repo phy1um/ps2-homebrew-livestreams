@@ -72,4 +72,3 @@ int mat4_lua_init(lua_State *l) {
   lua_setfield(l, -2, "applyMat4");
   return 1;
 }
-

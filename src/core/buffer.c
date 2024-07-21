@@ -180,18 +180,19 @@ static int buffer_slice(lua_State *l) {
   int slice_length = lua_tointeger(l, 3);
   lua_getfield(l, 1, "size");
   int buffer_length = lua_tointeger(l, -1);
-  if (offset+slice_length > buffer_length) {
+  if (offset + slice_length > buffer_length) {
     lua_pushstring(l, "slice longer than buffer");
     lua_error(l);
     return 1;
   }
   lua_getfield(l, 1, "ptr");
   char *buf = lua_touserdata(l, -1);
-  char *slice_start = buf+offset;
+  char *slice_start = buf + offset;
 
   lua_createtable(l, 0, 2);
   lua_pushinteger(l, slice_length);
-  lua_setfield(l, -2, "size"); lua_pushinteger(l, 0);
+  lua_setfield(l, -2, "size");
+  lua_pushinteger(l, 0);
   lua_setfield(l, -2, "head");
   lua_pushlightuserdata(l, slice_start);
   lua_setfield(l, -2, "ptr");

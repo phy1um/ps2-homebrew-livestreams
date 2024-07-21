@@ -3,7 +3,6 @@
 
 #include <p2g/log.h>
 
-
 #define EPSILON 0.000001
 
 static int float_compare(lua_State *l) {

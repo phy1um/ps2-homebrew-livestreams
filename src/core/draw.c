@@ -1,5 +1,5 @@
-#include <lua.h>
 #include <lauxlib.h>
+#include <lua.h>
 
 #include "../draw/draw.h"
 #include <p2g/log.h>
@@ -131,9 +131,9 @@ int draw2d_lua_upload_texture(lua_State *l) {
   }
 
   trace("calling upload texture with: w=%d, h=%d, psm=%d, vram=%d, ee_addr=%p",
-       width, height, psm, vram_addr, ptr);
+        width, height, psm, vram_addr, ptr);
   int rc = draw_upload_texture(ptr, width * height * 4, width, height, psm,
-                                 vram_addr);
+                               vram_addr);
   lua_pushboolean(l, rc);
   return 1;
 }
@@ -227,7 +227,8 @@ static int draw_lua_ee_transform(lua_State *l) {
   int vertex_count = lua_tointeger(l, 4);
   int vertex_size = lua_tointeger(l, 5);
   int xyz_offset = lua_tointeger(l, 6);
-  int out = draw3d_ee_transform_verts(matrix, offset, vertex_count, vertex_size, xyz_offset);
+  int out = draw3d_ee_transform_verts(matrix, offset, vertex_count, vertex_size,
+                                      xyz_offset);
   lua_pushinteger(l, out);
   return 1;
 }
@@ -255,4 +256,3 @@ int draw2d_lua_init(lua_State *l) {
   pushfn(draw_lua_ee_transform, "ee_transform");
   return 1;
 }
-

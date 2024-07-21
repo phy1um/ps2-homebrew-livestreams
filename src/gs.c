@@ -43,7 +43,8 @@ int gs_flip() {
   return 0;
 }
 
-int gs_set_fields(int width, int height, int fmt, int zfmt, int fb1_addr, int fb2_addr, int zbuf_addr) {
+int gs_set_fields(int width, int height, int fmt, int zfmt, int fb1_addr,
+    int fb2_addr, int zbuf_addr) {
   struct gs_state *st = GS_STATE;
   st->fb[0].address = fb1_addr;
   st->fb[0].width = width;
@@ -80,8 +81,9 @@ int gs_set_fields(int width, int height, int fmt, int zfmt, int fb1_addr, int fb
   return 0;
 }
 
-int gs_set_output(int width, int height, int interlace, int mode, int ffmd, int filter_flicker) {
-  graph_disable_output();  
+int gs_set_output(int width, int height, int interlace, int mode, int ffmd,
+    int filter_flicker) {
+  graph_disable_output();
   graph_set_mode(interlace, mode, ffmd, filter_flicker);
   graph_set_screen(0, 0, width, height);
   graph_set_bgcolor(0, 0, 0);

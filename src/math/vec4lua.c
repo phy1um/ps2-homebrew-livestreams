@@ -40,7 +40,6 @@ static int lua_sub_vec4(lua_State *l) {
   buf1[2] -= buf2[2];
   buf1[3] -= buf2[3];
 
-
   return 0;
 }
 
