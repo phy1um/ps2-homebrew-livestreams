@@ -19,6 +19,7 @@ PREFIX=src/
 
 DIST_BIN_NAME=p2g.elf
 PCSX2=pcsx2-qt 
+DOCKER=docker
  
 include .lintvars
 
