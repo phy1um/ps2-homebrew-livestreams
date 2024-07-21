@@ -12,12 +12,15 @@ int dma_lua_init(lua_State *l);
 int draw_lua_init(lua_State *l);
 int log_lua_init(lua_State *l);
 int tga_lua_init(lua_State *l);
+int io_lua_init(lua_State *l);
 int draw2d_lua_init(lua_State *l);
 int pad_lua_init(lua_State *l);
 int slotlist_lua_init(lua_State *l);
 int vec2_lua_init(lua_State *l);
 int vec3_lua_init(lua_State *l);
+int vec4_lua_init(lua_State *l);
 int mat3_lua_init(lua_State *l);
+int mat4_lua_init(lua_State *l);
 int floatmath_lua_init(lua_State *l);
 
 
@@ -28,11 +31,14 @@ static script_binding SCRIPT_CORE_LIBS[] = {
     {"buffer", draw_lua_init},
     {"log", log_lua_init},
     {"tga", tga_lua_init},
+    {"io", io_lua_init},
     {"slotlist", slotlist_lua_init},
     {"draw2d", draw2d_lua_init},
     {"math_vec2", vec2_lua_init},
     {"math_vec3", vec3_lua_init},
+    {"math_vec4", vec4_lua_init},
     {"math_mat3", mat3_lua_init},
+    {"math_mat4", mat4_lua_init},
     {"math_misc", floatmath_lua_init},
 };
 

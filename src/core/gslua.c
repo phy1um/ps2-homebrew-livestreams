@@ -11,11 +11,9 @@
 #include <string.h>
 
 #include <p2g/log.h>
+#include <p2g/gs.h>
 
 #include "../gs_state.h"
-
-// extern var GS_STATE defined here
-struct gs_state *GS_STATE;
 
 static int gslua_set_buffers(lua_State *l) {
   struct gs_state *st = GS_STATE;
@@ -56,37 +54,7 @@ static int gslua_set_buffers(lua_State *l) {
   int zb_fmt = lua_tointeger(l, -1);
   lua_pop(l, 1);
 
-  st->fb[0].address = fb1_addr;
-  st->fb[0].width = fb_width;
-  st->fb[0].height = fb_height;
-  st->fb[0].psm = fb_fmt;
-  st->fb[0].mask = 0;
-  st->fb[1].address = fb2_addr;
-  st->fb[1].width = fb_width;
-  st->fb[1].height = fb_height;
-  st->fb[1].psm = fb_fmt;
-  st->fb[1].mask = 0;
-
-  st->zb.address = zb_addr;
-  st->zb.zsm = zb_fmt;
-  // st->zb.method = ZTEST_METHOD_GREATER_EQUAL;
-  st->zb.method = ZTEST_METHOD_ALLPASS;
-  st->zb.mask = 0;
-  graph_set_framebuffer_filtered(fb2_addr, fb_width, fb_fmt, 0, 0);
-  graph_enable_output();
-
-  // init draw state
-  qword_t *head = malloc(20 * 16);
-  memset(head, 0, 20 * 16);
-  qword_t *q = head;
-  q = draw_setup_environment(q, 0, st->fb, &st->zb);
-  q = draw_primitive_xyoffset(q, 0, 2048 - (fb_width / 2),
-                              2048 - (fb_height / 2));
-  q = draw_finish(q);
-  dma_channel_send_normal(DMA_CHANNEL_GIF, head, q - head, 0, 0);
-  draw_wait_finish();
-  free(head);
-
+  gs_set_fields(fb_width, fb_height, fb_fmt, zb_fmt, fb1_addr, fb2_addr, zb_addr);
   return 0;
 }
 
@@ -95,18 +63,14 @@ static int gslua_set_output(lua_State *l) {
   int height = lua_tointeger(l, 2);
   int interlace = lua_tointeger(l, 3);
   int mode = lua_tointeger(l, 4);
-
-  // initialize GS with no output
-  graph_disable_output();
-  graph_set_mode(interlace, mode, GRAPH_MODE_FIELD, GRAPH_DISABLE);
-  graph_set_screen(0, 0, width, height);
-  graph_set_bgcolor(0, 0, 0);
-  return 1;
+  gs_set_output(width, height, interlace, mode, GRAPH_MODE_FIELD, GRAPH_DISABLE);
+  return 0;
 }
 
 #define bind(n, b)                                                             \
   lua_pushinteger(l, b);                                                       \
   lua_setfield(l, -2, n)
+
 int gs_lua_init(lua_State *l) {
   lua_createtable(l, 0, 16);
   lua_pushcfunction(l, gslua_set_output);

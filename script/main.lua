@@ -1,27 +1,65 @@
 
 local LOG = require"p2g.log"
+local TEST = require"p2g.test"
 
-local startup_ok = true
+local entrypoint = "eg.cube"
 
-local test_files = {"test_vec2", "test_mat3x3", "test_vec3", "test_slotlist"}
+test_record = {}
+
+local test_files = {
+  "test_vec2", 
+  "test_vec3", 
+  "test_mat3x3", 
+  "test_mat4x4", 
+  "test_slotlist",
+}
 function run_unit_tests()
   local ok = true
+  local any_fail = false
   for _, name in ipairs(test_files) do
-    local fn = require("test." .. name)
-    if fn() == false then 
-      ok = false 
+    local suite = require("test." .. name)
+    local fail = false
+    local record = {}
+    LOG.info("== Running suite " .. suite.name)
+    TEST.run_suite(suite.name, suite, {
+      passed = function(s, case) 
+        table.insert(record, {
+          ok = true,
+          test_name = case,
+        })
+      end,
+      failed = function(s, case, err)
+        fail = true
+        any_fail = true
+        LOG.error("  !! " .. case .. ": " .. tostring(err))
+        table.insert(record, {
+          ok = false,
+          test_name = case,
+          err = err, 
+        })
+      end,
+    })
+    test_record[suite.name] = record
+    if fail then 
+      LOG.error("!! Tests failed !!")
     end
   end
-  if not ok then error("failed unit tests!") end
+  if any_fail then
+    -- error("test failures")
+    -- currently having segfault issues with pcall?
+    -- so do this instead
+    return true
+  end
 end
 
-if pcall(run_unit_tests) ~= true then
-  LOG.error("failed to run unit tests")
+if run_unit_tests() == true then
+  LOG.error("invalid startup: unit tests failed")
+  entrypoint = "eg.tests"
 end
 
 LOG.info("loading entrypoint")
 
-require("eg.math")
+require(entrypoint)
 return {}
 
 -- default entrypoint - do nothing and hang!

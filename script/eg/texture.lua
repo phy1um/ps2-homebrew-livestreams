@@ -8,17 +8,17 @@ local GS = require"p2g.gs"
 local TGA = require"p2g.tga"
 local PAD = require"p2g.pad"
 local RM = require"p2g.buffer"
+local IO = require"p2g.io"
 
 local testTex1 = nil
 local testTex2 = nil
 local texturesInVram = false
 local vr = nil
 
-
 function PS2PROG.start()
-  PS2PROG.logLevel(LOG.traceLevel)
-  testTex1 = D2D.loadTexture("test.tga", 64, 64)
-  testTex2 = D2D.loadTexture("half.tga", 64, 64)
+  PS2PROG.logLevel(LOG.debugLevel)
+  testTex1 = TGA.from_file("test.tga", RM.alloc)
+  testTex2 = TGA.from_file("half.tga", RM.alloc)
   DMA.init(DMA.GIF)
   GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
   local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 256)

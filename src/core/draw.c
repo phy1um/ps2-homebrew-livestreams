@@ -1,4 +1,5 @@
 #include <lua.h>
+#include <lauxlib.h>
 
 #include "../draw/draw.h"
 #include <p2g/log.h>
@@ -196,6 +197,41 @@ static int draw2d_lua_bind_buffer(lua_State *l) {
   return 0;
 }
 
+// self:mesh_cnt(buffer, vert_count, vert_size)
+static int draw_lua_mesh_cnt(lua_State *l) {
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 2);
+  void *ptr = lua_touserdata(l, -1);
+  int vertex_count = lua_tointeger(l, 3);
+  int vertex_size = lua_tointeger(l, 4);
+  size_t out = draw3d_mesh_triangles_cnt(ptr, vertex_count, vertex_size);
+  lua_pushinteger(l, out);
+  return 1;
+}
+
+static int draw_lua_mesh_ref(lua_State *l) {
+  luaL_error(l, "unimplemented");
+  return 0;
+}
+
+// self:ee_transform(matrix, offset, vert_count, vert_size, xyz_offset)
+static int draw_lua_ee_transform(lua_State *l) {
+  lua_pushstring(l, "ptr");
+  lua_gettable(l, 2);
+  void *matrix = lua_touserdata(l, -1);
+  if (!matrix) {
+    luaL_error(l, "matrix is NULL");
+    return 1;
+  }
+  int offset = lua_tointeger(l, 3);
+  int vertex_count = lua_tointeger(l, 4);
+  int vertex_size = lua_tointeger(l, 5);
+  int xyz_offset = lua_tointeger(l, 6);
+  int out = draw3d_ee_transform_verts(matrix, offset, vertex_count, vertex_size, xyz_offset);
+  lua_pushinteger(l, out);
+  return 1;
+}
+
 #define pushfn(f, n)                                                           \
   lua_pushcfunction(l, f);                                                     \
   lua_setfield(l, -2, n)
@@ -214,5 +250,9 @@ int draw2d_lua_init(lua_State *l) {
   pushfn(draw2d_lua_upload_texture, "uploadTexture");
   pushfn(draw2d_lua_setclut, "setClut");
   pushfn(draw2d_lua_bind_buffer, "bindBuffer");
+  pushfn(draw_lua_mesh_cnt, "mesh_cnt");
+  pushfn(draw_lua_mesh_ref, "mesh_ref");
+  pushfn(draw_lua_ee_transform, "ee_transform");
   return 1;
 }
+

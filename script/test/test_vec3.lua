@@ -59,4 +59,4 @@ function suite.vec3_normalize()
   test.equal(v, M.vec3(10 / math.sqrt(150), 7 / math.sqrt(150), 1 / math.sqrt(150)))
 end
 
-return function() return test.run_suite(suite.name, suite) end
+return suite

@@ -20,11 +20,12 @@ void core_error(const char *);
  * DRAW 2D
  */
 enum d2d_type {
-  D2D_NONE,
-  D2D_GEOM,
-  D2D_RECT,
-  D2D_SPRITE,
-  D2D_TEXTRI,
+  DRAW_FMT_NONE,
+  DRAW_FMT_GEOM,
+  DRAW_FMT_GEOM3D,
+  DRAW_FMT_RECT,
+  DRAW_FMT_SPRITE,
+  DRAW_FMT_TEXTRI,
 };
 
 struct draw_gif {
@@ -145,5 +146,9 @@ int draw2d_set_clut_state(int texture_base);
 // int draw3d_set_property(int property_id, float value);
 // int draw3d_mesh(float *verts, size_t vert_len, uint32_t gif_fmt,
 //       int gif_fmt_len, int floats_per_vert);
+//
+int draw3d_ee_transform_verts(float *mvp, size_t offset_start, int vertex_count, int vertex_size, int pos_offset);
+size_t draw3d_mesh_triangles_cnt(void *buffer, int vertex_count, size_t vertex_size);
+int draw3d_mesh_triangles_ref(void *buffer, int vertex_count, size_t vertex_size);
 
 #endif

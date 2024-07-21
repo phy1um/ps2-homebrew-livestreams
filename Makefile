@@ -1,5 +1,5 @@
 ISO_TGT=test.iso
-BIN=src/test.elf
+BIN=src/p2g.elf
 
 PS2HOST?=192.168.20.99
 PLATFORM=ps2
@@ -22,15 +22,22 @@ PCSX2=pcsx2-qt
  
 include .lintvars
 
+ifeq ($(USE_DOCKER), true)
+.PHONY: dist
+dist: docker-lua docker-elf assets
+	cp $(BIN) dist/$(DIST_BIN_NAME)
+else
 .PHONY: dist
 dist: $(LUA_LIB) $(BIN) assets
 	cp $(BIN) dist/$(DIST_BIN_NAME)
+endif
 
 .PHONY: assets
 assets: scripts
 	if ! [ -d dist ]; then mkdir dist; fi
 	$(MAKE) -C asset
 	cp asset/*.tga dist/
+	cp asset/*.bin dist/
 	cp distfiles/* dist/
 	cp LICENSE dist/
 
@@ -55,7 +62,7 @@ release: clean-all dist
 # Run the engine
 .PHONY: run
 run: scripts
-	$(PCSX2) $(shell pwd)/dist/$(DIST_BIN_NAME)
+	$(PCSX2) $(shell pwd)/dist/$(DIST_BIN_NAME) 
 
 .PHONY: runps2
 runps2: scripts

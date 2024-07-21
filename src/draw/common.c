@@ -13,9 +13,9 @@
 #include <p2g/log.h>
 #include "draw.h"
 #include "buffer.h"
+#include "../gs_state.h"
 
 struct render_state state = {0};
-static zbuffer_t zb = {0};
 
 // easy :D
 int draw_clear_buffer() {
@@ -25,7 +25,7 @@ int draw_clear_buffer() {
   state.gif.head = 0;
   state.dma.head = 0;
   state.dma.in_cnt = 0;
-  state.d2d.draw_type = D2D_NONE;
+  state.d2d.draw_type = DRAW_FMT_NONE;
   return 1;
 }
 
@@ -92,9 +92,9 @@ int draw_dma_end() {
   return 1;
 }
 
-int draw_dma_ref(uint32_t addr) {
+int draw_dma_ref(uint32_t addr, int qwc) {
   draw_end_cnt();
-  dma_tag((uint32_t *)state.cmdbuffer_head, 0, 0x3 << 28, addr);
+  dma_tag((uint32_t *)state.cmdbuffer_head, qwc, 0x3 << 28, addr);
   state.cmdbuffer_head += QW_SIZE;
   state.cmdbuffer_head_offset += QW_SIZE;
   return 1;
@@ -130,7 +130,6 @@ int draw_frame_start() {
   float halfw = (state.screen_w * 1.0f) / 2.0f;
   float halfh = (state.screen_h * 1.0f) / 2.0f;
   qword_t *q = (qword_t *)state.cmdbuffer_head;
-  q = draw_disable_tests(q, 0, &zb);
   PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
   q++;
   PACK_GIFTAG(q,
@@ -145,6 +144,15 @@ int draw_frame_start() {
   trace("clear screen: %d, %d, %f, %f, %p -> %p", state.screen_w,
         state.screen_h, 2048.0f - halfw, 2048.0f - halfh, state.cmdbuffer_head,
         q);
+  // enable depth tests
+  PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
+  q++;
+  PACK_GIFTAG(q,
+              GS_SET_TEST(DRAW_ENABLE, ATEST_METHOD_NOTEQUAL, 0x00,
+                          ATEST_KEEP_FRAMEBUFFER, DRAW_DISABLE, DRAW_DISABLE,
+                          DRAW_ENABLE, GS_STATE->zb.method),
+              GS_REG_TEST);
+  q++;
   state.cmdbuffer_head = (char *)q;
   state.cmdbuffer_head_offset = ((char *)q - state.cmdbuffer);
   return 1;

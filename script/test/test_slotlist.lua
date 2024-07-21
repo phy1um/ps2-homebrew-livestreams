@@ -64,4 +64,4 @@ function suite.sl_clear()
   test.equal(c, 6)
 end
 
-return function() return test.run_suite(suite.name, suite) end
+return suite

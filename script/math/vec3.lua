@@ -77,6 +77,14 @@ function vec3.from(other)
   return n
 end
 
+function vec3:set(x, y, z)
+  -- avoid slower index func that checks for .x .y and .z
+  local buf = rawget(self, "buf")
+  buf:setFloat(0,x)
+  buf:setFloat(1,y)
+  buf:setFloat(2,z)
+end
+
 function vec3:add(other)
   M.addVec3(self.buf, other.buf)
 end
@@ -106,3 +114,4 @@ function vec3:normalize()
 end
 
 return vec3
+

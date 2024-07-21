@@ -52,15 +52,15 @@ int draw2d_triangle(float x1, float y1, float x2, float y2, float x3,
     draw_kick();
   }
 
-  if (state.d2d.draw_type != D2D_GEOM) {
-    if (state.d2d.draw_type != D2D_NONE) {
+  if (state.d2d.draw_type != DRAW_FMT_GEOM) {
+    if (state.d2d.draw_type != DRAW_FMT_NONE) {
       draw_update_last_tag_loops();
     }
 
     giftag_new(&state, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_prim(&state, GS_PRIM_TRIANGLE, 0, 0, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_TRIS_LEN, GIF_REGS_TRIS);
-    state.d2d.draw_type = D2D_GEOM;
+    state.d2d.draw_type = DRAW_FMT_GEOM;
   }
 
   push_rgbaq(&state, state.d2d.col);
@@ -87,8 +87,8 @@ int draw2d_textri(float x1, float y1, float u1, float v1, float x2, float y2,
     draw_kick();
   }
 
-  if (state.d2d.draw_type != D2D_TEXTRI) {
-    if (state.d2d.draw_type != D2D_NONE) {
+  if (state.d2d.draw_type != DRAW_FMT_TEXTRI) {
+    if (state.d2d.draw_type != DRAW_FMT_NONE) {
       draw_update_last_tag_loops();
     }
 
@@ -101,7 +101,7 @@ int draw2d_textri(float x1, float y1, float u1, float v1, float x2, float y2,
     giftag_ad_tex2(&state, state.tex_psm, state.clut_tex, 0, 0, 0, 0x2);
     giftag_ad_prim(&state, GS_PRIM_TRIANGLE, 0, 1, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_TEXTRI_LEN, GIF_REGS_TEXTRI);
-    state.d2d.draw_type = D2D_TEXTRI;
+    state.d2d.draw_type = DRAW_FMT_TEXTRI;
   }
 
   push_rgbaq(&state, state.d2d.col);
@@ -128,15 +128,15 @@ int draw2d_rect(float x1, float y1, float w, float h) {
     draw_kick();
   }
 
-  if (state.d2d.draw_type != D2D_RECT) {
-    if (state.d2d.draw_type != D2D_NONE) {
+  if (state.d2d.draw_type != DRAW_FMT_RECT) {
+    if (state.d2d.draw_type != DRAW_FMT_NONE) {
       draw_update_last_tag_loops();
     }
 
     giftag_new(&state, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_prim(&state, GS_PRIM_SPRITE, 0, 0, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_RECT_LEN, GIF_REGS_RECT);
-    state.d2d.draw_type = D2D_RECT;
+    state.d2d.draw_type = DRAW_FMT_RECT;
   }
 
   push_rgbaq(&state, state.d2d.col);
@@ -260,9 +260,9 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
     draw_kick();
   }
 
-  if (state.d2d.draw_type != D2D_SPRITE ||
+  if (state.d2d.draw_type != DRAW_FMT_SPRITE ||
       state.active_tex != state.tex_vram_addr) {
-    if (state.d2d.draw_type != D2D_NONE) {
+    if (state.d2d.draw_type != DRAW_FMT_NONE) {
       draw_update_last_tag_loops();
     }
 
@@ -276,7 +276,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
     giftag_ad_tex2(&state, state.tex_psm, state.clut_tex, 0, 0, 0, 0x2);
     giftag_ad_prim(&state, GS_PRIM_SPRITE, 0, 1, 0);
     giftag_new(&state, 0, 1, 0, GIF_REGS_SPRITE_LEN, GIF_REGS_SPRITE);
-    state.d2d.draw_type = D2D_SPRITE;
+    state.d2d.draw_type = DRAW_FMT_SPRITE;
   }
 
   push_st(&state, u1, v1);
