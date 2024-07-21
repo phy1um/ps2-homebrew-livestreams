@@ -60,8 +60,7 @@ int gs_set_fields(int width, int height, int fmt, int zfmt, int fb1_addr,
   st->zb.enable = 1;
   st->zb.address = zbuf_addr;
   st->zb.zsm = zfmt;
-  // st->zb.method = ZTEST_METHOD_GREATER_EQUAL;
-  st->zb.method = ZTEST_METHOD_ALLPASS;
+  st->zb.method = ZTEST_METHOD_GREATER_EQUAL;
   st->zb.mask = 0;
   graph_set_framebuffer_filtered(fb2_addr, width, fmt, 0, 0);
   graph_enable_output();
