@@ -45,6 +45,8 @@ static int io_file_size(lua_State *l) {
   size_t file_size = ftell(f);
   fseek(f, 0L, SEEK_SET);
 
+  fclose(f);
+
   lua_pushinteger(l, file_size);
   return 1;
 }
