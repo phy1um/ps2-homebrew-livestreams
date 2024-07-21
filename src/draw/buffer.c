@@ -6,7 +6,7 @@
 #include "draw.h"
 
 static int command_buffer_align_head(struct commandbuffer *c, size_t b) {
-  while(c->offset % b != 0) {
+  while (c->offset % b != 0) {
     c->head += 1;
     c->offset += 1;
   }
@@ -72,7 +72,7 @@ int giftag_ad_prim(struct commandbuffer *s, int type, int shaded, int textured,
 }
 
 int giftag_ad_bitbltbuf(struct commandbuffer *s, int dba, int dbw,
-    uint64_t psm) {
+                        uint64_t psm) {
   gif_ad(s, GS_REG_BITBLTBUF,
          SHIFT(dba, 0x3fff, 32) | SHIFT(dbw, 0x3f, 48) | SHIFT(psm, 0x3f, 56));
   return 1;
@@ -128,7 +128,7 @@ int giftag_ad_tex2(struct commandbuffer *s, int psm, int cbp, int cpsm, int csm,
 }
 
 int giftag_ad_alpha(struct commandbuffer *s, int a, int b, int c, int d,
-    int fix) {
+                    int fix) {
   gif_ad(s, GS_REG_ALPHA,
          SHIFT(a, 0x3, 0) | SHIFT(b, 0x3, 2) | SHIFT(c, 0x3, 4) |
              SHIFT(d, 0x3, 6) | SHIFT(fix, 0xff, 32));
@@ -179,7 +179,8 @@ int dma_tag(uint32_t *t, int qwc, int type, uint32_t addr) {
 }
 
 int vifcode(uint32_t *t, int op, int stall, int num, uint16_t imm) {
-  t[0] = (imm&0xffff) | ((num&0xff) << 16) | ((stall<<31)|((op&0x7f)<<24));
+  t[0] = (imm & 0xffff) | ((num & 0xff) << 16) |
+         ((stall << 31) | ((op & 0x7f) << 24));
   t[1] = 0;
   t[2] = 0;
   t[3] = 0;
@@ -187,13 +188,11 @@ int vifcode(uint32_t *t, int op, int stall, int num, uint16_t imm) {
 }
 
 int vifcode_update_imm(uint16_t *t, uint16_t imm) {
-  t[0] = imm&0xffff; 
+  t[0] = imm & 0xffff;
   return 1;
 }
 
-
 int vifcode_update_num(uint8_t *t, uint8_t num) {
-    t[2] = num&0xff; 
-    return 1;
+  t[2] = num & 0xff;
+  return 1;
 }
-

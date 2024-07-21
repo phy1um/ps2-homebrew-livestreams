@@ -172,7 +172,7 @@ size_t draw3d_mesh_triangles_cnt(void *buffer, int vertex_count,
 int draw3d_mesh_triangles_ref(void *buffer, int vertex_count,
     size_t vertex_size);
 
-// TODO: circulare dependency thing
+// TODO(phy1um): circulare dependency thing
 int draw_vifcode_end(struct commandbuffer *c);
 int draw_vifcode_direct_start(struct commandbuffer *c);
 int draw_vu_end_unpack_inline(struct commandbuffer *c, size_t packet_size);

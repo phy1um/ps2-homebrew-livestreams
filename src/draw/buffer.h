@@ -8,7 +8,8 @@ int giftag_new(struct commandbuffer *s, int flag, int nloop, int eop, int nregs,
     uint64_t regs);
 int giftag_ad_prim(struct commandbuffer *s, int, int, int, int);
 int giftag_ad_texflush(struct commandbuffer *s);
-int giftag_ad_bitbltbuf(struct commandbuffer *s, int dba, int dbw, uint64_t psm);
+int giftag_ad_bitbltbuf(struct commandbuffer *s, int dba, int dbw,
+    uint64_t psm);
 int giftag_ad_trxpos(struct commandbuffer *s, int sx, uint64_t sy, uint64_t dx,
     uint64_t dy, uint64_t dir);
 

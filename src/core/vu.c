@@ -1,9 +1,10 @@
-#include "../draw/draw.h"
-#include <p2g/log.h>
 #include <lauxlib.h>
 #include <lua.h>
+#include <p2g/log.h>
 
-static const char * VU_PROG_METATABLE = "ps2.vuprog";
+#include "../draw/draw.h"
+
+static const char *VU_PROG_METATABLE = "ps2.vuprog";
 #define PROG_STATE_UNBOUND 0
 #define PROG_STATE_BOUND_VU0 1
 #define PROG_STATE_BOUND_VU1 2
@@ -124,13 +125,11 @@ static int vu_call(lua_State *l) {
   return 0;
 }
 
-static int vu_free(lua_State *l) {
-  return 0;
-}
+static int vu_free(lua_State *l) { return 0; }
 
 static int vu_new(lua_State *l) {
   const char *name = lua_tostring(l, 1);
-  lua_createtable(l, 0, 4); 
+  lua_createtable(l, 0, 4);
   lua_pushinteger(l, PROG_STATE_UNBOUND);
   lua_setfield(l, -2, "_state");
   lua_pushstring(l, name);

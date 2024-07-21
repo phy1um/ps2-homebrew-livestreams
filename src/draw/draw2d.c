@@ -42,8 +42,8 @@ extern struct render_state state;
 
 int draw2d_triangle(float x1, float y1, float x2, float y2, float x3,
                     float y3) {
-  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.buffer.offset, x1, y1,
-        x2, y2, x3, y3);
+  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.buffer.offset, x1, y1, x2, y2, x3,
+        y3);
   if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
     draw_kick_vif();
   }
@@ -98,9 +98,10 @@ int draw2d_textri(float x1, float y1, float u1, float v1, float x2, float y2,
     giftag_new(&state.buffer, 0, 5, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_texa(&state.buffer, 0x80, 0x80);
     giftag_ad_tex1(&state.buffer, 1, 0, 1, 0, 0);
-    giftag_ad_tex0(&state.buffer, 0, state.tex_vram_addr / 64, state.tex_width / 64,
-                   state.tex_psm, floorlog2(state.tex_width),
-                   floorlog2(state.tex_height), 1, 0);
+    giftag_ad_tex0(&state.buffer, 0, state.tex_vram_addr / 64,
+                   state.tex_width / 64, state.tex_psm,
+                   floorlog2(state.tex_width), floorlog2(state.tex_height), 1,
+                   0);
     giftag_ad_tex2(&state.buffer, state.tex_psm, state.clut_tex, 0, 0, 0, 0x2);
     giftag_ad_prim(&state.buffer, GS_PRIM_TRIANGLE, 0, 1, 0);
     giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_TEXTRI_LEN, GIF_REGS_TEXTRI);
@@ -280,9 +281,10 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
     giftag_new(&state.buffer, 0, 5, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_texa(&state.buffer, 0x80, 0x80);
     giftag_ad_tex1(&state.buffer, 1, 0, 1, 0, 0);
-    giftag_ad_tex0(&state.buffer, 0, state.tex_vram_addr / 64, state.tex_width / 64,
-                   state.tex_psm, floorlog2(state.tex_width),
-                   floorlog2(state.tex_height), 1, 0);
+    giftag_ad_tex0(&state.buffer, 0, state.tex_vram_addr / 64,
+                   state.tex_width / 64, state.tex_psm,
+                   floorlog2(state.tex_width), floorlog2(state.tex_height), 1,
+                   0);
     giftag_ad_tex2(&state.buffer, state.tex_psm, state.clut_tex, 0, 0, 0, 0x2);
     giftag_ad_prim(&state.buffer, GS_PRIM_SPRITE, 0, 1, 0);
     giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_SPRITE_LEN, GIF_REGS_SPRITE);
@@ -290,7 +292,7 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
   }
 
   push_st(&state.buffer, u1, v1);
-  // TODO: d2d.col should be part of commandbuffer for GIF
+  // TODO(phy1um): d2d.col should be part of commandbuffer for GIF
   push_rgbaq(&state.buffer, state.d2d.col);
   push_xyz2(&state.buffer, to_coord(x - 320), to_coord(y - 224), 0);
   push_st(&state.buffer, u2, v2);

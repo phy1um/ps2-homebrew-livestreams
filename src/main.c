@@ -203,10 +203,10 @@ int main(int argc, char *argv[]) {
     trace("MAIN - BEGIN FRAME");
     pad_frame_start();
     pad_poll();
-    if(ps2luaprog_onframe(L)) {
+    if (ps2luaprog_onframe(L)) {
       info("halting program - lua frame exception");
       ps2luaprog_is_running = 0;
-    };
+    }
     trace("WAIT DRAW");
     // TODO(tommarks): draw2d flag to know if draw was submitted
     draw_wait_finish();

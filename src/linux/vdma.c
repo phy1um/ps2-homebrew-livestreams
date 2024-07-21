@@ -6,18 +6,18 @@
 #include <stdint.h>
 
 char *CHANNEL_NAMES[] = {
-  "VIF0", "VIF1", "GIF", "??", 
-  "??", "??", "??", "??", 
-  "??", "??", "!!OOB!!",
+    "VIF0", "VIF1", "GIF", "??", "??", "??", "??", "??", "??", "??", "!!OOB!!",
 };
 
 void channel_process(int chan_id, void *data, int len) {
-  info("channel %s(%d): sink @ %p, size=%d", CHANNEL_NAMES[chan_id], chan_id, data, len);
+  info("channel %s(%d): sink @ %p, size=%d", CHANNEL_NAMES[chan_id], chan_id,
+       data, len);
   return;
 }
 
 int dma_channel_initialize(int chan, void *handler, int flags) {
-  info("DMA chan init: %s(%d), handler=%p, flags=%x", CHANNEL_NAMES[chan], chan, handler, flags);
+  info("DMA chan init: %s(%d), handler=%p, flags=%x", CHANNEL_NAMES[chan], chan,
+       handler, flags);
   return 0;
 }
 
@@ -32,18 +32,20 @@ int dma_channel_send_normal(int chan, void *data, int qwc, int flags, int spr) {
 
 int dma_channel_send_chain(int chan, void *data, int data_size, int flags,
                            int spr) {
-  trace("dma send chain: %p (%d) -> channel %s(%d)", data, data_size * 16, CHANNEL_NAMES[chan], chan);
+  trace("dma send chain: %p (%d) -> channel %s(%d)", data, data_size * 16,
+        CHANNEL_NAMES[chan], chan);
   int hb = 0;
   while (hb < data_size * 16) {
     uint32_t t0 = *((uint32_t *)(data + hb));
     uint32_t addr = *((uint32_t *)(data + hb + 4));
     unsigned int qwc = t0 & 0xffff;
     unsigned int type = (t0 >> 28) & 0x7;
-    trace("parse dma tag: %08X (addr = %04X qwc = %04X type = %02X", t0, addr, qwc, type);
+    trace("parse dma tag: %08X (addr = %04X qwc = %04X type = %02X", t0, addr,
+          qwc, type);
     switch (type) {
     case DMA_CNT:
       channel_process(chan, data + hb + 8, qwc * 16);
-      hb += (qwc+1) * 16;
+      hb += (qwc + 1) * 16;
       break;
     case DMA_REF:
       channel_process(chan, ((void *)&addr), qwc * 16);

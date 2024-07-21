@@ -243,7 +243,6 @@ static int draw_vu_unpack_inline(lua_State *l) {
   return 0;
 }
 
-
 #define pushfn(f, n)                                                           \
   lua_pushcfunction(l, f);                                                     \
   lua_setfield(l, -2, n)
