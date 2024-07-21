@@ -135,7 +135,7 @@ int giftag_ad_alpha(struct commandbuffer *s, int a, int b, int c, int d,
   return 1;
 }
 
-int push_rgbaq(struct commandbuffer *s, unsigned char cols[4]) {
+int push_rgbaq(struct commandbuffer *s, const unsigned char cols[4]) {
   uint32_t *v = (uint32_t *)s->head;
   v[0] = cols[0];
   v[1] = cols[1];
@@ -180,7 +180,7 @@ int dma_tag(uint32_t *t, int qwc, int type, uint32_t addr) {
 
 int vifcode(uint32_t *t, int op, int stall, int num, uint16_t imm) {
   t[0] = (imm & 0xffff) | ((num & 0xff) << 16) |
-         ((stall << 31) | ((op & 0x7f) << 24));
+         ((((uint64_t)stall) << 31) | ((op & 0x7f) << 24));
   t[1] = 0;
   t[2] = 0;
   t[3] = 0;

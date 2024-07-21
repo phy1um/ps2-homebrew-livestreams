@@ -27,7 +27,7 @@ int giftag_ad_alpha(struct commandbuffer *s, int a, int b, int c, int d,
     int fix);
 
 
-int push_rgbaq(struct commandbuffer *s, unsigned char cols[4]);
+int push_rgbaq(struct commandbuffer *s, const unsigned char cols[4]);
 int push_xyz2(struct commandbuffer *s, uint16_t x, uint16_t y, uint32_t z);
 int push_st(struct commandbuffer *state, float s, float t);
 

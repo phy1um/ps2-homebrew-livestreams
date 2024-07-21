@@ -3,13 +3,15 @@
 #include <p2g/log.h>
 #include <p2g/ps2math.h>
 
-float p2m_vec2_length(float *v2) {
+float p2m_vec2_length(const float *v2) {
   float xs = v2[0] * v2[0];
   float ys = v2[1] * v2[1];
   return sqrtf(xs + ys);
 }
 
-float p2m_vec2_dot(float *a, float *b) { return (a[0] * b[0]) + (a[1] * b[1]); }
+float p2m_vec2_dot(const float *a, const float *b) { 
+  return (a[0] * b[0]) + (a[1] * b[1]); 
+}
 
 void p2m_vec2_rotate(float *v, float theta) {
   float x = v[0];
@@ -23,14 +25,14 @@ void p2m_vec2_scale(float *v, float s) {
   v[1] *= s;
 }
 
-float p2m_vec3_length(float *v3) {
+float p2m_vec3_length(const float *v3) {
   float xs = v3[0] * v3[0];
   float ys = v3[1] * v3[1];
   float zs = v3[2] * v3[2];
   return sqrtf(xs + ys + zs);
 }
 
-float p2m_vec3_dot(float *a, float *b) {
+float p2m_vec3_dot(const float *a, const float *b) {
   return (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]);
 }
 
@@ -40,15 +42,15 @@ void p2m_vec3_scale(float *v, float s) {
   v[2] *= s;
 }
 
-float p2m_vec4_length(float *v3) {
-  float xs = v3[0] * v3[0];
-  float ys = v3[1] * v3[1];
-  float zs = v3[2] * v3[2];
-  float ws = v3[3] * v3[3];
+float p2m_vec4_length(const float *v4) {
+  float xs = v4[0] * v4[0];
+  float ys = v4[1] * v4[1];
+  float zs = v4[2] * v4[2];
+  float ws = v4[3] * v4[3];
   return sqrtf(xs + ys + zs + ws);
 }
 
-float p2m_vec4_dot(float *a, float *b) {
+float p2m_vec4_dot(const float *a, const float *b) {
   return (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]) + (a[3] + b[3]);
 }
 
@@ -59,13 +61,13 @@ void p2m_vec4_scale(float *v, float s) {
   v[3] *= s;
 }
 
-void p2m_m3_copy(float *a, float *b) {
+void p2m_m3_copy(float *a, const float *b) {
   for (int i = 0; i < 9; i++) {
     a[i] = b[i];
   }
 }
 
-void p2m_m3_apply(float *m3, float *v) {
+void p2m_m3_apply(const float *m3, float *v) {
   float nx = m3[0] * v[0] + m3[1] * v[1] + m3[2] * v[2];
   float ny = m3[3] * v[0] + m3[4] * v[1] + m3[5] * v[2];
   float nz = m3[6] * v[0] + m3[7] * v[1] + m3[8] * v[2];
@@ -74,7 +76,7 @@ void p2m_m3_apply(float *m3, float *v) {
   v[2] = nz;
 }
 
-void p2m_m3_add(float *a, float *b) {
+void p2m_m3_add(float *a, const float *b) {
   for (int i = 0; i < 9; i++) {
     a[i] += b[i];
   }
@@ -92,7 +94,7 @@ void p2m_m3_identity(float *m) {
   m[8] = 1;
 }
 
-void p2m_m3_multiply(float *a, float *b, float *to) {
+void p2m_m3_multiply(const float *a, const float *b, float *to) {
   float a00 = a[0];
   float a10 = a[1];
   float a20 = a[2];
@@ -133,7 +135,7 @@ void p2m_m4_identity(float *m) {
   m[15] = 1;
 }
 
-void p2m_m4_apply(float *m, float *v) {
+void p2m_m4_apply(const float *m, float *v) {
   float nx = m[0]*v[0]  + m[1]*v[1]  + m[2]*v[2]  + m[3]*v[3];
   float ny = m[4]*v[0]  + m[5]*v[1]  + m[6]*v[2]  + m[7]*v[3];
   float nz = m[8]*v[0]  + m[9]*v[1]  + m[10]*v[2] + m[11]*v[3];
@@ -144,19 +146,19 @@ void p2m_m4_apply(float *m, float *v) {
   v[3] = nw;
 }
 
-void p2m_m4_copy(float *a, float *b) {
+void p2m_m4_copy(float *a, const float *b) {
   for (int i = 0; i < 16; i++) {
     a[i] = b[i];
   }
 }
 
-void p2m_m4_add(float *a, float *b) {
+void p2m_m4_add(float *a, const float *b) {
   for (int i = 0; i < 16; i++) {
     a[i] += b[i];
   }
 }
 
-void p2m_m4_multiply(float *a, float *b, float *to) {
+void p2m_m4_multiply(const float *a, const float *b, float *to) {
   float a00 = a[0];
   float a10 = a[1];
   float a20 = a[2];
