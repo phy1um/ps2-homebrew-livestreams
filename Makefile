@@ -22,9 +22,15 @@ PCSX2=pcsx2-qt
  
 include .lintvars
 
+ifeq ($(USE_DOCKER), true)
+.PHONY: dist
+dist: docker-lua docker-elf assets
+	cp $(BIN) dist/$(DIST_BIN_NAME)
+else
 .PHONY: dist
 dist: $(LUA_LIB) $(BIN) assets
 	cp $(BIN) dist/$(DIST_BIN_NAME)
+endif
 
 .PHONY: assets
 assets: scripts

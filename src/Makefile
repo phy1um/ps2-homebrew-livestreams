@@ -20,8 +20,8 @@ SIM_OBJS:=$(addprefix $(PREFIX)linux/, $(SIM_OBJS))
 
 SIM_BIN=$(PREFIX)test.exe
 
-ifeq ($(PLATFORM), ps2)
-$(info Platform=ps2 detected)
+ifeq ($(platform), PS2)
+$(info platform=PS2 detected)
 include $(PS2SDK)/samples/Makefile.eeglobal
 include $(PS2SDK)/samples/Makefile.pref
 else
