@@ -40,15 +40,15 @@ int draw3d_instance_header_uint32(uint32_t value) { return 0; }
 // TODO: we need a second DMA chain/drawbuffer for stuff going through VIF
 int draw3d_mesh_triangles_ref(void *buffer, int vertex_count,
     size_t vertex_size) {
-  trace("triangle mesh ref @ %u", state.vif_buffer.offset);
-  if (state.vif_buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
+  trace("triangle mesh ref @ %u", state.buffer.offset);
+  if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
     // TODO: wtf do we do here if we have to split
     draw_kick_vif();
   }
-  draw_end_cnt(&state.vif_buffer); 
+  draw_end_cnt(&state.buffer); 
   int buffer_size = vertex_count * vertex_size;
   int qwc = buffer_size / 4 + (buffer_size%4 == 0 ? 0 : 1);
-  draw_dma_ref(&state.vif_buffer, (uint32_t) buffer, qwc);
+  draw_dma_ref(&state.buffer, (uint32_t) buffer, qwc);
   state.this_frame.tris += vertex_count / 3;
   return 0;
 }
@@ -56,35 +56,35 @@ int draw3d_mesh_triangles_ref(void *buffer, int vertex_count,
 // put a mesh into drawbuffer by copy (needed to do CPU transforms)
 size_t draw3d_mesh_triangles_cnt(void *buffer, int vertex_count,
     size_t vertex_size) {
-  if (state.vif_buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
+  if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
     draw_kick_vif();
   }
 
   int buffer_size = vertex_count * vertex_size;
 
-  trace("triangle mesh cnt @ %u [#vert = %d, |vert| = %d]", state.vif_buffer.offset, vertex_count, vertex_size);
+  trace("triangle mesh cnt @ %u [#vert = %d, |vert| = %d]", state.buffer.offset, vertex_count, vertex_size);
 
-  if (state.vif_buffer.offset >= state.vif_buffer.length - buffer_size) {
+  if (state.buffer.offset >= state.buffer.length - buffer_size) {
     logerr("no room to CNT draw model");
     return -1;
   }
 
   if (state.d2d.draw_type != DRAW_FMT_GEOM3D) {
     if (state.d2d.draw_type != DRAW_FMT_NONE) {
-      commandbuffer_update_last_tag_loop(&state.vif_buffer);
+      commandbuffer_update_last_tag_loop(&state.buffer);
     }
-    giftag_new(&state.vif_buffer, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
-    giftag_ad_prim(&state.vif_buffer, GS_PRIM_TRIANGLE, 0, 0, 0);
-    giftag_new(&state.vif_buffer, 0, 1, 0, GIF_REGS_FMT_GEOM3D_LEN, GIF_REGS_FMT_GEOM3D);
+    giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
+    giftag_ad_prim(&state.buffer, GS_PRIM_TRIANGLE, 0, 0, 0);
+    giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_FMT_GEOM3D_LEN, GIF_REGS_FMT_GEOM3D);
     state.d2d.draw_type = DRAW_FMT_GEOM;
   }
 
-  size_t out = state.vif_buffer.offset;
-  memcpy(state.vif_buffer.head, buffer, buffer_size);
-  state.vif_buffer.head += buffer_size;
-  state.vif_buffer.offset += buffer_size;
+  size_t out = state.buffer.offset;
+  memcpy(state.buffer.head, buffer, buffer_size);
+  state.buffer.head += buffer_size;
+  state.buffer.offset += buffer_size;
   state.this_frame.tris += vertex_count / 3;
-  state.vif_buffer.gif.loop_count += vertex_count / 3;
+  state.buffer.gif.loop_count += vertex_count / 3;
   return out;
 }
 
@@ -96,7 +96,7 @@ int draw3d_ee_transform_verts(float *mvp, size_t offset_start, int vertex_count,
         vertex_count, vertex_size);
   size_t vertex_base = offset_start;
   for(int i = 0; i < vertex_count; i++) {
-    float *vertex = (float*) (state.vif_buffer.ptr + vertex_base);
+    float *vertex = (float*) (state.buffer.ptr + vertex_base);
     float *position = vertex + pos_offset;
     position[3] = 1.f;
     trace(" read verts @ %p(%d) [+%d => %p]", vertex, i, pos_offset, position);

@@ -410,7 +410,7 @@ static int drawlua_end_frame(lua_State *l) {
   return 0;
 }
 
-static int drawbuffer_free(lua_State *l) { return 0; }
+// static int drawbuffer_free(lua_State *l) { return 0; }
 
 static int buffer_alloc(lua_State *l) {
   int size = lua_tointeger(l, 1);

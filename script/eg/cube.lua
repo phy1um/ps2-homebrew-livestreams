@@ -26,8 +26,9 @@ local instances = {}
 
 
 function PS2PROG.start()
-  PS2PROG.logLevel(LOG.infoLevel)
+  PS2PROG.logLevel(LOG.debugLevel)
   DMA.init(DMA.GIF)
+  DMA.init(DMA.VIF1)
   GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
   local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 2048)
   local fb2 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 2048)

@@ -166,3 +166,17 @@ int dma_tag(uint32_t *t, int qwc, int type, uint32_t addr) {
   t[3] = 0;
   return 1;
 }
+
+int vifcode(uint32_t *t, int op, int stall, int num, uint16_t imm) {
+  t[0] = (imm&0xffff) | ((num&0xff) << 16) | ((stall<<31)|((op&0x7f)<<24));
+  t[1] = 0;
+  t[2] = 0;
+  t[3] = 0;
+  return 1;
+}
+
+int vifcode_update_imm(uint16_t *t, uint16_t imm) {
+  t[0] = imm&0xffff; 
+  return 1;
+}
+

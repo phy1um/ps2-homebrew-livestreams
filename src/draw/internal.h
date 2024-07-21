@@ -8,6 +8,8 @@ int draw_start_cnt();
 int dmatag_raw(struct commandbuffer *c, int qwc, int type, int addr);
 int draw_end_cnt();
 int draw_dma_end();
+int draw_vifcode_direct_start(struct commandbuffer *c);
+int draw_vifcode_end(struct commandbuffer *c);
 // transfer qwc quad-words from addr, then read next tag
 int draw_dma_ref(struct commandbuffer *c, uint32_t addr, int qwc);
 int draw_kick_vif();

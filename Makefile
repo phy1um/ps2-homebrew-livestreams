@@ -2,8 +2,8 @@ ISO_TGT=test.iso
 BIN=src/p2g.elf
 
 PS2HOST?=192.168.20.99
-PLATFORM=ps2
-platform=PS2
+#PLATFORM=ps2
+#platform=PS2
 
 VERSION?=$(shell git rev-parse --short HEAD)
 ISO_FLAGS?=-l --allow-lowercase -A "P2Garage Engine by Tom Marks -- coding.tommarks.xyz" -V "P2GARAGE:$(VERSION)"

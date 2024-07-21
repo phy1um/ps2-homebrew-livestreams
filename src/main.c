@@ -207,8 +207,7 @@ int main(int argc, char *argv[]) {
     if (ps2luaprog_onframe(L)) {
       info("halting program - lua frame exception");
       ps2luaprog_is_running = 0;
-    }
-    // may be required? -- dma_wait_fast();
+    };
     trace("WAIT DRAW");
     // TODO(tommarks): draw2d flag to know if draw was submitted
     draw_wait_finish();

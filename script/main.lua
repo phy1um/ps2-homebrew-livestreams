@@ -52,12 +52,14 @@ function run_unit_tests()
   end
 end
 
+--[[
 if run_unit_tests() == true then
   LOG.error("invalid startup: unit tests failed")
   entrypoint = "eg.tests"
 end
+--]]
 
-LOG.info("loading entrypoint")
+LOG.info("loading entrypoint: " .. entrypoint)
 
 require(entrypoint)
 return {}

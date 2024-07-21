@@ -44,8 +44,7 @@ int commandbuffer_update_last_tag_loop(struct commandbuffer *c) {
 // easy :D
 int draw_clear_buffer() {
   trace("draw clear buffer");
-  clear_command_buffer(&state.vif_buffer);
-  clear_command_buffer(&state.gif_buffer);
+  clear_command_buffer(&state.buffer);
   state.d2d.draw_type = DRAW_FMT_NONE;
   return 1;
 }
@@ -57,6 +56,17 @@ int draw_update_last_tag_loops() {
   return rv;
 }
 */
+
+int draw_vifcode_direct_start(struct commandbuffer *c) {
+  trace("start vifcode @ %d", c->offset);
+  c->vif.head = c->head;
+  c->vif.is_direct_gif = 1;
+  c->vif.is_active = 1;
+  vifcode((uint32_t*) c->vif.head, VIF_CODE_DIRECT, VIF_CODE_NO_STALL, 0, 0);
+  c->head += QW_SIZE;
+  c->offset += QW_SIZE;
+  return 1;
+}
 
 int draw_start_cnt(struct commandbuffer *c) {
   trace("start cnt @ %d", c->offset);
@@ -74,6 +84,37 @@ int dmatag_raw(struct commandbuffer *c, int qwc, int type, int addr) {
   c->offset += QW_SIZE;
   return 1;
 }
+
+int draw_vifcode_end(struct commandbuffer *c) {
+  trace("end vifcode, direct=%d, buffer@=%d", c->vif.is_direct_gif,
+      c->offset);
+  if (!c->vif.is_active) {
+    return 0; 
+  }
+  size_t packet_len = c->head - c->vif.head;
+  if (packet_len == QW_SIZE) {
+    trace("rewinding vifcode of empty packet");
+    c->head -= QW_SIZE;
+    c->offset -= QW_SIZE;
+    return 1;
+  }
+  if (c->vif.is_direct_gif) {
+    trace("set vifcode direct immediate");
+    int qwc = packet_len/QW_SIZE;
+    if (packet_len % QW_SIZE != 0) {
+      qwc += 1;
+    }
+    if (qwc >= 65536) {
+      // TODO: ???
+      logerr("vifcode is too big!!!");
+      return 1;
+    } 
+    vifcode_update_imm(c->vif.head, qwc-1);
+  } else {
+    logerr("unsupported VIF transfer");
+  }
+}
+
 
 int draw_end_cnt(struct commandbuffer *c) {
   trace("end cnt, state=%d, head=%d", c->dma.in_cnt,
@@ -116,38 +157,41 @@ int draw_dma_ref(struct commandbuffer *c, uint32_t addr, int qwc) {
 }
 
 int draw_kick_gif() {
-  trace("kick gif buffer of size=%d", state.gif_buffer.offset);
-  commandbuffer_update_last_tag_loop(&state.gif_buffer);
-  draw_end_cnt(&state.gif_buffer);
-  draw_dma_end(&state.gif_buffer);
-  size_t buffer_size = state.gif_buffer.head - state.gif_buffer.ptr;
+  trace("kick gif buffer of size=%d", state.buffer.offset);
+  commandbuffer_update_last_tag_loop(&state.buffer);
+  draw_end_cnt(&state.buffer);
+  draw_dma_end(&state.buffer);
+  size_t buffer_size = state.buffer.head - state.buffer.ptr;
   trace("dma send");
-  print_buffer((qword_t *)state.gif_buffer.ptr, buffer_size / 16);
-  dma_channel_send_chain(DMA_CHANNEL_GIF, state.gif_buffer.ptr, buffer_size / 16, 0,
+  print_buffer((qword_t *)state.buffer.ptr, buffer_size / 16);
+  dma_channel_send_chain(DMA_CHANNEL_GIF, state.buffer.ptr, buffer_size / 16, 0,
                          0);
   dma_wait_fast();
   // TODO(phy1um): get new memory?
-  clear_command_buffer(&state.gif_buffer);
-  draw_start_cnt(&state.gif_buffer);
+  clear_command_buffer(&state.buffer);
+  draw_start_cnt(&state.buffer);
   // TODO: kick count vif vs gif
   state.this_frame.kick_count += 1;
   return 1;
 }
 
 int draw_kick_vif() {
-  trace("kick vif buffer of size=%d", state.vif_buffer.offset);
-  commandbuffer_update_last_tag_loop(&state.vif_buffer);
-  draw_end_cnt(&state.vif_buffer);
-  draw_dma_end(&state.vif_buffer);
-  size_t buffer_size = state.vif_buffer.head - state.vif_buffer.ptr;
+  trace("kick vif buffer of size=%d", state.buffer.offset);
+  commandbuffer_update_last_tag_loop(&state.buffer);
+  // TODO: this naming is inconsistent
+  draw_vifcode_end(&state.buffer);
+  draw_end_cnt(&state.buffer);
+  draw_dma_end(&state.buffer);
+  // ---
+  size_t buffer_size = state.buffer.head - state.buffer.ptr;
   trace("dma send");
-  print_buffer((qword_t *)state.vif_buffer.ptr, buffer_size / 16);
-  dma_channel_send_chain(DMA_CHANNEL_VIF1, state.vif_buffer.ptr, buffer_size / 16, 0,
+  print_buffer((qword_t *)state.buffer.ptr, buffer_size / 16);
+  dma_channel_send_chain(DMA_CHANNEL_VIF1, state.buffer.ptr, buffer_size / 16, 0,
                          0);
   dma_wait_fast();
   // TODO(phy1um): get new memory?
-  clear_command_buffer(&state.vif_buffer);
-  draw_start_cnt(&state.vif_buffer);
+  clear_command_buffer(&state.buffer);
+  draw_start_cnt(&state.buffer);
   // TODO: kick count vif vs gif
   state.this_frame.kick_count += 1;
   return 1;
@@ -157,13 +201,13 @@ int draw_frame_start() {
   trace("frame start");
   memset(&state.this_frame, 0, sizeof(struct draw_stats));
   draw_clear_buffer();
-  draw_start_cnt(&state.gif_buffer);
-  draw_start_cnt(&state.vif_buffer);
+  draw_start_cnt(&state.buffer);
+  draw_vifcode_direct_start(&state.buffer);
 
   // Clear the screen using PS2SDK functions
   float halfw = (state.screen_w * 1.0f) / 2.0f;
   float halfh = (state.screen_h * 1.0f) / 2.0f;
-  qword_t *q = (qword_t *)state.gif_buffer.head;
+  qword_t *q = (qword_t *)state.buffer.head;
   PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
   q++;
   PACK_GIFTAG(q,
@@ -176,7 +220,7 @@ int draw_frame_start() {
                  state.screen_h, state.clear[0], state.clear[1],
                  state.clear[2]);
   trace("clear screen: %d, %d, %f, %f, %p -> %p", state.screen_w,
-        state.screen_h, 2048.0f - halfw, 2048.0f - halfh, state.gif_buffer.head,
+        state.screen_h, 2048.0f - halfw, 2048.0f - halfh, state.buffer.head,
         q);
   // enable depth tests
   PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
@@ -187,16 +231,16 @@ int draw_frame_start() {
                           DRAW_ENABLE, GS_STATE->zb.method),
               GS_REG_TEST);
   q++;
-  state.gif_buffer.head = (char *)q;
-  state.gif_buffer.offset = ((char *)q - state.gif_buffer.ptr);
+  state.buffer.head = (char *)q;
+  state.buffer.offset = ((char *)q - state.buffer.ptr);
   return 1;
 }
 
 int draw_frame_end() {
   trace("frame end");
-  qword_t *q = draw_finish((qword_t *)state.gif_buffer.head);
-  state.gif_buffer.head = (char *)q;
-  draw_kick_gif();
+  qword_t *q = draw_finish((qword_t *)state.buffer.head);
+  state.buffer.head = (char *)q;
+  draw_kick_vif();
   memcpy(&state.last_frame, &state.this_frame, sizeof(struct draw_stats));
   return 1;
 }

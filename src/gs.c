@@ -36,7 +36,7 @@ int gs_flip() {
   q = draw_finish(q);
   dma_wait_fast();
   trace("GS SEND FLIP BUFFER");
-  dma_channel_send_normal(DMA_CHANNEL_GIF, flip_buffer, q - flip_buffer, 0, 0);
+  dma_channel_send_normal(2, flip_buffer, q - flip_buffer, 0, 0);
   trace("GS WAIT FLIP BUFFER DRAW FINISH");
   draw_wait_finish();
   trace("GS FLIP DONE");

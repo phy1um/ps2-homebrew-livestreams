@@ -13,6 +13,11 @@
 #define GIF_MAX_LOOPS 0x7fff
 #define QW_SIZE 4*sizeof(uint32_t)
 
+// TODO: move to some other folder
+#define VIF_CODE_DIRECT 0x50
+#define VIF_CODE_NO_STALL 0x0
+#define VIF_CODE_STALL 0x1
+
 void core_error(const char *);
 #define error(msg) core_error(msg)
 
@@ -36,6 +41,12 @@ struct draw_gif {
 struct draw_dma {
   char *head;
   int in_cnt;
+};
+
+struct draw_vif {
+  char *head;
+  int is_direct_gif;
+  int is_active;
 };
 
 struct draw_stats {
@@ -90,6 +101,7 @@ struct commandbuffer {
   size_t length;
   struct draw_dma dma;
   struct draw_gif gif;
+  struct draw_vif vif;
 };
 
 struct render_state {
@@ -97,8 +109,7 @@ struct render_state {
   char clear[4];
   int screen_w;
   int screen_h;
-  struct commandbuffer vif_buffer;
-  struct commandbuffer gif_buffer;
+  struct commandbuffer buffer;
   void *zbuffer;
 
   int tex_vram_addr;

@@ -42,33 +42,33 @@ extern struct render_state state;
 
 int draw2d_triangle(float x1, float y1, float x2, float y2, float x3,
                     float y3) {
-  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.gif_buffer.offset, x1, y1,
+  trace("tri @ %u %f,%f  %f,%f  %f,%f", state.buffer.offset, x1, y1,
         x2, y2, x3, y3);
-  if (state.gif_buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw_kick_gif();
+  if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
+    draw_kick_vif();
   }
 
-  if (state.gif_buffer.offset >= state.gif_buffer.length - 80) {
+  if (state.buffer.offset >= state.buffer.length - 80) {
     trace("triangle: early kick because buffer is full");
-    draw_kick_gif();
+    draw_kick_vif();
   }
 
   if (state.d2d.draw_type != DRAW_FMT_GEOM) {
     if (state.d2d.draw_type != DRAW_FMT_NONE) {
-      commandbuffer_update_last_tag_loop(&state.gif_buffer);
+      commandbuffer_update_last_tag_loop(&state.buffer);
     }
 
-    giftag_new(&state.gif_buffer, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
-    giftag_ad_prim(&state.gif_buffer, GS_PRIM_TRIANGLE, 0, 0, 0);
-    giftag_new(&state.gif_buffer, 0, 1, 0, GIF_REGS_TRIS_LEN, GIF_REGS_TRIS);
+    giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
+    giftag_ad_prim(&state.buffer, GS_PRIM_TRIANGLE, 0, 0, 0);
+    giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_TRIS_LEN, GIF_REGS_TRIS);
     state.d2d.draw_type = DRAW_FMT_GEOM;
   }
 
-  push_rgbaq(&state.gif_buffer, state.d2d.col);
-  push_xyz2(&state.gif_buffer, to_coord(x1 - 320), to_coord(y1 - 224), 0);
-  push_xyz2(&state.gif_buffer, to_coord(x2 - 320), to_coord(y2 - 224), 0);
-  push_xyz2(&state.gif_buffer, to_coord(x3 - 320), to_coord(y3 - 224), 0);
-  state.gif_buffer.gif.loop_count += 1;
+  push_rgbaq(&state.buffer, state.d2d.col);
+  push_xyz2(&state.buffer, to_coord(x1 - 320), to_coord(y1 - 224), 0);
+  push_xyz2(&state.buffer, to_coord(x2 - 320), to_coord(y2 - 224), 0);
+  push_xyz2(&state.buffer, to_coord(x3 - 320), to_coord(y3 - 224), 0);
+  state.buffer.gif.loop_count += 1;
   state.this_frame.tris += 1;
   return 1;
 }
@@ -77,73 +77,73 @@ int draw2d_textri(float x1, float y1, float u1, float v1, float x2, float y2,
                   float u2, float v2, float x3, float y3, float u3, float v3) {
   trace("drawing textri @ %f %f %f %f -- %f %f %f %f -- %f %f %f %f", x1, y1,
         u1, v1, x2, y2, u2, v2, x3, y3, u3, v3);
-  if (state.gif_buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw_kick_gif();
+  if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
+    draw_kick_vif();
   }
 
-  trace("textri: head = %d, len = %d", state.gif_buffer.offset,
-        state.gif_buffer.length);
-  if (state.gif_buffer.offset >= state.gif_buffer.length - 80) {
+  trace("textri: head = %d, len = %d", state.buffer.offset,
+        state.buffer.length);
+  if (state.buffer.offset >= state.buffer.length - 80) {
     trace("textri: early kick because buffer is full");
-    draw_kick_gif();
+    draw_kick_vif();
   }
 
   if (state.d2d.draw_type != DRAW_FMT_TEXTRI) {
     if (state.d2d.draw_type != DRAW_FMT_NONE) {
-      commandbuffer_update_last_tag_loop(&state.gif_buffer);
+      commandbuffer_update_last_tag_loop(&state.buffer);
     }
 
-    giftag_new(&state.gif_buffer, 0, 5, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
-    giftag_ad_texa(&state.gif_buffer, 0x80, 0x80);
-    giftag_ad_tex1(&state.gif_buffer, 1, 0, 1, 0, 0);
-    giftag_ad_tex0(&state.gif_buffer, 0, state.tex_vram_addr / 64, state.tex_width / 64,
+    giftag_new(&state.buffer, 0, 5, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
+    giftag_ad_texa(&state.buffer, 0x80, 0x80);
+    giftag_ad_tex1(&state.buffer, 1, 0, 1, 0, 0);
+    giftag_ad_tex0(&state.buffer, 0, state.tex_vram_addr / 64, state.tex_width / 64,
                    state.tex_psm, floorlog2(state.tex_width),
                    floorlog2(state.tex_height), 1, 0);
-    giftag_ad_tex2(&state.gif_buffer, state.tex_psm, state.clut_tex, 0, 0, 0, 0x2);
-    giftag_ad_prim(&state.gif_buffer, GS_PRIM_TRIANGLE, 0, 1, 0);
-    giftag_new(&state.gif_buffer, 0, 1, 0, GIF_REGS_TEXTRI_LEN, GIF_REGS_TEXTRI);
+    giftag_ad_tex2(&state.buffer, state.tex_psm, state.clut_tex, 0, 0, 0, 0x2);
+    giftag_ad_prim(&state.buffer, GS_PRIM_TRIANGLE, 0, 1, 0);
+    giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_TEXTRI_LEN, GIF_REGS_TEXTRI);
     state.d2d.draw_type = DRAW_FMT_TEXTRI;
   }
 
-  push_rgbaq(&state.gif_buffer, state.d2d.col);
-  push_st(&state.gif_buffer, u1, v1);
-  push_xyz2(&state.gif_buffer, to_coord(x1 - 320), to_coord(y1 - 224), 0);
-  push_st(&state.gif_buffer, u2, v2);
-  push_xyz2(&state.gif_buffer, to_coord(x2 - 320), to_coord(y2 - 224), 0);
-  push_st(&state.gif_buffer, u3, v3);
-  push_xyz2(&state.gif_buffer, to_coord(x3 - 320), to_coord(y3 - 224), 0);
-  state.gif_buffer.gif.loop_count += 1;
+  push_rgbaq(&state.buffer, state.d2d.col);
+  push_st(&state.buffer, u1, v1);
+  push_xyz2(&state.buffer, to_coord(x1 - 320), to_coord(y1 - 224), 0);
+  push_st(&state.buffer, u2, v2);
+  push_xyz2(&state.buffer, to_coord(x2 - 320), to_coord(y2 - 224), 0);
+  push_st(&state.buffer, u3, v3);
+  push_xyz2(&state.buffer, to_coord(x3 - 320), to_coord(y3 - 224), 0);
+  state.buffer.gif.loop_count += 1;
   state.this_frame.tris += 1;
   return 1;
 }
 
 int draw2d_rect(float x1, float y1, float w, float h) {
-  trace("rect @ %u %f %f %f %f", state.gif_buffer.offset, x1, y1, w, h);
+  trace("rect @ %u %f %f %f %f", state.buffer.offset, x1, y1, w, h);
 
-  if (state.gif_buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw_kick_gif();
+  if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
+    draw_kick_vif();
   }
 
-  if (state.gif_buffer.offset >= state.gif_buffer.length - 80) {
+  if (state.buffer.offset >= state.buffer.length - 80) {
     trace("rect: early kick because buffer is full");
-    draw_kick_gif();
+    draw_kick_vif();
   }
 
   if (state.d2d.draw_type != DRAW_FMT_RECT) {
     if (state.d2d.draw_type != DRAW_FMT_NONE) {
-      commandbuffer_update_last_tag_loop(&state.gif_buffer);
+      commandbuffer_update_last_tag_loop(&state.buffer);
     }
 
-    giftag_new(&state.gif_buffer, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
-    giftag_ad_prim(&state.gif_buffer, GS_PRIM_SPRITE, 0, 0, 0);
-    giftag_new(&state.gif_buffer, 0, 1, 0, GIF_REGS_RECT_LEN, GIF_REGS_RECT);
+    giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
+    giftag_ad_prim(&state.buffer, GS_PRIM_SPRITE, 0, 0, 0);
+    giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_RECT_LEN, GIF_REGS_RECT);
     state.d2d.draw_type = DRAW_FMT_RECT;
   }
 
-  push_rgbaq(&state.gif_buffer, state.d2d.col);
-  push_xyz2(&state.gif_buffer, to_coord(x1 - 320), to_coord(y1 - 224), 0);
-  push_xyz2(&state.gif_buffer, to_coord(x1 + w - 320), to_coord(y1 + h - 224), 0);
-  state.gif_buffer.gif.loop_count += 1;
+  push_rgbaq(&state.buffer, state.d2d.col);
+  push_xyz2(&state.buffer, to_coord(x1 - 320), to_coord(y1 - 224), 0);
+  push_xyz2(&state.buffer, to_coord(x1 + w - 320), to_coord(y1 + h - 224), 0);
+  state.buffer.gif.loop_count += 1;
   state.this_frame.tris += 1;
   return 1;
 }
@@ -174,16 +174,16 @@ int draw_upload_texture(void *texture, size_t bytes, int width, int height,
                         int format, int vram_addr) {
   trace("uploading tex %p -> %d", texture, vram_addr);
 
-  commandbuffer_update_last_tag_loop(&state.gif_buffer);
+  commandbuffer_update_last_tag_loop(&state.buffer);
   // setup
-  giftag_new(&state.gif_buffer, 0, 4, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
-  giftag_ad_bitbltbuf(&state.gif_buffer, vram_addr / 64, width / 64, format);
-  giftag_ad_trxpos(&state.gif_buffer, 0, 0, 0, 0, 0);
-  giftag_ad_trxreg(&state.gif_buffer, width, height);
-  giftag_ad_trxdir(&state.gif_buffer, 0);
+  giftag_new(&state.buffer, 0, 4, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
+  giftag_ad_bitbltbuf(&state.buffer, vram_addr / 64, width / 64, format);
+  giftag_ad_trxpos(&state.buffer, 0, 0, 0, 0, 0);
+  giftag_ad_trxreg(&state.buffer, width, height);
+  giftag_ad_trxdir(&state.buffer, 0);
 
   // end current drawing
-  draw_end_cnt(&state.gif_buffer);
+  draw_end_cnt(&state.buffer);
 
   // assume format == PSM32
   int ee_vram_size = width * height * 4;
@@ -207,14 +207,14 @@ int draw_upload_texture(void *texture, size_t bytes, int width, int height,
   // split upload into reasonably sized blocks
   int img_addr = (int)texture;
   while (packet_count > 0) {
-    if (state.gif_buffer.offset >= state.gif_buffer.length - 5 * QW_SIZE) {
+    if (state.buffer.offset >= state.buffer.length - 5 * QW_SIZE) {
       trace("upload texture: early kick because buffer is full");
-      draw_kick_gif();
-      draw_end_cnt(&state.gif_buffer);
+      draw_kick_vif();
+      draw_end_cnt(&state.buffer);
     }
-    dmatag_raw(&state.gif_buffer, 1, 0x1 << 28, 0);
-    giftag_new(&state.gif_buffer, GIF_IMAGE, block_size, 0, 0, 0);
-    dmatag_raw(&state.gif_buffer, block_size, 0x3 << 28, img_addr);
+    dmatag_raw(&state.buffer, 1, 0x1 << 28, 0);
+    giftag_new(&state.buffer, GIF_IMAGE, block_size, 0, 0, 0);
+    dmatag_raw(&state.buffer, block_size, 0x3 << 28, img_addr);
 
     img_addr += block_size * 16;
     packet_count -= 1;
@@ -222,20 +222,20 @@ int draw_upload_texture(void *texture, size_t bytes, int width, int height,
 
   // if there is any leftover, handle that here
   if (remain > 0) {
-    if (state.gif_buffer.offset >= state.gif_buffer.length - 5 * QW_SIZE) {
+    if (state.buffer.offset >= state.buffer.length - 5 * QW_SIZE) {
       trace("upload texture (remain): early kick because buffer is full");
-      draw_kick_gif();
-      draw_end_cnt(&state.gif_buffer);
+      draw_kick_vif();
+      draw_end_cnt(&state.buffer);
     }
-    dmatag_raw(&state.gif_buffer, 1, 0x1 << 28, 0);
-    giftag_new(&state.gif_buffer, GIF_IMAGE, remain, 0, 0, 0);
-    dmatag_raw(&state.gif_buffer, remain, 0x3 << 28, img_addr);
+    dmatag_raw(&state.buffer, 1, 0x1 << 28, 0);
+    giftag_new(&state.buffer, GIF_IMAGE, remain, 0, 0, 0);
+    dmatag_raw(&state.buffer, remain, 0x3 << 28, img_addr);
   }
 
-  draw_start_cnt(&state.gif_buffer);
+  draw_start_cnt(&state.buffer);
 
-  giftag_new(&state.gif_buffer, GIF_PACKED, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
-  giftag_ad_texflush(&state.gif_buffer);
+  giftag_new(&state.buffer, GIF_PACKED, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
+  giftag_ad_texflush(&state.buffer);
 
   return 1;
 }
@@ -252,42 +252,42 @@ int draw2d_bind_texture(int tex_vram_addr, int width, int height, int psm) {
 int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
                   float u2, float v2) {
   trace("drawing sprite @ %f,%f", x, y);
-  if (state.gif_buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw_kick_gif();
+  if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
+    draw_kick_vif();
   }
 
-  if (state.gif_buffer.offset >= state.gif_buffer.length - 80) {
+  if (state.buffer.offset >= state.buffer.length - 80) {
     trace("sprite: early kick because buffer is full");
-    draw_kick_gif();
+    draw_kick_vif();
   }
 
   if (state.d2d.draw_type != DRAW_FMT_SPRITE ||
       state.active_tex != state.tex_vram_addr) {
     if (state.d2d.draw_type != DRAW_FMT_NONE) {
-      commandbuffer_update_last_tag_loop(&state.gif_buffer);
+      commandbuffer_update_last_tag_loop(&state.buffer);
     }
 
     state.active_tex = state.tex_vram_addr;
-    giftag_new(&state.gif_buffer, 0, 5, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
-    giftag_ad_texa(&state.gif_buffer, 0x80, 0x80);
-    giftag_ad_tex1(&state.gif_buffer, 1, 0, 1, 0, 0);
-    giftag_ad_tex0(&state.gif_buffer, 0, state.tex_vram_addr / 64, state.tex_width / 64,
+    giftag_new(&state.buffer, 0, 5, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
+    giftag_ad_texa(&state.buffer, 0x80, 0x80);
+    giftag_ad_tex1(&state.buffer, 1, 0, 1, 0, 0);
+    giftag_ad_tex0(&state.buffer, 0, state.tex_vram_addr / 64, state.tex_width / 64,
                    state.tex_psm, floorlog2(state.tex_width),
                    floorlog2(state.tex_height), 1, 0);
-    giftag_ad_tex2(&state.gif_buffer, state.tex_psm, state.clut_tex, 0, 0, 0, 0x2);
-    giftag_ad_prim(&state.gif_buffer, GS_PRIM_SPRITE, 0, 1, 0);
-    giftag_new(&state.gif_buffer, 0, 1, 0, GIF_REGS_SPRITE_LEN, GIF_REGS_SPRITE);
+    giftag_ad_tex2(&state.buffer, state.tex_psm, state.clut_tex, 0, 0, 0, 0x2);
+    giftag_ad_prim(&state.buffer, GS_PRIM_SPRITE, 0, 1, 0);
+    giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_SPRITE_LEN, GIF_REGS_SPRITE);
     state.d2d.draw_type = DRAW_FMT_SPRITE;
   }
 
-  push_st(&state.gif_buffer, u1, v1);
+  push_st(&state.buffer, u1, v1);
   // TODO: d2d.col should be part of commandbuffer for GIF
-  push_rgbaq(&state.gif_buffer, state.d2d.col);
-  push_xyz2(&state.gif_buffer, to_coord(x - 320), to_coord(y - 224), 0);
-  push_st(&state.gif_buffer, u2, v2);
-  push_rgbaq(&state.gif_buffer, state.d2d.col);
-  push_xyz2(&state.gif_buffer, to_coord(x + w - 320), to_coord(y + h - 224), 0);
-  state.gif_buffer.gif.loop_count += 1;
+  push_rgbaq(&state.buffer, state.d2d.col);
+  push_xyz2(&state.buffer, to_coord(x - 320), to_coord(y - 224), 0);
+  push_st(&state.buffer, u2, v2);
+  push_rgbaq(&state.buffer, state.d2d.col);
+  push_xyz2(&state.buffer, to_coord(x + w - 320), to_coord(y + h - 224), 0);
+  state.buffer.gif.loop_count += 1;
   state.this_frame.tris += 1;
   return 1;
 }
@@ -299,7 +299,7 @@ int draw2d_set_clut_state(int texture_base) {
 
 int draw_bind_buffer(void *buf, size_t buf_len) {
   logdbg("bind buffer %p", buf);
-  state.gif_buffer.ptr = buf;
-  state.gif_buffer.length = buf_len;
+  state.buffer.ptr = buf;
+  state.buffer.length = buf_len;
   return draw_clear_buffer();
 }

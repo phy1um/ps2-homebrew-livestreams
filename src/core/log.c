@@ -3,6 +3,7 @@
 
 #include <p2g/log.h>
 #include <p2g/utils.h>
+#include <string.h>
 
 void lua_log_message(lua_State *l, int level, const char *pre) {
   if (log_output_level >= level) {
