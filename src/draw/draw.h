@@ -83,15 +83,22 @@ struct d2d_state {
   enum d2d_type draw_type;
 };
 
+struct commandbuffer {
+  char *ptr;
+  char *head;
+  size_t offset;
+  size_t length;
+  struct draw_dma dma;
+  struct draw_gif gif;
+};
+
 struct render_state {
   int has_ctx;
   char clear[4];
   int screen_w;
   int screen_h;
-  char *cmdbuffer;
-  char *cmdbuffer_head;
-  size_t cmdbuffer_head_offset;
-  size_t cmdbuffer_len;
+  struct commandbuffer vif_buffer;
+  struct commandbuffer gif_buffer;
   void *zbuffer;
 
   int tex_vram_addr;
@@ -101,8 +108,6 @@ struct render_state {
   int active_tex;
   int clut_tex;
 
-  struct draw_dma dma;
-  struct draw_gif gif;
   struct draw_stats this_frame;
   struct draw_stats last_frame;
 

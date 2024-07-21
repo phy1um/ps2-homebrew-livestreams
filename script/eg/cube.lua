@@ -38,7 +38,7 @@ function PS2PROG.start()
   local db = RM.alloc(200 * 1024)
   DRAW:bindBuffer(db)
 
-  local file_target = "knight.bin"
+  local file_target = "cube.bin"
   local sz = IO.file_size(file_target)
   local verts = sz / (8*4) 
   cube_model = RM.alloc(sz)
@@ -52,9 +52,7 @@ function PS2PROG.start()
     table.insert(instances, i)
   end
 
-  putcube(0, 0, -5, 30, 0, 0)
   putcube(0, 0, -3, 20, 0.1, 0.2)
-  putcube(-14, 0, -15, 3, 0, 0)
 
 end
 
