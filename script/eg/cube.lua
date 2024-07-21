@@ -27,7 +27,7 @@ local instances = {}
 local vuprog = {}
 
 function PS2PROG.start()
-  PS2PROG.logLevel(LOG.traceLevel)
+  PS2PROG.logLevel(LOG.debugLevel)
   DMA.init(DMA.GIF)
   DMA.init(DMA.VIF1)
   GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
