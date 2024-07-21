@@ -19,7 +19,10 @@ PREFIX=src/
 
 DIST_BIN_NAME=p2g.elf
 PCSX2=pcsx2-qt 
-DOCKER=docker
+
+DOCKER_IMG=ps2build
+DOCKERFLAGS=--user "$(shell id -u):$(shell id -g)"
+DOCKER?=docker
  
 include .lintvars
 
@@ -95,3 +98,20 @@ include quality.makefile
 sim: clean-all $(SIM_BIN) assets
 	cp $(SIM_BIN) dist/sim
 	
+# Docker rules
+.PHONY: docker-image
+docker-image:
+	$(DOCKER) build -t $(DOCKER_IMG) .
+
+.PHONY: docker-elf
+docker-elf:
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(BIN)
+
+.PHONY: docker-iso
+docker-iso:
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) make $(ISO_TGT)
+
+.PHONY: docker-lua
+docker-lua: lua
+	$(DOCKER) run --rm $(DOCKERFLAGS) -v $(shell pwd):/src $(DOCKER_IMG) bash -c "platform=PS2 make $(LUA_LIB)"
+
