@@ -11,7 +11,7 @@ local LOG = require"p2g.log"
 function PS2PROG.start()
   PS2PROG.logLevel(LOG.traceLevel)
   DMA.init(DMA.GIF)
-  DMA.init(DMA.VIF1)
+  D2D.set_buffer_target(0)
   GS.setOutput(640, 448, GS.INTERLACED, GS.NTSC)
   local fb1 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 2048)
   local fb2 = VRAM.mem:framebuffer(640, 448, GS.PSM24, 2048)
