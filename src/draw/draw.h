@@ -93,6 +93,7 @@ struct d2d_state {
 
 struct commandbuffer {
   int target_vif;
+  int in_frame;
   char *ptr;
   char *head;
   size_t offset;
@@ -129,6 +130,7 @@ struct render_state {
 
 int draw_frame_start();
 int draw_frame_end();
+int draw_set_target(int target_vif);
 
 int draw_get_context(int ctx);
 int draw_end_context();

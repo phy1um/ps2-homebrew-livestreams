@@ -42,7 +42,7 @@ int draw3d_mesh_triangles_ref(void *buffer, int vertex_count,
   trace("triangle mesh ref @ %u", state.buffer.offset);
   if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
     // wtf do we do here if we have to split
-    draw_kick_vif();
+    draw_kick();
   }
   draw_end_cnt(&state.buffer);
   int buffer_size = vertex_count * vertex_size;
@@ -56,7 +56,7 @@ int draw3d_mesh_triangles_ref(void *buffer, int vertex_count,
 size_t draw3d_mesh_triangles_cnt(void *buffer, int vertex_count,
                                  size_t vertex_size) {
   if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw_kick_vif();
+    draw_kick();
   }
 
   int buffer_size = vertex_count * vertex_size;

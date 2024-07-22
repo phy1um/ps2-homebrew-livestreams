@@ -15,6 +15,7 @@
 #include "../gs_state.h"
 #include "buffer.h"
 #include "draw.h"
+#include "internal.h"
 
 struct render_state state = {0};
 
@@ -53,7 +54,7 @@ int commandbuffer_update_last_tag_loop(struct commandbuffer *c) {
 
 // easy :D
 int draw_clear_buffer() {
-  trace("draw clear buffer");
+  trace("draw clear buffer (%p %d)", state.buffer.ptr, state.buffer.offset);
   clear_command_buffer(&state.buffer);
   state.d2d.draw_type = DRAW_FMT_NONE;
   return 1;
@@ -127,8 +128,8 @@ int draw_giftags_begin(struct commandbuffer *c) {
 int draw_vifcode_end(struct commandbuffer *c) {
   trace("end vifcode, direct=%d, unpack_inline=%d, buffer@=%d",
         c->vif.is_direct_gif, c->vif.is_inline_unpack, c->offset);
-  if (!c->vif.is_active) {
-    return 0;
+  if (!c->target_vif || !c->vif.is_active) {
+    return 1;
   }
   size_t packet_len = c->head - c->vif.head;
   if (packet_len == sizeof(uint32_t)) {
@@ -204,50 +205,63 @@ int draw_dma_ref(struct commandbuffer *c, uint32_t addr, int qwc) {
   return 1;
 }
 
-int draw_kick_gif() {
-  trace("kick gif buffer of size=%d", state.buffer.offset);
-  commandbuffer_update_last_tag_loop(&state.buffer);
-  // draw_end_cnt(&state.buffer);
-  draw_dma_end(&state.buffer);
-  size_t buffer_size = state.buffer.head - state.buffer.ptr;
-  trace("dma send");
-  print_buffer((qword_t *)state.buffer.ptr, buffer_size / 16);
-  dma_channel_send_chain(DMA_CHANNEL_GIF, state.buffer.ptr, buffer_size / 16, 0,
+int draw_kick() {
+  struct commandbuffer *c = &state.buffer;
+  if (c->target_vif) {
+    return draw_kick_vif(c);
+  } else {
+    return draw_kick_gif(c);
+  }
+}
+
+int draw_kick_gif(struct commandbuffer *c) {
+  trace("kick gif: buffer of size=%d", c->offset);
+  commandbuffer_update_last_tag_loop(c);
+  draw_dma_end(c);
+  size_t buffer_size = c->head - c->ptr;
+  trace("kick gif: send");
+  print_buffer((qword_t *)c->ptr, buffer_size / 16);
+  dma_channel_send_chain(DMA_CHANNEL_GIF, c->ptr, buffer_size / 16, 0,
                          0);
+  trace("kick gif: dma wait fast");
+  // TODO(phy1um): fix this wait...
   dma_wait_fast();
   // TODO(phy1um): get new memory?
-  clear_command_buffer(&state.buffer);
-  draw_start_cnt(&state.buffer);
+  clear_command_buffer(c);
+  draw_start_cnt(c);
   // TODO(phy1um): kick count vif vs gif
   state.this_frame.kick_count += 1;
   return 1;
 }
 
-int draw_kick_vif() {
-  trace("kick vif buffer of size=%d", state.buffer.offset);
-  commandbuffer_update_last_tag_loop(&state.buffer);
-  draw_vifcode_end(&state.buffer);
-  draw_dma_end(&state.buffer);
-  size_t buffer_size = state.buffer.head - state.buffer.ptr;
-  trace("dma send TO VIF AND NOT GIF!!!!");
-  print_buffer((qword_t *)state.buffer.ptr, buffer_size / 16);
-  dma_channel_send_chain(0x1, state.buffer.ptr, buffer_size / 16, 0, 0);
+int draw_kick_vif(struct commandbuffer *c) {
+  trace("kick vif: buffer of size=%d", c->offset);
+  commandbuffer_update_last_tag_loop(c);
+  draw_vifcode_end(c);
+  draw_dma_end(c);
+  size_t buffer_size = c->head - c->ptr;
+  trace("kick vif: dma send TO VIF AND NOT GIF!!!!");
+  print_buffer((qword_t *)c->ptr, buffer_size / 16);
+  dma_channel_send_chain(0x1, c->ptr, buffer_size / 16, 0, 0);
+  trace("kick vif: dma wait fast");
   dma_wait_fast();
   // TODO(phy1um): get new memory?
-  clear_command_buffer(&state.buffer);
-  draw_start_cnt(&state.buffer);
+  clear_command_buffer(c);
+  draw_start_cnt(c);
   // TODO(phy1um): kick count vif vs gif
   state.this_frame.kick_count += 1;
   return 1;
 }
 
 int draw_frame_start() {
-  trace("frame start");
+  trace("frame start: %p (%d)", state.buffer.ptr, state.buffer.offset);
+  state.buffer.in_frame = 1;
   memset(&state.this_frame, 0, sizeof(struct draw_stats));
-  state.buffer.target_vif = 1;
   draw_clear_buffer();
   draw_start_cnt(&state.buffer);
-  draw_vifcode_direct_start(&state.buffer);
+  if (state.buffer.target_vif) {
+    draw_vifcode_direct_start(&state.buffer);
+  }
 
   // Clear the screen using PS2SDK functions
   float halfw = (state.screen_w * 1.0f) / 2.0f;
@@ -282,13 +296,16 @@ int draw_frame_start() {
 }
 
 int draw_frame_end() {
-  trace("frame end");
+  trace("frame end: in");
+  commandbuffer_update_last_tag_loop(&state.buffer);
   draw_giftags_begin(&state.buffer);
-  trace("AD draw finish buffer@=%d", state.buffer.offset);
+  trace("frame end: AD draw finish buffer@=%d", state.buffer.offset);
   giftag_new(&state.buffer, 0, 1, 1, 0x1, 0xe);
   gif_ad(&state.buffer, 0x61, 1);
-  draw_kick_vif();
+  draw_kick();
+  trace("frame end: /kick");
   memcpy(&state.last_frame, &state.this_frame, sizeof(struct draw_stats));
+  state.buffer.in_frame = 0;
   return 1;
 }
 
@@ -302,3 +319,13 @@ int draw_vu_end_unpack_inline(struct commandbuffer *c, size_t packet_size) {
   c->vif.is_inline_unpack = 0;
   return 1;
 }
+
+int draw_set_target(int target_vif) {
+  if (state.buffer.in_frame) {
+    logerr("cannot set VIF target = %d during a frame", target_vif);
+    return 0;
+  }
+  state.buffer.target_vif = target_vif;
+  return 1;
+}
+

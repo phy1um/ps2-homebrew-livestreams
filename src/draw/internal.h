@@ -12,8 +12,9 @@ int draw_vifcode_direct_start(struct commandbuffer *c);
 int draw_vifcode_end(struct commandbuffer *c);
 // transfer qwc quad-words from addr, then read next tag
 int draw_dma_ref(struct commandbuffer *c, uint32_t addr, int qwc);
-int draw_kick_vif();
-int draw_kick_gif();
+int draw_kick();
+int draw_kick_vif(struct commandbuffer *c);
+int draw_kick_gif(struct commandbuffer *c);
 int commandbuffer_update_last_tag_loop(struct commandbuffer *c);
 
 #endif

@@ -45,12 +45,12 @@ int draw2d_triangle(float x1, float y1, float x2, float y2, float x3,
   trace("tri @ %u %f,%f  %f,%f  %f,%f", state.buffer.offset, x1, y1, x2, y2, x3,
         y3);
   if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw_kick_vif();
+    draw_kick();
   }
 
   if (state.buffer.offset >= state.buffer.length - 80) {
     trace("triangle: early kick because buffer is full");
-    draw_kick_vif();
+    draw_kick();
   }
 
   if (state.d2d.draw_type != DRAW_FMT_GEOM) {
@@ -79,14 +79,14 @@ int draw2d_textri(float x1, float y1, float u1, float v1, float x2, float y2,
   trace("drawing textri @ %f %f %f %f -- %f %f %f %f -- %f %f %f %f", x1, y1,
         u1, v1, x2, y2, u2, v2, x3, y3, u3, v3);
   if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw_kick_vif();
+    draw_kick();
   }
 
   trace("textri: head = %d, len = %d", state.buffer.offset,
         state.buffer.length);
   if (state.buffer.offset >= state.buffer.length - 80) {
     trace("textri: early kick because buffer is full");
-    draw_kick_vif();
+    draw_kick();
   }
 
   if (state.d2d.draw_type != DRAW_FMT_TEXTRI) {
@@ -124,12 +124,12 @@ int draw2d_rect(float x1, float y1, float w, float h) {
   trace("rect @ %u %f %f %f %f", state.buffer.offset, x1, y1, w, h);
 
   if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw_kick_vif();
+    draw_kick();
   }
 
   if (state.buffer.offset >= state.buffer.length - 80) {
     trace("rect: early kick because buffer is full");
-    draw_kick_vif();
+    draw_kick();
   }
 
   if (state.d2d.draw_type != DRAW_FMT_RECT) {
@@ -215,7 +215,7 @@ int draw_upload_texture(void *texture, size_t bytes, int width, int height,
   while (packet_count > 0) {
     if (state.buffer.offset >= state.buffer.length - 5 * QW_SIZE) {
       trace("upload texture: early kick because buffer is full");
-      draw_kick_vif();
+      draw_kick();
       draw_end_cnt(&state.buffer);
     }
     dmatag_raw(&state.buffer, 1, 0x1 << 28, 0);
@@ -231,7 +231,7 @@ int draw_upload_texture(void *texture, size_t bytes, int width, int height,
   if (remain > 0) {
     if (state.buffer.offset >= state.buffer.length - 5 * QW_SIZE) {
       trace("upload texture (remain): early kick because buffer is full");
-      draw_kick_vif();
+      draw_kick();
       draw_end_cnt(&state.buffer);
     }
     dmatag_raw(&state.buffer, 1, 0x1 << 28, 0);
@@ -262,12 +262,12 @@ int draw2d_sprite(float x, float y, float w, float h, float u1, float v1,
                   float u2, float v2) {
   trace("drawing sprite @ %f,%f", x, y);
   if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
-    draw_kick_vif();
+    draw_kick();
   }
 
   if (state.buffer.offset >= state.buffer.length - 80) {
     trace("sprite: early kick because buffer is full");
-    draw_kick_vif();
+    draw_kick();
   }
 
   if (state.d2d.draw_type != DRAW_FMT_SPRITE ||
