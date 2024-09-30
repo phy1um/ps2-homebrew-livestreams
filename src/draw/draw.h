@@ -7,6 +7,8 @@
 #include <draw.h>
 #include "vu.h"
 
+#include <p2g/core.h>
+
 /**
  * CONSTANTS
  */
@@ -14,8 +16,9 @@
 #define GIF_MAX_LOOPS 0x7fff
 #define QW_SIZE 4*sizeof(uint32_t)
 
-void core_error(const char *);
-#define error(msg) core_error(msg)
+#define error(msg) p2g_fatal(msg)
+
+
 
 /**
  * DRAW 2D

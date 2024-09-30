@@ -8,5 +8,5 @@ int gs_set_fields(int width, int height, int fmt, int zfmt, int fb1_addr,
     int fb2_addr, int zbuf_addr);
 int gs_set_output(int width, int height, int interlace, int mode, int ffmd,
     int filter_flicker);
-
+int gs_framebuffer_size(int width, int height, int psm);
 #endif

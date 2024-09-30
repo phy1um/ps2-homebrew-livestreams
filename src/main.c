@@ -19,14 +19,13 @@
 #include <p2g/ps2luaprog.h>
 #include <p2g/script.h>
 #include <p2g/utils.h>
+#include <p2g/core.h>
 
 extern int ps2luaprog_is_running;
 
 #ifndef LOG_LEVEL_DEFAUT
 #define LOG_LEVEL_DEFAULT LOG_LEVEL_TRACE
 #endif
-
-int log_output_level = LOG_LEVEL_DEFAULT;
 
 #define BASE_PATH_MAX_LEN 180
 #define FILE_NAME_MAX_LEN 300
@@ -50,9 +49,8 @@ char main_script[FILE_NAME_MAX_LEN];
     }                                                                          \
   } while (0)
 
-void core_error(const char *msg) {
+void on_fatal() {
   ps2luaprog_is_running = 0;
-  logerr("FATAL ERROR: %s", msg);
 }
 
 static int ps2lua_scr_print(lua_State *l) {
@@ -109,6 +107,8 @@ static int runfile(lua_State *l, const char *fname) {
 }
 
 int main(int argc, char *argv[]) {
+
+  p2g_set_fatal_handler(on_fatal);
 
 #ifndef NO_SCREEN_PRINT
   init_scr();

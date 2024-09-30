@@ -89,3 +89,24 @@ int gs_set_output(int width, int height, int interlace, int mode, int ffmd,
   return 1;
 }
 
+int gs_framebuffer_size(int width, int height, int psm) {
+  int size = width*height;
+  switch (psm) {
+    case GS_PSM_32:
+    case GS_PSMZ_32:
+      size *= 4;
+      break;
+    case GS_PSM_24:
+      size *= 3;
+      break;
+    case GS_PSM_16:
+    case GS_PSMZ_16:
+    case GS_PSM_16S:
+      size *= 2;
+      break;
+    case GS_PSM_4:
+      size = (int)((float)size*0.5);
+      break;
+  }
+  return 1;
+}
