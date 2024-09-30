@@ -45,6 +45,7 @@ int gs_flip() {
 
 int gs_set_fields(int width, int height, int fmt, int zfmt, int fb1_addr,
     int fb2_addr, int zbuf_addr) {
+  trace("setup GS fields: fb1 @ %d, fb2 @ %d, zbuffer @ %d", fb1_addr, fb2_addr, zbuf_addr);
   struct gs_state *st = GS_STATE;
   st->fb[0].address = fb1_addr;
   st->fb[0].width = width;
@@ -108,5 +109,5 @@ int gs_framebuffer_size(int width, int height, int psm) {
       size = (int)((float)size*0.5);
       break;
   }
-  return 1;
+  return size;
 }
