@@ -9,8 +9,8 @@ float p2m_vec2_length(const float *v2) {
   return sqrtf(xs + ys);
 }
 
-float p2m_vec2_dot(const float *a, const float *b) { 
-  return (a[0] * b[0]) + (a[1] * b[1]); 
+float p2m_vec2_dot(const float *a, const float *b) {
+  return (a[0] * b[0]) + (a[1] * b[1]);
 }
 
 void p2m_vec2_rotate(float *v, float theta) {

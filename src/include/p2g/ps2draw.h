@@ -147,9 +147,12 @@ int draw2d_set_clut_state(int texture_base);
 // int draw3d_mesh(float *verts, size_t vert_len, uint32_t gif_fmt,
 //       int gif_fmt_len, int floats_per_vert);
 //
-int draw3d_ee_transform_verts(float *mvp, size_t offset_start, int vertex_count, int vertex_size, int pos_offset);
-size_t draw3d_mesh_triangles_cnt(void *buffer, int vertex_count, size_t vertex_size);
-int draw3d_mesh_triangles_ref(void *buffer, int vertex_count, size_t vertex_size);
+int draw3d_ee_transform_verts(float *mvp, size_t offset_start,
+    int vertex_count, int vertex_size, int pos_offset);
+size_t draw3d_mesh_triangles_cnt(void *buffer, int vertex_count,
+    size_t vertex_size);
+int draw3d_mesh_triangles_ref(void *buffer, int vertex_count,
+    size_t vertex_size);
 
 
 

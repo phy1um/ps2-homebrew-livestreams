@@ -4,7 +4,7 @@
 
 #ifndef LOG_LEVEL_DEFAULT
 #define LOG_LEVEL_DEFAULT LOG_LEVEL_DEBUG
-#endif 
+#endif
 
 int log_output_level = LOG_LEVEL_DEFAULT;
 
@@ -18,7 +18,7 @@ void p2g_fatal(const char *msg, ...) {
 }
 
 void p2g_fatal_busyloop() {
-  while(1) {}
+  while (1) {}
 }
 
 fatal_handler_t p2g_fatal_handler = p2g_fatal_busyloop;

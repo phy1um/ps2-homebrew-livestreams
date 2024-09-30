@@ -2,12 +2,14 @@
 #ifndef PS2_HOMEBREW_DRAW_DRAW_H
 #define PS2_HOMEBREW_DRAW_DRAW_H
 
+#include <p2g/core.h>
+
 #include <stdint.h>
 #include <stddef.h>
 #include <draw.h>
+
 #include "vu.h"
 
-#include <p2g/core.h>
 
 /**
  * CONSTANTS
