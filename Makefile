@@ -13,7 +13,9 @@ LUA_FILES=$(shell find script -type f -name "*.lua")
 LUA_LIB=src/liblua.a
 
 CPPCHECK_REPORT=cppcheck_report.xml
-CPPCHECK_IMG=ghcr.io/facthunder/cppcheck:latest
+# facthunder/cppcheck:latest (as of 2.12.1) is broken pending this PR:
+# https://github.com/Facthunder/cppcheck/pull/35
+CPPCHECK_IMG=ghcr.io/facthunder/cppcheck:2.7
 CPPCHECK_OUT=html/
 
 PREFIX=src/
