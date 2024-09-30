@@ -66,7 +66,7 @@ int giftag_ad_prim(struct commandbuffer *s, int type, int shaded, int textured,
                    int aa) {
   gif_ad(s, GS_REG_PRIM,
          type | SHIFT(shaded, 1, 3) | SHIFT(textured, 1, 4) |
-             SHIFT(1, 1, 6)  // this one is alpha
+             SHIFT(1, 1, 6) // this one is alpha
              | SHIFT(aa, 1, 7));
   return 1;
 }

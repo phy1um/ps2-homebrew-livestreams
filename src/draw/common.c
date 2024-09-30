@@ -221,8 +221,7 @@ int draw_kick_gif(struct commandbuffer *c) {
   size_t buffer_size = c->head - c->ptr;
   trace("kick gif: send");
   print_buffer((qword_t *)c->ptr, buffer_size / 16);
-  dma_channel_send_chain(DMA_CHANNEL_GIF, c->ptr, buffer_size / 16, 0,
-                         0);
+  dma_channel_send_chain(DMA_CHANNEL_GIF, c->ptr, buffer_size / 16, 0, 0);
   trace("kick gif: dma wait fast");
   // TODO(phy1um): fix this wait...
   dma_wait_fast();
@@ -328,4 +327,3 @@ int draw_set_target(int target_vif) {
   state.buffer.target_vif = target_vif;
   return 1;
 }
-
