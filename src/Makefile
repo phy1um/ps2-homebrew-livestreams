@@ -1,6 +1,5 @@
 PS2SDK=/usr/local/ps2dev/ps2sdk
 DVP-AS:=dvp-as
-
 HOST_OBJS=$(CORE_OBJ) main.o ps2luaprog.o liblua.a
 MAIN_OBJ=utils.o gs.o pad.o core.o
 CORE_OBJ=core/bindings.o core/buffer.o core/dma.o core/draw.o core/gslua.o core/log.o core/pad.o core/slotlist.o core/tga.o core/io.o core/vu.o math/vec2lua.o math/vec3lua.o math/mat3lua.o math/float.o math/mat4lua.o math/vec4lua.o
@@ -8,7 +7,6 @@ DRAW_OBJ=draw/draw2d.o draw/common.o draw/buffer.o draw/draw3d.o draw/vu.o
 MATH_OBJ=ps2math.o 
 EXAMPLES=examples/rect.c
 
-EE_BIN=$(PREFIX)test.elf
 # EE_OBJS=$(MAIN_OBJ) $(CORE_OBJ) $(DRAW_OBJ) $(MATH_OBJ) liblua.a
 EE_OBJS=$(MAIN_OBJ) $(DRAW_OBJ) $(MATH_OBJ) 
 EE_LIBS=-ldma -lgraph -ldraw -lkernel -ldebug -lmath3d -lm -lpad 
@@ -24,6 +22,12 @@ SIM_OBJS=vdma.o vkernel.o vdraw.o vgraphics.o vpad.o draw_environment.o draw_cle
 SIM_OBJS:=$(addprefix $(PREFIX)linux/, $(SIM_OBJS))
 
 SIM_BIN=$(PREFIX)test.exe
+
+DEBUG_OPTS=-DLOG_TRACE
+P2G_LIB=$(PREFIX)libp2g.a
+
+EXAMPLES_SRC=$(wildcard $(PREFIX)examples/*.c)
+EXAMPLES_BIN=$(patsubst %.c,%.elf,$(EXAMPLES_SRC))
 
 ifeq ($(platform), PS2)
 $(info platform=PS2 detected)
@@ -50,12 +54,13 @@ $(SIM_BIN): $(EE_OBJS) $(SIM_OBJS)
 clean:
 	rm -rf $(EE_BIN) $(EE_OBJS) $(HOST_OBJS) $(SIM_BIN) $(SIM_OBJS)
 
-$(PREFIX)libp2g.a: $(EE_OBJS)
+$(P2G_LIB): $(EE_OBJS)
 	$(EE_AR) rcs $@ $(EE_OBJS)
 
 $(PREFIX)p2g.elf: $(PREFIX)libp2g.a $(EE_OBJS) $(HOST_OBJS)
 	$(EE_CC) -T$(EE_LINKFILE) $(EE_OPTFLAGS) -o $@ $(EE_OBJS) $(HOST_OBJS) $(EE_LDFLAGS) $(EXTRA_LDFLAGS) $(EE_LIBS)
 
-$(PREFIX)examples/rect.bin: $(PREFIX)/examples/rect.c 
-	$(EE_CC) -T$(EE_LINKFILE) $(EE_INCS) $(EE_OPTFLAGS) -o $@ $< $(EE_OBJS) $(EE_LDFLAGS) $(EXTRA_LDFLAGS) $(EE_LIBS)
+$(PREFIX)examples/%.elf: $(PREFIX)/examples/%.c $(P2G_LIB)
+	$(EE_CC) -T$(EE_LINKFILE) $(DEBUG_OPTS) $(EE_INCS) $(EE_OPTFLAGS) -o $@ $< $(P2G_LIB) $(EE_LDFLAGS) $(EXTRA_LDFLAGS) $(EE_LIBS)
 
+examples: $(EXAMPLES_BIN)
