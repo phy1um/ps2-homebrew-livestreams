@@ -8,23 +8,31 @@
 #include <p2g/log.h>
 #include <p2g/pad.h>
 
-#define pad_test(b, v)                                                         \
-  do {                                                                         \
-    if ((c & b)) {                                                             \
-      btn_held[v] = 1;                                                         \
-    }                                                                          \
-  } while (0)
+#define pad_test(b, v) \
+if (c&b) { \
+  if (btn_held[v]) { \
+    btn_release[v] = 1;\
+    btn_held[v] = 0;\
+  } else {\
+    btn_press[v] = 1;\
+    btn_held[v] = 1;\
+  }\
+}
 
 char *pad_buffer;
 struct padButtonStatus *pad_read_space;
 
-int *btn_held;
+static int *btn_held;
+static int *btn_press;
+static int *btn_release;
 
 int joysticks[JOY_AXIS_COUNT];
 
 int prev_inputs;
 
 int button_held(int b) { return btn_held[b]; }
+int button_pressed(int b) { return btn_press[b]; }
+int button_released(int b) { return btn_release[b]; }
 
 int joy_axis_value(int a) { return joysticks[a]; }
 
@@ -42,6 +50,8 @@ static void wait_vblank() {
 
 int pad_init() {
   btn_held = memalign(BTN_MAX * sizeof(int), 256);
+  btn_press = memalign(BTN_MAX * sizeof(int), 256);
+  btn_release = memalign(BTN_MAX * sizeof(int), 256);
   pad_buffer = memalign(256, 256);
   if ((u32)pad_buffer & 0xf) {
     info("pad buffer was not 16byte aligned: %x", (int)pad_buffer);
@@ -111,6 +121,7 @@ void pad_poll() {
   if (padRead(0, 0, pad_read_space) != 0) {
     int pad = 0xffff ^ pad_read_space->btns;
     int c = pad ^ prev_inputs;
+    prev_inputs = pad;
     pad_test(PAD_LEFT, DPAD_LEFT);
     pad_test(PAD_RIGHT, DPAD_RIGHT);
     pad_test(PAD_UP, DPAD_UP);
@@ -134,7 +145,8 @@ void pad_poll() {
 
 void pad_frame_start() {
   for (int i = 0; i < BTN_MAX; i++) {
-    btn_held[i] = 0;
+    btn_press[i] = 0;
+    btn_release[i] = 0;
   }
 }
 
