@@ -279,7 +279,7 @@ int draw_frame_start() {
                  state.screen_h, state.clear[0], state.clear[1],
                  state.clear[2]);
   trace("clear screen: %d, %d, %f, %f, %p -> %p", state.screen_w,
-        state.screen_h, 2048.0f - halfw, 2048.0f - halfh, state.buffer.head, q);
+        state.screen_h, 2048.0f + halfw, 2048.0f + halfh, state.buffer.head, q);
   // enable depth tests
   PACK_GIFTAG(q, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
   q++;
