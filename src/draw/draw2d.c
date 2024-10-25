@@ -174,9 +174,9 @@ int draw2d_screen_dimensions(int w, int h) {
   return 1;
 }
 
-int draw_upload_texture(void *texture, size_t bytes, int width, int height,
-                        int format, int vram_addr) {
-  trace("uploading tex %p -> %d", texture, vram_addr);
+int draw_upload_texture(void *texture, size_t texture_size, int width,
+                        int height, int format, int vram_addr) {
+  trace("uploading tex %p -> %X", texture, vram_addr);
 
   commandbuffer_update_last_tag_loop(&state.buffer);
   // setup
@@ -193,9 +193,10 @@ int draw_upload_texture(void *texture, size_t bytes, int width, int height,
 
   // assume format == PSM32
   int ee_vram_size = width * height * 4;
-  if (ee_vram_size > bytes) {
-    logerr("texture upload overflows buffer - bad dimensions %d, %d", width,
-           height);
+  if (ee_vram_size > texture_size) {
+    logerr("texture upload overflows buffer - bad dimensions %d, %d "
+           "(texture size=%zu)",
+           width, height, texture_size);
     return 0;
   }
 
@@ -203,7 +204,7 @@ int draw_upload_texture(void *texture, size_t bytes, int width, int height,
   if (ee_vram_size % 16 != 0) {
     qwc += 1;
   }
-  int block_size = BLOCK_SIZE_BYTES / 16;
+  int block_size = qwc;
   int packet_count = qwc / block_size;
   int remain = qwc % block_size;
 
