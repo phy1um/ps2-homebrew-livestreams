@@ -45,7 +45,7 @@ int gs_flip() {
 
 int gs_set_fields(int width, int height, int fmt, int zfmt, int fb1_addr,
     int fb2_addr, int zbuf_addr) {
-  trace("setup GS fields: fb1 @ %d, fb2 @ %d, zbuffer @ %d", fb1_addr,
+  trace("setup GS fields (words): fb1 @ %X, fb2 @ %X, zbuffer @ %X", fb1_addr,
       fb2_addr, zbuf_addr);
   struct gs_state *st = GS_STATE;
   st->fb[0].address = fb1_addr;
@@ -62,7 +62,7 @@ int gs_set_fields(int width, int height, int fmt, int zfmt, int fb1_addr,
   st->zb.enable = 1;
   st->zb.address = zbuf_addr;
   st->zb.zsm = zfmt;
-  st->zb.method = ZTEST_METHOD_GREATER_EQUAL;
+  st->zb.method = ZTEST_METHOD_ALLPASS;
   st->zb.mask = 0;
   graph_set_framebuffer_filtered(fb2_addr, width, fmt, 0, 0);
   graph_enable_output();
@@ -104,6 +104,7 @@ int gs_framebuffer_size(int width, int height, int psm) {
     case GS_PSM_16:
     case GS_PSMZ_16:
     case GS_PSM_16S:
+    case GS_PSMZ_16S:
       size *= 2;
       break;
     case GS_PSM_4:
@@ -111,4 +112,10 @@ int gs_framebuffer_size(int width, int height, int psm) {
       break;
   }
   return size;
+}
+
+int gs_set_ztest(int method) {
+  struct gs_state *st = GS_STATE;
+  st->zb.method = method;
+  return 1;
 }
