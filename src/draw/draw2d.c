@@ -177,6 +177,10 @@ int draw2d_screen_dimensions(int w, int h) {
 int draw_upload_texture(void *texture, size_t texture_size, int width,
                         int height, int format, int vram_addr) {
   trace("uploading tex %p -> %X", texture, vram_addr);
+  if (width == 0 || height == 0) {
+    info("texture %p has 0 size: %d x %d", width, height);
+    return 0;
+  }
 
   commandbuffer_update_last_tag_loop(&state.buffer);
   // setup
