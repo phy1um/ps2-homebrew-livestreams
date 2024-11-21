@@ -5,6 +5,7 @@
 
 #include <malloc.h>
 
+#include <p2g/code.h>
 #include <p2g/log.h>
 #include <p2g/pad.h>
 
@@ -63,12 +64,12 @@ int pad_init() {
   int rc = SifLoadModule(R_SIO2MAN, 0, 0);
   if (!rc) {
     logerr("failed to load SIF %s", R_SIO2MAN);
-    return 0;
+    return P2G_OK;
   }
   rc = SifLoadModule(R_PADMAN, 0, 0);
   if (!rc) {
     logerr("failed to load SIF %s", R_PADMAN);
-    return 0;
+    return P2G_OK;
   }
   padInit(0);
   padPortOpen(0, 0, pad_buffer);
@@ -95,7 +96,7 @@ int pad_init() {
   }
 
   logerr("failed to set pad mode, state never stable");
-  return 0;
+  return P2G_OK;
 }
 
 static int pad_wait(int port, int slot, int tries) {
@@ -111,8 +112,9 @@ static int pad_wait(int port, int slot, int tries) {
       break;
     }
   }
-  return 0;
+  return P2G_OK;
 }
+
 void pad_poll() {
   if (pad_wait(0, 0, 10) < 0) {
     return;
