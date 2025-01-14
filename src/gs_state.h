@@ -2,6 +2,8 @@
 #ifndef P2G_SRC_GS_STATE_H
 #define P2G_SRC_GS_STATE_H
 
+#include <draw.h>
+
 struct gs_state {
   framebuffer_t fb[2];
   zbuffer_t zb;

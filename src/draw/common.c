@@ -19,7 +19,7 @@
 
 struct render_state state = {0};
 
-static int command_buffer_align_head(struct commandbuffer *c, size_t b) {
+int command_buffer_align_head(struct commandbuffer *c, size_t b) {
   int old_offset = c->offset;
   while (c->offset % b != 0) {
     c->head += 1;
@@ -69,6 +69,9 @@ int draw_update_last_tag_loops() {
 */
 
 int draw_vifcode_direct_start(struct commandbuffer *c) {
+  if (!c->dma.in_cnt) {
+    draw_start_cnt(c);
+  }
   trace("start direct vifcode @ %d", c->offset);
   command_buffer_align_head(c, 16);
   vifcode((uint32_t *)c->head, VIF_CODE_NOP, VIF_CODE_NO_STALL, 0, 0);
@@ -198,6 +201,8 @@ int draw_dma_end(struct commandbuffer *c) {
 }
 
 int draw_dma_ref(struct commandbuffer *c, uint32_t addr, int qwc) {
+  trace("dma ref tag buffer@=%d (addr = %lX qwc = %X)", c->offset, addr, qwc);
+  command_buffer_align_head(&state.buffer, 16);
   draw_end_cnt(c);
   dma_tag((uint32_t *)c->head, qwc, 0x3 << 28, addr);
   c->head += QW_SIZE;

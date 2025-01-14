@@ -16,5 +16,6 @@ int draw_kick();
 int draw_kick_vif(struct commandbuffer *c);
 int draw_kick_gif(struct commandbuffer *c);
 int commandbuffer_update_last_tag_loop(struct commandbuffer *c);
+int command_buffer_align_head(struct commandbuffer *c, size_t b);
 
 #endif

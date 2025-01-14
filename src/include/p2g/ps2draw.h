@@ -121,6 +121,7 @@ int draw_upload_texture(void *texture, size_t bytes, int width, int height,
     int format, int vram_addr);
 
 int draw_bind_buffer(void *buf, size_t buf_len);
+int draw_set_target(int target_vif);
 
 // 2d renderer API
 int draw2d_clear_colour(char r, char g, char b);

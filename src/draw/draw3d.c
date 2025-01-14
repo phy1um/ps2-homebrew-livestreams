@@ -39,14 +39,14 @@ int draw3d_instance_header_uint32(uint32_t value) { return 0; }
 // put a mesh into drawbuffer by reference (DMA copies without CPU copy)
 int draw3d_mesh_triangles_ref(void *buffer, int vertex_count,
                               size_t vertex_size) {
-  trace("triangle mesh ref @ %u", state.buffer.offset);
+  trace("triangle mesh ref @ %u (%p) vc = %d, vs = %zu", state.buffer.offset,
+      buffer, vertex_count, vertex_size);
   if (state.buffer.gif.loop_count >= GIF_MAX_LOOPS - 1) {
     // wtf do we do here if we have to split
     draw_kick();
   }
-  draw_end_cnt(&state.buffer);
   int buffer_size = vertex_count * vertex_size;
-  int qwc = buffer_size / 4 + (buffer_size % 4 == 0 ? 0 : 1);
+  int qwc = buffer_size / 16 + (buffer_size % 4 == 0 ? 0 : 1);
   draw_dma_ref(&state.buffer, (uint32_t)buffer, qwc);
   state.this_frame.tris += vertex_count / 3;
   return 0;
