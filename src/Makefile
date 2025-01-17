@@ -39,7 +39,7 @@ INCS=-I $(PREFIX)linux/include -I./$(PREFIX)include
 	$(CC) $(EE_CFLAGS) $(INCS) -c -o $@ $<
 endif
 
-vu1prog/%.vuobj: vu1prog/%.asm
+$(PREFIX)vu1prog/%.vuobj: $(PREFIX)vu1prog/%.asm
 	$(DVP-AS) $(DVP_FLAGS) -o $@ $<
 
 # TODO(Tom Marks): update ISO building to include everything in dist/
