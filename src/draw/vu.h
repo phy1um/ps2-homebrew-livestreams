@@ -16,11 +16,10 @@
 #define TARGET_VU0 1
 #define TARGET_VU1 2
 
-
 int draw_vu_upload_program(void *buf, size_t buf_size, int vu_uprog_addr,
     int vu_target);
 int draw_vu_call_program(int vu_uprog_addr);
-int draw_vu_begin_unpack_inline(uint32_t target_addr);
-int draw_vu_unpack_v4_32(void *buffer, size_t buffer_size, int vu_addr, int is_ref);
+
+int draw_vu_begin_unpack_verts(int fmt, uint64_t gif_regs, uint16_t nregs, int vu_addr);
 
 #endif

@@ -35,7 +35,18 @@ static int clear_command_buffer(struct commandbuffer *c) {
   c->gif.head = 0;
   c->dma.head = 0;
   c->dma.in_cnt = 0;
+  c->vif.is_active = 0;
   return 0;
+}
+
+static size_t vif_unpack_stride(int fmt) {
+  switch (fmt) {
+    case VIF_CODE_UNPACK_V432:
+      return 4*4;
+    default:
+      logerr("invalid VIF UNPACK format: %d", fmt);
+      return 0;
+  }
 }
 
 int commandbuffer_update_last_tag_loop(struct commandbuffer *c) {
@@ -97,6 +108,10 @@ int draw_start_cnt(struct commandbuffer *c) {
   dma_tag((uint32_t *)c->head, 0, 0x1 << 28, 0);
   c->head += sizeof(uint64_t);
   c->offset += sizeof(uint64_t);
+  // if UNPACK, track vertex data start in this CNT
+  if (c->vif.is_active && c->vif.is_unpack) {
+    c->vif.unpack_cnt_working_nloop_offset = c->offset;
+  }
   return 1;
 }
 
@@ -111,7 +126,7 @@ int dmatag_raw(struct commandbuffer *c, int qwc, int type, int addr) {
 int draw_giftags_begin(struct commandbuffer *c) {
   trace("begin giftags buffer@=%d", c->offset);
   if (c->target_vif) {
-    if (c->vif.is_active && c->vif.is_inline_unpack) {
+    if (c->vif.is_active && c->vif.is_unpack) {
       trace("giftags in an inline unpack..");
       command_buffer_align_head(c, 16);
       return 1;
@@ -130,7 +145,7 @@ int draw_giftags_begin(struct commandbuffer *c) {
 
 int draw_vifcode_end(struct commandbuffer *c) {
   trace("end vifcode, direct=%d, unpack_inline=%d, buffer@=%d",
-        c->vif.is_direct_gif, c->vif.is_inline_unpack, c->offset);
+        c->vif.is_direct_gif, c->vif.is_unpack, c->offset);
   if (!c->target_vif || !c->vif.is_active) {
     return 1;
   }
@@ -158,8 +173,28 @@ int draw_vifcode_end(struct commandbuffer *c) {
           tag_offset, packet_len);
     vifcode_update_imm((uint16_t *)c->vif.head, qwc);
     c->vif.is_direct_gif = 0;
-  } else if (c->vif.is_inline_unpack) {
-    draw_vu_end_unpack_inline(c, packet_len);
+  } else if (c->vif.is_unpack) {
+    trace("end VIF unpack");
+    // how many verts?
+    size_t element_stride = vif_unpack_stride(c->vif.unpack_fmt);
+    c->vif.unpack_byte_sum += c->offset - c->vif.unpack_cnt_working_nloop_offset;
+    size_t nelems = c->vif.unpack_byte_sum / element_stride;
+    if (c->vif.unpack_byte_sum % element_stride != 0) {
+      nelems += 1;
+    }
+    size_t qwc = c->vif.unpack_byte_sum / 16 + (c->vif.unpack_byte_sum % 16 ? 1 : 0);
+    int nloop = qwc / c->vif.unpack_nregs;
+    trace("VIF unpack state: #elems = %d, #qwc = %d, #loop = %d", nelems, qwc, nloop);
+    if (nloop <= GIF_MAX_LOOPS) {
+      uint32_t eop = *c->vif.unpack_giftag_head & 0x8000;
+      *c->vif.unpack_giftag_head = nloop | eop;
+      trace("wrote nloops @ GIFTag (buffer=%p) as %X", c->vif.unpack_giftag_head, nloop|eop);
+    } else {
+      error("too many loops in UNPACK giftag");
+    }
+    // update NUM field of vifcode
+    char *vifcode = c->vif.head;
+    vifcode[2] = nelems;
   } else {
     logerr("unsupported VIF transfer");
   }
@@ -186,6 +221,10 @@ int draw_end_cnt(struct commandbuffer *c) {
     } else {
       *lh = dma_len / 16;
     }
+    if (c->vif.is_active && c->vif.is_unpack) {
+      uint32_t bytes = c->offset - c->vif.unpack_cnt_working_nloop_offset;
+      c->vif.unpack_byte_sum += bytes;
+    }
   }
   return 1;
 }
@@ -207,6 +246,10 @@ int draw_dma_ref(struct commandbuffer *c, uint32_t addr, int qwc) {
   dma_tag((uint32_t *)c->head, qwc, 0x3 << 28, addr);
   c->head += QW_SIZE;
   c->offset += QW_SIZE;
+  if (c->vif.is_active && c->vif.is_unpack) {
+    trace("dma ref updates VIF unpack bytes: +=%d", qwc*16);
+    c->vif.unpack_byte_sum += qwc*16;    
+  }
   return 1;
 }
 
@@ -310,17 +353,6 @@ int draw_frame_end() {
   trace("frame end: /kick");
   memcpy(&state.last_frame, &state.this_frame, sizeof(struct draw_stats));
   state.buffer.in_frame = 0;
-  return 1;
-}
-
-int draw_vu_end_unpack_inline(struct commandbuffer *c, size_t packet_size) {
-  commandbuffer_update_last_tag_loop(c);
-  size_t qword_size = packet_size / 16;
-  int buffer_position = (int)(c->vif.head - c->ptr);
-  trace("vu inline unpack end: update num = %d @buffer pos=%d", qword_size,
-        buffer_position);
-  vifcode_update_num((uint8_t *)c->vif.head, qword_size);
-  c->vif.is_inline_unpack = 0;
   return 1;
 }
 

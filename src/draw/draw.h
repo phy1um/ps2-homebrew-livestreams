@@ -47,8 +47,13 @@ struct draw_dma {
 struct draw_vif {
   char *head;
   int is_direct_gif;
-  int is_inline_unpack;
+  int is_unpack;
   int is_active;
+  uint32_t *unpack_giftag_head;
+  int unpack_cnt_working_nloop_offset;
+  int unpack_byte_sum;
+  int unpack_nregs;
+  int unpack_fmt;
 };
 
 struct draw_stats {

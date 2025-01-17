@@ -179,11 +179,11 @@ int dma_tag(uint32_t *t, int qwc, int type, uint32_t addr) {
 }
 
 int vifcode(uint32_t *t, int op, int stall, int num, uint16_t imm) {
-  t[0] = (imm & 0xffff) | ((num & 0xff) << 16) |
-         ((((uint64_t)stall) << 31) | ((op & 0x7f) << 24));
-  t[1] = 0;
-  t[2] = 0;
-  t[3] = 0;
+  char *p = (char *) t;
+  p[3] = op&0x7f;
+  p[2] = num&0xff;
+  p[1] = imm>>8;
+  p[0] = imm&0xff;
   return 1;
 }
 

@@ -60,50 +60,43 @@ int draw_vu_call_program(int vu_uprog_addr) {
   return 0;
 }
 
-// TODO(phy1um): support extra flags
-int draw_vu_unpack_v4_32(void *buffer, size_t buffer_size, int vu_addr, int is_ref) {
+int draw_vu_begin_unpack_verts(int unpack_fmt, uint64_t gif_regs, uint16_t nregs, int vu_addr) {
   struct commandbuffer *c = &state.buffer;
   draw_vifcode_end(c);
-  size_t qword_size = buffer_size / 16;
-  command_buffer_align_head(c, 8);
-  c->head += 4;
-  c->offset += 4;
-  vifcode((uint32_t *)c->head, VIF_CODE_UNPACK_V432, VIF_CODE_NO_STALL,
-          qword_size, vu_addr);
 
-  if (is_ref) {
-    draw_dma_ref(c, (int)buffer, qword_size);
-  } else {
-    size_t n_bytes = (qword_size)*16;
-    memcpy(c->head, buffer, n_bytes);
-    c->head += n_bytes;
-    c->offset += n_bytes;
+  c->head +=  32;
+  c->offset += 32;
+
+  int qw_base = (c->offset / 16)*16;
+  if (c->offset % 16 > 12) {
+    logerr("unhandled alignment case");
+    return 1;
   }
-
-  return 0;
-}
-
-int draw_vu_begin_unpack_inline(uint32_t target_addr) {
-  struct commandbuffer *c = &state.buffer;
-  draw_vifcode_end(c);
-  int qw_base = (c->offset / 16) * 16;
-  if (c->offset > 96) {
-    trace("TODO");
-    return 0;
-  }
-  while (c->offset - qw_base != 96) {
+  while (c->offset - qw_base != 12) {
     c->head += 1;
     c->offset += 1;
   }
-  trace("vu begin inline unpack (vu addr=%lu) @buffer=%d", target_addr,
-        c->offset);
-  vifcode((uint32_t *)c->head, VIF_CODE_UNPACK_V432, VIF_CODE_NO_STALL, 0,
-          target_addr);
+  trace("begin unpack @buffer=%d, vu addr = %lu, GIFTag regs = %llX(%d), fmt = %d",
+      c->offset, vu_addr, gif_regs, nregs, unpack_fmt);
+  vifcode((uint32_t *)c->head, unpack_fmt, VIF_CODE_NO_STALL, 0,
+          vu_addr);
   c->vif.head = c->head;
-  c->vif.is_direct_gif = 0;
-  c->vif.is_inline_unpack = 1;
   c->vif.is_active = 1;
+  c->vif.is_direct_gif = 0;
+  c->vif.is_unpack = 1;
+  c->vif.unpack_byte_sum = 0;
+  c->vif.unpack_fmt = unpack_fmt;
+  c->vif.unpack_nregs = nregs;
+
   c->head += sizeof(uint32_t);
   c->offset += sizeof(uint32_t);
+
+  command_buffer_align_head(c, 16);
+  // TODO: hack
+  c->gif.head = 0;
+  c->vif.unpack_cnt_working_nloop_offset = c->offset;
+  c->vif.unpack_giftag_head = (uint32_t*)(c->head-16);
+  trace("vif unpack giftag ptr = %p (%p) (aka %d)", c->vif.unpack_giftag_head, c->head-16, c->offset - 16);
   return 0;
 }
+

@@ -234,12 +234,14 @@ static int draw_lua_ee_transform(lua_State *l) {
 }
 
 static int draw_vu_unpack_inline(lua_State *l) {
+  /*
   int addr = lua_tointeger(l, 1);
   int rc = draw_vu_begin_unpack_inline(addr);
   if (rc != 0) {
     luaL_error(l, "inline upload to %d", addr);
     return 1;
   }
+  */
   return 0;
 }
 

@@ -76,7 +76,7 @@ size_t draw3d_mesh_triangles_cnt(void *buffer, int vertex_count,
     draw_giftags_begin(&state.buffer);
     giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_AD_LEN, GIF_REGS_AD);
     giftag_ad_prim(&state.buffer, GS_PRIM_TRIANGLE, 0, 0, 0);
-    giftag_new(&state.buffer, 0, 1, 0, GIF_REGS_FMT_GEOM3D_LEN,
+    giftag_new(&state.buffer, 0, 1, 1, GIF_REGS_FMT_GEOM3D_LEN,
                GIF_REGS_FMT_GEOM3D);
     state.d2d.draw_type = DRAW_FMT_GEOM;
   }
