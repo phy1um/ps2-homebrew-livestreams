@@ -14,6 +14,8 @@
 
 #include "gs_state.h"
 
+#define GS_REG_CSR ((volatile uint64_t *)0x12001000)
+
 struct gs_state *GS_STATE;
 static qword_t *flip_buffer;
 
@@ -21,6 +23,7 @@ int gs_init() {
   info("init GS -- no framebuffer");
   GS_STATE = calloc(1, sizeof(struct gs_state));
   flip_buffer = memalign(64, 10 * 16);
+  *GS_REG_CSR |= 0x2;
   return 0;
 }
 
