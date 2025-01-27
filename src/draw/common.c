@@ -36,6 +36,7 @@ static int clear_command_buffer(struct commandbuffer *c) {
   c->dma.head = 0;
   c->dma.in_cnt = 0;
   c->vif.is_active = 0;
+  memset(c->head, 0, c->length);
   return 0;
 }
 
@@ -188,7 +189,7 @@ int draw_vifcode_end(struct commandbuffer *c) {
     if (nloop <= GIF_MAX_LOOPS) {
       uint32_t eop = *c->vif.unpack_giftag_head & 0x8000;
       *c->vif.unpack_giftag_head = nloop | eop;
-      trace("wrote nloops @ GIFTag (buffer=%p) as %X", c->vif.unpack_giftag_head, nloop|eop);
+      trace("wrote nloops @ GIFTag (buffer=%p) as %lX", c->vif.unpack_giftag_head, nloop|eop);
     } else {
       error("too many loops in UNPACK giftag");
     }
