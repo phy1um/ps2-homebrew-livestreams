@@ -60,7 +60,8 @@ int draw_vu_call_program(int vu_uprog_addr) {
   return 0;
 }
 
-int draw_vu_begin_unpack_verts(int unpack_fmt, uint64_t gif_regs, uint16_t nregs, int vu_addr) {
+int draw_vu_begin_unpack_verts(int unpack_fmt, uint64_t gif_regs, uint16_t nregs, int vu_addr,
+    void *header, size_t header_size) {
   struct commandbuffer *c = &state.buffer;
   draw_vifcode_end(c);
 
@@ -76,7 +77,7 @@ int draw_vu_begin_unpack_verts(int unpack_fmt, uint64_t gif_regs, uint16_t nregs
     c->head += 1;
     c->offset += 1;
   }
-  trace("begin unpack @buffer=%d, vu addr = %lu, GIFTag regs = %llX(%d), fmt = %d",
+  trace("begin unpack @buffer=%d, vu addr = %u, GIFTag regs = %llX(%d), fmt = %d",
       c->offset, vu_addr, gif_regs, nregs, unpack_fmt);
   vifcode((uint32_t *)c->head, unpack_fmt, VIF_CODE_NO_STALL, 0,
           vu_addr);
@@ -84,13 +85,18 @@ int draw_vu_begin_unpack_verts(int unpack_fmt, uint64_t gif_regs, uint16_t nregs
   c->vif.is_active = 1;
   c->vif.is_direct_gif = 0;
   c->vif.is_unpack = 1;
-  c->vif.unpack_byte_sum = 0;
+  c->vif.unpack_byte_sum = header_size;
   c->vif.unpack_fmt = unpack_fmt;
   c->vif.unpack_nregs = nregs;
 
   c->head += sizeof(uint32_t);
   c->offset += sizeof(uint32_t);
 
+  memcpy(c->head, header, header_size);
+  c->head += header_size;
+  c->offset += header_size;
+
+  // TODO: assume 16 byte aligned otherwise unpack_byte_sum is wrong
   command_buffer_align_head(c, 16);
   // TODO: hack
   c->gif.head = 0;

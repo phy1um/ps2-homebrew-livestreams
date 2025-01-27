@@ -20,6 +20,7 @@ int draw_vu_upload_program(void *buf, size_t buf_size, int vu_uprog_addr,
     int vu_target);
 int draw_vu_call_program(int vu_uprog_addr);
 
-int draw_vu_begin_unpack_verts(int fmt, uint64_t gif_regs, uint16_t nregs, int vu_addr);
+int draw_vu_begin_unpack_verts(int unpack_fmt, uint64_t gif_regs, uint16_t nregs, int vu_addr,
+    void *header, size_t header_size);
 
 #endif
