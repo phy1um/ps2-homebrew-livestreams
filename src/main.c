@@ -106,7 +106,7 @@ static int runfile(lua_State *l, const char *fname) {
   return 0;
 }
 
-int main(int argc, char *argv[]) {
+static int script_engine_run(int argc, char *argv[]) {
 
   p2g_set_fatal_handler(on_fatal);
 
@@ -207,13 +207,6 @@ int main(int argc, char *argv[]) {
       info("halting program - lua frame exception");
       ps2luaprog_is_running = 0;
     }
-    trace("WAIT DRAW");
-    // TODO(tommarks): draw2d flag to know if draw was submitted
-    draw_wait_finish();
-    trace("WAIT VSYNC");
-    graph_wait_vsync();
-    trace("FLIP");
-    gs_flip();
     trace("FLIPOUT");
     frame_count += 1;
     clock_t now = clock();
@@ -223,7 +216,23 @@ int main(int argc, char *argv[]) {
       frame_count = 0;
       next_fps_report = now + CLOCKS_PER_SEC;
     }
+    trace("SLEEP");
+    SleepThread();
+    trace("WAKE + FLIP");
+    gs_flip();
   }
 
   info("main loop ended");
 }
+
+int main(int argc, char *argv[]) {
+   struct p2g_app app = {
+    .main = script_engine_run,
+  };
+  if(p2g_app_init(&app)) {
+    p2g_fatal("startup error");
+  }
+  int rv = p2g_app_run(&app, argc, argv);
+  p2g_fatal("app main returned");
+}
+

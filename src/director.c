@@ -12,7 +12,7 @@
 #include "debug/debug.h"
 
 #ifndef VBLANK_TIMEOUT_MAX
-#define VBLANK_TIMEOUT_MAX 50
+#define VBLANK_TIMEOUT_MAX 100
 #endif
 
 #define VU1DBG_STACK_SIZE 0x4000
