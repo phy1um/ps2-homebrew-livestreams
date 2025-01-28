@@ -233,15 +233,16 @@ static int draw_lua_ee_transform(lua_State *l) {
   return 1;
 }
 
-static int draw_vu_unpack_inline(lua_State *l) {
-  /*
-  int addr = lua_tointeger(l, 1);
-  int rc = draw_vu_begin_unpack_inline(addr);
+static int draw_vu_begin_unpack(lua_State *l) {
+  int unpack_kind = lua_tointeger(l, 2); 
+  int vertex_fields = lua_tointeger(l, 3);
+  int vertex_nregs = lua_tointeger(l, 4);
+  int vu_addr = lua_tointeger(l, 5);
+  int rc = draw_vu_begin_unpack_verts(unpack_kind, vertex_fields, vertex_nregs, vu_addr, 0, 0);
   if (rc != 0) {
-    luaL_error(l, "inline upload to %d", addr);
+    luaL_error(l, "begin unpack to VU memory @ %d", vu_addr);
     return 1;
   }
-  */
   return 0;
 }
 
@@ -257,6 +258,10 @@ static int ldraw_set_target(lua_State *l) {
 
 #define pushfn(f, n)                                                           \
   lua_pushcfunction(l, f);                                                     \
+  lua_setfield(l, -2, n)
+
+#define bind(b, n)                                                             \
+  lua_pushinteger(l, b);                                                       \
   lua_setfield(l, -2, n)
 
 int draw2d_lua_init(lua_State *l) {
@@ -276,7 +281,7 @@ int draw2d_lua_init(lua_State *l) {
   pushfn(draw_lua_mesh_cnt, "mesh_cnt");
   pushfn(draw_lua_mesh_ref, "mesh_ref");
   pushfn(draw_lua_ee_transform, "ee_transform");
-  pushfn(draw_vu_unpack_inline, "vu_begin_unpack_inline");
+  pushfn(draw_vu_begin_unpack, "vu_begin_unpack_inline");
   pushfn(ldraw_set_target, "set_buffer_target");
   return 1;
 }

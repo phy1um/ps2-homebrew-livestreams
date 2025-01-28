@@ -23,6 +23,7 @@ int vec4_lua_init(lua_State *l);
 int mat3_lua_init(lua_State *l);
 int mat4_lua_init(lua_State *l);
 int floatmath_lua_init(lua_State *l);
+int vif_lua_init(lua_State *l);
 
 static script_binding SCRIPT_CORE_LIBS[] = {
     {"gs", gs_lua_init},
@@ -33,6 +34,7 @@ static script_binding SCRIPT_CORE_LIBS[] = {
     {"tga", tga_lua_init},
     {"io", io_lua_init},
     {"vu", vu_lua_init},
+    {"vif", vif_lua_init},
     {"slotlist", slotlist_lua_init},
     {"draw2d", draw2d_lua_init},
     {"math_vec2", vec2_lua_init},

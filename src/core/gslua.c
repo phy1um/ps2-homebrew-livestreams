@@ -69,6 +69,11 @@ static int gslua_set_output(lua_State *l) {
   return 0;
 }
 
+static int gslua_set_ztest(lua_State *l) {
+  int method = lua_tointeger(l, 1);
+  return gs_set_ztest(method);
+}
+
 #define bind(n, b)                                                             \
   lua_pushinteger(l, b);                                                       \
   lua_setfield(l, -2, n)
@@ -79,6 +84,8 @@ int gs_lua_init(lua_State *l) {
   lua_setfield(l, -2, "setOutput");
   lua_pushcfunction(l, gslua_set_buffers);
   lua_setfield(l, -2, "setBuffers");
+  lua_pushcfunction(l, gslua_set_ztest);
+  lua_setfield(l, -2, "set_ztest");
 
   bind("PSM4", GS_PSM_4);
   bind("PSM4HL", GS_PSM_4HL);
@@ -105,6 +112,11 @@ int gs_lua_init(lua_State *l) {
   bind("HDTV_480P", GRAPH_MODE_HDTV_480P);
   bind("HDTV_576P", GRAPH_MODE_HDTV_576P);
   bind("HDTV_720P", GRAPH_MODE_HDTV_720P);
+
+  bind("ZTEST_GE", ZTEST_METHOD_GREATER_EQUAL);
+  bind("ZTEST_GT", ZTEST_METHOD_GREATER);
+  bind("ZTEST_ALL", ZTEST_METHOD_ALLPASS);
+  bind("ZTEST_NONE", ZTEST_METHOD_ALLFAIL);
 
   return 1;
 }
