@@ -1,5 +1,6 @@
 
 local GIF = require"p2g.gif"
+local VIF = require"p2g.vif"
 local P = require"p2g.const"
 local DRAW = require"p2g.draw2d"
 local VRAM = require"p2g.vram"
@@ -36,6 +37,7 @@ function PS2PROG.start()
   local fb2 = VRAM.mem:framebuffer(640, 448, GS.PSM32, 2048)
   local zb = VRAM.mem:framebuffer(640, 448, GS.PSMZ16, 2048)
   GS.setBuffers(fb1, fb2, zb)
+  GS.set_ztest(GS.ZTEST_GE)
   DRAW:screenDimensions(640, 448)
   DRAW:clearColour(0x2b, 0x2b, 0x2b)
   local db = RM.alloc(200 * 1024)
@@ -119,9 +121,10 @@ function PS2PROG.frame()
     vuprog:upload_to(VU.VU1, 0xe00)
     first_frame = false
   end
-  DRAW:vu_begin_unpack_inline(0x100)
+  --LOG.debug("got unpack fmt: " .. VIF.UNPACK_V432)
+  DRAW:vu_begin_unpack_inline(VIF.UNPACK_V432, 0x515151, 6, 0x100)
   I.draw_all(instances, cam)
-  LOG.debug("try call")
+  --LOG.debug("try call")
   vuprog:call()
   DRAW:frameEnd()
 

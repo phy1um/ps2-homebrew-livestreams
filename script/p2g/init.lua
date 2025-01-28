@@ -30,6 +30,7 @@ coreLoad("dma")
 coreLoad("gs")
 coreLoad("io")
 coreLoad("vu")
+coreLoad("vif")
 coreLoad("buffer")
 coreLoad("pad")
 
