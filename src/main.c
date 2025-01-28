@@ -50,6 +50,7 @@ char main_script[FILE_NAME_MAX_LEN];
   } while (0)
 
 void on_fatal() {
+  logerr("fatal error: stopping program");
   ps2luaprog_is_running = 0;
 }
 
@@ -223,6 +224,7 @@ static int script_engine_run(int argc, char *argv[]) {
   }
 
   info("main loop ended");
+  return 1;
 }
 
 int main(int argc, char *argv[]) {
@@ -233,6 +235,6 @@ int main(int argc, char *argv[]) {
     p2g_fatal("startup error");
   }
   int rv = p2g_app_run(&app, argc, argv);
-  p2g_fatal("app main returned");
+  p2g_fatal("app main returned: %d", rv);
 }
 
