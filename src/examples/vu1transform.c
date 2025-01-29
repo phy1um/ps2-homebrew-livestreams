@@ -5,6 +5,7 @@
 #include <p2g/ps2draw.h>
 #include <p2g/utils.h>
 #include <p2g/pad.h>
+#include <p2g/ps2math.h>
 
 // PS2SDK deps
 #include <dma.h>
@@ -15,6 +16,7 @@
 
 // normal deps
 #include <stdlib.h>
+#include <math.h>
 
 #include "../draw/vu.h"
 
@@ -22,6 +24,61 @@
 #define SCR_HEIGHT 448
 // vertex = 4x f32 XYZW, 4x u32 RGBA
 #define VERT_SIZE ((4*4) + (4*4))
+
+#define ASPECT (1.3333333f)
+
+#define swap(a, b) \
+  do { \
+    typeof(a) tt = a;\
+    a = b; \
+    b = tt; \
+  }(while(0))
+
+static void transpose(float m4[16]) {
+  for (int j = 0; j < 3; j++) {
+    for (int i = j; i < 4; i++) {
+      swap(m4_index(m4, i, j), m4_index(m4, j, i));
+    }
+  }
+}
+
+static void view_matrix(float x, float y, float z, float m4[16]) {
+  p2m_m4_identity(m4);
+  m4_index(m4, 3, 0) = -x;
+  m4_index(m4, 3, 1) = -y;
+  m4_index(m4, 3, 2) = -z;
+  m4_index(m4, 3, 3) = 1;
+}
+
+static void projection_matrix(float m4[16]) {
+  p2m_m4_identity(m4);
+  float near = 0.1;
+  float far = 100;
+  float fov = 0.2;
+  float top = near * tanf(fov/2);
+  float right = top * ASPECT;
+  m4_index(m4, 0, 0) = near/right;
+  m4_index(m4, 1, 1) = near/top;
+  m4_index(m4, 2, 2) = (far+near)/(far-near);
+  m4_index(m4, 2, 3) = (-2*far*near)/(far - near);
+  m4_index(m4, 3, 2) = 1;
+}
+
+static void translation_matrix(float x, float y, float z, float m4[16]) {
+  p2m_m4_identity(m4);
+  m4_index(m4, 3, 0) = x;
+  m4_index(m4, 3, 1) = y;
+  m4_index(m4, 3, 2) = z;
+  m4_index(m4, 3, 3) = 1;
+}
+
+static void scale_matrix(float s, float m4[16]) {
+  p2m_m4_identity(m4);
+  m4_index(m4, 0, 0) = s;
+  m4_index(m4, 1, 1) = s;
+  m4_index(m4, 2, 2) = s;
+  m4_index(m4, 3, 3) = 1;
+}
 
 static uint32_t VRAM_HEAD = 0;
 static uint32_t VRAM_SIZE = 4 * 1024 * 1024;
@@ -110,9 +167,14 @@ int appmain(int argc, char *argv[]) {
       first_frame = 0;
     }
     float mvp_matrix[16];
-    mvp_matrix[0] = 40.f;
-    mvp_matrix[1] = 40.f;
-    mvp_matrix[2] = 40.f;
+    float tmp[16];
+    p2m_m4_identity(mvp_matrix);
+    p2m_m4_identity(tmp);
+    projection_matrix(mvp_matrix); 
+    translation_matrix(4, 4, 0, tmp);
+    p2m_m4_multiply(mvp_matrix, tmp, mvp_matrix);
+    scale_matrix(40.f, tmp);
+    p2m_m4_multiply(mvp_matrix, tmp, mvp_matrix);
     draw_vu_begin_unpack_verts(VIF_CODE_UNPACK_V432, 0x151515, 6, 0, mvp_matrix, 16*sizeof(float));
     draw3d_mesh_triangles_cnt(buffer, vertex_count, VERT_SIZE);
     draw_vu_call_program(0x0);

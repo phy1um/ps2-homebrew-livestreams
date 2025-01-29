@@ -2,6 +2,9 @@
 #ifndef PS2_MATH_H
 #define PS2_MATH_H
 
+#define m4_index(m, ii, jj) ((m)[(ii) + ((jj)*4)])
+#define m3_index(m, ii, jj) ((m)[(ii) + ((jj)*3)])
+
 float p2m_vec2_length(const float *v2);
 float p2m_vec2_dot(const float *a, const float *b);
 void p2m_vec2_rotate(float *v2, float theta);
