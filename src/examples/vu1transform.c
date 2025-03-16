@@ -32,7 +32,7 @@
     typeof(a) tt = a;\
     a = b; \
     b = tt; \
-  }(while(0))
+  }while(0)
 
 static void transpose(float m4[16]) {
   for (int j = 0; j < 3; j++) {
