@@ -1,5 +1,5 @@
 ISO_TGT=test.iso
-BIN=src/p2g.elf
+BIN=src/bin/p2g.elf
 
 PS2HOST?=192.168.20.99
 #PLATFORM=ps2
