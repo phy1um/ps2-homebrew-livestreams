@@ -1,3 +1,5 @@
+BINDIR=$(PREFIX)bin/
+
 PS2SDK=/usr/local/ps2dev/ps2sdk
 DVP-AS:=dvp-as
 HOST_OBJS=$(CORE_OBJ) main.o ps2luaprog.o liblua.a
@@ -21,13 +23,21 @@ EE_LDFLAGS=-L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib -L$(PS2SDK)/ports/lib
 SIM_OBJS=vdma.o vkernel.o vdraw.o vgraphics.o vpad.o draw_environment.o draw_clear.o
 SIM_OBJS:=$(addprefix $(PREFIX)linux/, $(SIM_OBJS))
 
-SIM_BIN=$(PREFIX)test.exe
+SIM_BIN=$(BINDIR)test.exe
 
 DEBUG_OPTS=-DLOG_TRACE
-P2G_LIB=$(PREFIX)libp2g.a
+P2G_LIB=$(BINDIR)libp2g.a
 
 EXAMPLES_SRC=$(wildcard $(PREFIX)examples/*.c)
 EXAMPLES_BIN=$(patsubst %.c,%.elf,$(EXAMPLES_SRC))
+
+VU1PROGS_SRC=$(wildcard $(PREFIX)vu1prog/*.asm)
+VU1PROGS_OBJ=$(patsubst %.asm,%.vuobj,$(VU1PROGS_SRC))
+VU1PROGS_BIN=$(patsubst %.vuobj,%.vuprog,$(VU1PROGS_OBJ))
+
+SCRIPT_VU_EXTRACT=./$(PREFIX)build_scripts/extract_vu_prog.py
+
+$(info vu1bins $(VU1PROGS_BIN))
 
 ifeq ($(platform), PS2)
 $(info platform=PS2 detected)
@@ -39,29 +49,31 @@ INCS=-I $(PREFIX)linux/include -I./$(PREFIX)include
 	$(CC) $(EE_CFLAGS) $(INCS) -c -o $@ $<
 endif
 
-$(PREFIX)vu1prog/%.vuobj: $(PREFIX)vu1prog/%.asm
-	$(DVP-AS) $(DVP_FLAGS) -o $@ $<
-
-# TODO(Tom Marks): update ISO building to include everything in dist/
-$(ISO_TGT): $(EE_BIN)
-	mkisofs $(ISO_FLAGS) -o $(ISO_TGT) ./dist/*
-
-$(SIM_BIN): $(EE_OBJS) $(SIM_OBJS)
-	$(CC) $(EE_CFLAGS) -llua -lm -o $@ $(EE_OBJS) $(SIM_OBJS)
-
-
-.PHONY: clean
-clean:
-	rm -rf $(EE_BIN) $(EE_OBJS) $(HOST_OBJS) $(SIM_BIN) $(SIM_OBJS)
-
 $(P2G_LIB): $(EE_OBJS)
 	$(EE_AR) rcs $@ $(EE_OBJS)
 
-$(PREFIX)p2g.elf: $(PREFIX)libp2g.a $(EE_OBJS) $(HOST_OBJS)
+$(BINDIR)p2g.elf: $(P2G_LIB) $(EE_OBJS) $(HOST_OBJS)
 	$(EE_CC) -T$(EE_LINKFILE) $(EE_OPTFLAGS) -o $@ $(EE_OBJS) $(HOST_OBJS) $(EE_LDFLAGS) $(EXTRA_LDFLAGS) $(EE_LIBS)
 
 $(PREFIX)examples/%.elf: $(PREFIX)/examples/%.c $(P2G_LIB)
 	$(EE_CC) -T$(EE_LINKFILE) $(DEBUG_OPTS) $(EE_INCS) $(EE_OPTFLAGS) -o $@ $< $(P2G_LIB) $(EE_LDFLAGS) $(EXTRA_LDFLAGS) $(EE_LIBS)
 
+$(PREFIX)vu1prog/%.vuobj: $(PREFIX)vu1prog/%.asm
+	$(DVP-AS) $(DVP_FLAGS) -o $@ $<
+
+$(PREFIX)vu1prog/%.vuprog: $(PREFIX)vu1prog/%.vuobj
+	$(SCRIPT_VU_EXTRACT) $< $@
+
+$(SIM_BIN): $(EE_OBJS) $(SIM_OBJS)
+	$(CC) $(EE_CFLAGS) -llua -lm -o $@ $(EE_OBJS) $(SIM_OBJS)
+
 examples: $(EXAMPLES_BIN)
+
+vu1progs: $(VU1PROGS_BIN)
+
+bins: $(P2G_LIB) $(EXAMPLES_BIN) $(VU1PROGS_BIN) $(BINDIR)p2g.elf
+
+.PHONY: clean
+clean:
+	rm -rf $(EE_BIN) $(EE_OBJS) $(HOST_OBJS) $(SIM_BIN) $(SIM_OBJS) $(VU1PROGS_OBJ) $(VU1PROGS_BIN)
 
